@@ -7,9 +7,27 @@ test("shared client includes the session cookie and preserves the endpoint", asy
   t.mock.method(globalThis, "fetch", async (url, options) => {
     assert.equal(url, "http://127.0.0.1:8000/api/catalog");
     assert.equal(options.credentials, "include");
+    assert.equal(options.cache, "no-store");
     return new Response(JSON.stringify({zones: []}));
   });
   assert.deepEqual(await apiRequest("/api/catalog"), {zones: []});
+});
+
+test("private requests cannot opt into the browser HTTP cache", async t => {
+  t.mock.method(globalThis, "fetch", async (_url, options) => {
+    assert.equal(options.cache, "no-store");
+    return new Response('{"ok":true}');
+  });
+  await apiRequest("/api/auth/me", {cache:"force-cache"});
+});
+
+test("offline writes fail without being queued or sent", async t => {
+  const descriptor=Object.getOwnPropertyDescriptor(globalThis,"navigator");
+  Object.defineProperty(globalThis,"navigator",{configurable:true,value:{onLine:false}});
+  t.after(()=>{if(descriptor)Object.defineProperty(globalThis,"navigator",descriptor);else delete globalThis.navigator;});
+  const fetch=t.mock.method(globalThis,"fetch",async()=>{throw new Error("Must not send offline writes");});
+  await assert.rejects(apiRequest("/api/allocation-requests",{method:"POST",body:"{}"}),{code:"NETWORK_UNAVAILABLE"});
+  assert.equal(fetch.mock.callCount(),0);
 });
 
 test("slot deletion accepts the API's empty 204 response", async t => {

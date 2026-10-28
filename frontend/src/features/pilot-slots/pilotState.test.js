@@ -26,10 +26,11 @@ test("zone drawer actions are independent of pilot state", () => {
 });
 
 test("vendor starts on their assigned demonstration slot and refresh retains selection", () => {
-  let state = pilotReducer(initialPilotState, {type: "loaded", layout: {my_slot_id: "S002", slots: []}});
+  const layout = {zone_id: "NN_F_013", my_slot_id: "S002", slots: [{slot_id: "S002"}, {slot_id: "S005"}]};
+  let state = pilotReducer(initialPilotState, {type: "loaded", layout});
   assert.equal(state.selectedId, "S002");
   state = pilotReducer(state, {type: "select", slotId: "S005"});
-  state = pilotReducer(state, {type: "loaded", layout: {my_slot_id: "S002", slots: []}});
+  state = pilotReducer(state, {type: "loaded", layout});
   assert.equal(state.selectedId, "S005");
 });
 

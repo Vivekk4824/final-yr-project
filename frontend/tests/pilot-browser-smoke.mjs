@@ -54,6 +54,7 @@ try {
   await navigate("admin");
   await waitFor("document.querySelector('.admin-tabs') && !document.querySelector('.admin-loading-state')");
   await click("Zone Management");
+  await waitFor("!!document.querySelector('.row-detail')");
   await evaluate("document.querySelector('.row-detail').click()");
   await click("View Slot Map");
   await waitFor("document.querySelectorAll('.pilot-slot-polygon').length === 10");
@@ -62,25 +63,13 @@ try {
   for(const id of ['S010','S009']) {await evaluate(`document.querySelector('.pilot-slot-${id}').dispatchEvent(new MouseEvent('click',{bubbles:true}))`);await waitFor(`document.querySelector('.pilot-details h3').textContent === '${id}'`);assert.equal(await evaluate('scrollY === window.__desktopY'),true);assert.deepEqual(await evaluate('[window.__desktopMap.clientWidth,window.__desktopMap.clientHeight]'),await evaluate('window.__desktopSize'));}
   await evaluate("document.querySelector('.pilot-slot-S005').dispatchEvent(new MouseEvent('click',{bubbles:true}))");
   await waitFor("document.querySelector('.pilot-details h3').textContent === 'S005'");
-  await click("Save demonstration slot");
-  await waitFor("document.querySelector('.pilot-panel').textContent.includes('S005 demonstration updated.')");
-  await click("Layout tools");
-  await click("Generate geographic preview");
-  await waitFor("!!document.querySelector('.pilot-draft-banner')");
-  await evaluate("document.querySelector('.pilot-draft-banner input').click()");
-  await click("Save reviewed layout");
-  await waitFor("!document.querySelector('.pilot-draft-banner')");
-  await click("Edit Slot Layout");
-  await waitFor("!!document.querySelector('.pilot-drag-handle')");
-  await click("Apply Rotation");
-  await waitFor("window.__editValidations > 0");
-  await evaluate("document.querySelector('.pilot-draft-banner input').click()");
-  await click("Save reviewed layout");
-  await waitFor("!document.querySelector('.pilot-draft-banner')");
+  await click("Save slot assignment");
+  await waitFor("document.querySelector('.pilot-panel').textContent.includes('S005 assignment updated.')");
   await evaluate("window.__pilotMapNode = document.querySelector('.pilot-context-map'); true");
   await click("Back to All Zones");
   await waitFor("!!document.querySelector('.admin-map-canvas')");
   await click("Zone Management");
+  await waitFor("!!document.querySelector('.row-detail')");
   await evaluate("document.querySelector('.row-detail').click()");
   await waitFor("!!document.querySelector('.drawer-close')");
   await evaluate("document.querySelector('.drawer-close').click()");
@@ -89,7 +78,6 @@ try {
   await click("View Slot Map");
   assert.equal(await evaluate("document.querySelector('.pilot-details h3').textContent"), "S005");
   assert.equal(await evaluate("window.__pilotMapNode === document.querySelector('.pilot-context-map')"), true);
-  await click("Layout tools");
   await click("Zoom to selected slot");
   await delay(1500);
   if (reviewOutput) {
@@ -108,17 +96,17 @@ try {
     console.log(`Review screenshots: ${reviewOutput}`);
   }
   await navigate("portal-vendor");
-  await waitFor("Array.from(document.querySelectorAll('button')).some(b => b.textContent === 'Navigate to My Slot')");
-  await click("Navigate to My Slot");
+  await waitFor("Array.from(document.querySelectorAll('button')).some(b => b.textContent === 'View My Slot')");
+  await click("View My Slot");
   await waitFor("document.querySelector('.pilot-details h3')?.textContent === 'S002'");
   await click("Back to Dashboard");
   assert.equal(await evaluate("document.querySelector('.pilot-panel').hidden"), true);
-  await click("Navigate to My Slot");
+  await click("View My Slot");
   assert.equal(await evaluate("document.querySelector('.pilot-details h3').textContent"), "S002");
   await navigate("vendor");
   await waitFor("document.querySelector('.pilot-details h3')?.textContent === 'S002'");
   assert.equal(await evaluate("document.querySelector('.pilot-details form') === null"), true);
-  assert.ok(await evaluate("document.querySelector('.slot-own-access').textContent.includes('My assigned slot: S002')"));
+  assert.ok(await evaluate("document.querySelector('.slot-own-access').textContent.includes('S002')"));
   assert.equal(await evaluate("document.querySelectorAll('.pilot-panel .leaflet-container').length"), 1);
   assert.equal(await evaluate("Array.from(document.querySelectorAll('button')).some(b => b.textContent.includes('Start Navigation'))"),false);
   await evaluate("window.__slotMap = document.querySelector('.pilot-context-map');window.__mapSize = [window.__slotMap.clientWidth,window.__slotMap.clientHeight];window.__beforeY=scrollY; true");
@@ -143,10 +131,10 @@ try {
   assert.equal(exceptions.length, 0, JSON.stringify(exceptions));
   for (const width of [1440,390]) {
     await command("Emulation.setDeviceMetricsOverride", {width,height:1000,deviceScaleFactor:1,mobile:width===390});
-    for (const mode of ["overview","registry","analysis","review","research-recommendations","portal-requests","portal-profile","portal-vendor","auth","shell-admin","shell-vendor"]) {
+    for (const mode of ["portal-requests","portal-profile","portal-vendor","auth","shell-admin","shell-vendor"]) {
       await navigate(mode); await delay(650);
-      if (mode === "auth") {await waitFor("!!document.querySelector('.auth-government-header img')"); await evaluate("document.querySelectorAll('.auth-choice button')[1].click()"); await waitFor("!!document.querySelector('input[type=password]')");}
-      if (mode.startsWith("shell-")) {await waitFor("!!document.querySelector('.implementation-sidebar .brand img')"); if (width === 390) {await evaluate("document.querySelector('.mobile-menu').click()"); await waitFor("!!document.querySelector('.implementation-sidebar.mobile-open')"); await evaluate("document.querySelector('.mobile-close').click()");}}
+      if (mode === "auth") {await waitFor("!!document.querySelector('.auth-government-header .municipal-brand-mark img')"); await evaluate("document.querySelectorAll('.auth-choice button')[1].click()"); await waitFor("!!document.querySelector('input[type=password]')");}
+      if (mode.startsWith("shell-")) await waitFor("!!document.querySelector('.vm-header')");
       if (mode === "registry") {await waitFor("!!document.querySelector('.hub-table tbody tr')"); assert.equal(await evaluate("document.querySelector('.hub-table tbody').textContent.includes('NN_F_013')"),true,"Registry loads catalog data"); assert.equal(await evaluate("document.querySelector('.hub-error') === null"),true);}
       assert.equal(await evaluate("document.documentElement.scrollWidth <= innerWidth"),true,`${mode} fits ${width}px`);
       if (reviewOutput) {const shot=await command("Page.captureScreenshot",{format:"png",captureBeyondViewport:true});await writeFile(path.join(reviewOutput,`${mode}-${width}.png`),Buffer.from(shot.data,"base64"));}

@@ -96,7 +96,7 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
     <button className="vendor-back recommendation-detail-back" onClick={onBack}><ArrowLeft size={16}/> {t("recommend.backRecommendations")}</button>
     <header className="recommendation-detail-header">
       <div><span className="recommendation-detail-rank">{zone.rank ? t("recommend.recommendedZone", {rank: zone.rank}) : t("recommend.viewRecommendation")}</span><h1>{zone.zone_id}</h1><p>{zoneDescription(zone,t("fallback.zoneDescription"))}</p><small>{zoneName(zone,t("display.zoneMissing"))}</small><div className="recommendation-detail-location"><MapPin size={14}/><span>{zone.zone_division || t("common.notSpecified")}</span></div></div>
-      <div className="recommendation-detail-score"><span>{t("recommend.suitability")}</span><strong>{score(zone.score,t("common.notRecorded"))}</strong><small>/100</small><em>{t("recommend.recommendedForBusiness")}: {categoryLabel(language, profile?.business_category)}</em></div>
+      {zone.score != null && <div className="recommendation-detail-score"><span>{t("recommend.suitability")}</span><strong>{score(zone.score,t("common.notRecorded"))}</strong><small>/100</small><em>{t("recommend.recommendedForBusiness")}: {categoryLabel(language, profile?.business_category)}</em></div>}
     </header>
 
     <div className="recommendation-summary-cards recommendation-operational-summary">
@@ -106,15 +106,15 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
     </div>
 
     <section className="recommendation-quick-summary">
-      <div className="quick-summary-copy"><span className="vendor-eyebrow">{t("recommend.whyThisZone")}</span><h2>{finalStrength ? t("recommend.overallQuality", {quality: t(`recommend.strength.${finalStrength}`)}) : t("recommend.whyRankTitle", {rank: zone.rank})}</h2><p>{summary}</p></div>
+      <div className="quick-summary-copy"><span className="vendor-eyebrow">{t("recommend.whyThisZone")}</span><h2>{finalStrength ? t("recommend.overallQuality", {quality: t(`recommend.strength.${finalStrength}`)}) : t("recommend.whyThisZone")}</h2><p>{summary}</p></div>
       <div className="quick-summary-reasons"><div><h3>{t("recommend.mainStrengths")}</h3>{strengths.map(factor => <span key={factor.key}><Check size={15}/><b>{shortFactorLabel(t, factor)}</b><small>{t(`recommend.strength.${strengthKey(normalizedScore(factor.score))}`)}</small></span>)}</div>{weakest && <div className="quick-summary-consideration"><h3>{t("recommend.mainConsideration")}</h3><span><AlertCircle size={16}/><b>{t("recommend.considerationText", {factor: shortFactorLabel(t, weakest)})}</b></span></div>}</div>
     </section>
 
-    <section className="recommendation-factors-section">
+    <details className="recommendation-factors-section vm-advanced"><summary>{t("recommend.whyRanking")}</summary>
       <div className="recommendation-section-heading recommendation-ai-heading"><div><span className="vendor-eyebrow">{t("recommend.factorOverview")}</span><h2>{t("recommend.sixFactors")}</h2><p>{t("recommend.factorOverviewHelp")}</p></div><button className="vendor-secondary recommendation-ai-button" type="button" onClick={loadAiExplanation} disabled={aiLoading}><Sparkles size={15}/>{t(aiLoading ? "recommend.aiLoading" : aiResult ? "recommend.aiRefresh" : "recommend.aiExplain")}</button></div>
       {(aiResult?.message || aiError) && <p className={`recommendation-ai-notice ${aiError ? "error" : ""}`} role="status">{aiError || aiResult.message}</p>}
       <div className="recommendation-factor-grid">{factors.map(factor => <FactorCard key={factor.key} factor={factor} language={language} t={t} expanded={expandedFactor === factor.key} onToggle={() => setExpandedFactor(current => current === factor.key ? "" : factor.key)} aiExplanation={aiByFactor.get(factor.key)} aiSource={aiResult?.source}/>)}</div>
-    </section>
+    </details>
 
     <section className="recommendation-zone-context">
       <div className="recommendation-zone-map"><h2>{t("recommend.zoneContext")}</h2><RecommendationDetailMap zone={zone} recommendations={recommendations} context={mapContext}/></div>

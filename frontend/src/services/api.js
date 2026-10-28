@@ -1,19 +1,23 @@
-// Keep browser and API on the same hostname in local development. A page opened
-// at localhost cannot reliably send a SameSite session cookie to 127.0.0.1
-// (and vice versa), even though both addresses reach the same machine.
-const LOCAL_API_BASE = typeof window === "undefined"
-  ? "http://127.0.0.1:8000"
-  : `${window.location.protocol}//${window.location.hostname}:8000`;
+// Browser requests use the website's origin. Vite proxies /api to FastAPI,
+// so LAN devices do not need access to the backend's localhost-only port.
+// A deployment with a separate API may explicitly set VITE_API_BASE.
+const LOCAL_API_BASE = typeof window === "undefined" ? "http://127.0.0.1:8000" : "";
 const API_BASE = (import.meta.env?.VITE_API_BASE || LOCAL_API_BASE).replace(/\/$/, "");
 
 export async function apiRequest(path, options = {}) {
+  const unavailable = () => {
+    if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("vendormap:connection-lost"));
+    const error = new Error("Unable to reach the service. Check that the backend is running and try again.");
+    error.code = "NETWORK_UNAVAILABLE";
+    return error;
+  };
+  if (typeof navigator !== "undefined" && navigator.onLine === false) throw unavailable();
   let response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {credentials: "include", ...options});
+    response = await fetch(`${API_BASE}${path}`, {credentials: "include", ...options, cache: "no-store"});
   } catch (cause) {
     if (cause?.name === "AbortError") throw cause;
-    const error = new Error("Unable to reach the service. Check that the backend is running and try again.");
-    error.code = "NETWORK_UNAVAILABLE"; throw error;
+    throw unavailable();
   }
   if (response.status === 204) return null;
   let body;

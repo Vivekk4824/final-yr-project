@@ -1,3 +1,4 @@
+@layer features {
 .pilot-panel {background:#fff; color:#203849; border:1px solid #dce5ea; border-radius:12px; padding:24px; margin:20px 0;}
 .pilot-geographic .pilot-context-map {height:640px; min-height:480px;}
 .pilot-map-frame {position:relative;}
@@ -57,3 +58,5 @@
 .pilot-details small {font-size:11px; line-height:1.6; color:#637888;}
 @media(max-width:1000px) {.pilot-workspace {grid-template-columns:1fr;} .pilot-details dl {display:grid; grid-template-columns:1fr 1fr; gap:12px;}}
 @media(max-width:600px) {.pilot-panel {padding:14px;} .pilot-header h2 {font-size:20px;} .pilot-visual {padding:10px;} .pilot-context-map {height:380px;} .pilot-details dl {grid-template-columns:1fr;} .pilot-header>button {width:100%;}}
+
+}

@@ -1,0 +1,495 @@
+{
+  "checks": [
+    "OTP login reaches onboarding",
+    "Home action loads three real recommendations",
+    "Ranking preferences persist through UI",
+    "Explore all opens interactive map/list",
+    "Non-top-three application submitted through UI",
+    "Profile saves through UI",
+    "Officer approves vendor application through UI",
+    "Vendor directory loads",
+    "Vendor search returns registered test vendor",
+    "Read-only relocation alternatives load for approved vendor",
+    "Zone management loads official capacity",
+    "City map opens",
+    "Geographic slot workspace opens",
+    "No browser runtime exceptions"
+  ],
+  "layouts": [
+    {
+      "name": "login",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "vendor-home",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74.3125,
+        "bottom": 130.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74.3125,
+        "bottom": 130.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74.3125,
+        "bottom": 130.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 135.4375,
+        "bottom": 191.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 135.4375,
+        "bottom": 179.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 135.4375,
+        "bottom": 191.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 135.4375,
+        "bottom": 179.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 131,
+        "bottom": 185,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 135.4375,
+        "bottom": 191.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 135.4375,
+        "bottom": 179.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 80.5,
+        "bottom": 124.5,
+        "display": "flex"
+      }
+    }
+  ],
+  "errors": []
+}

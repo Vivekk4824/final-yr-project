@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "Production service worker registers and controls the app on a secure loopback origin",
+    "Chromium installability criteria pass; Android, maskable and Apple PNG icon dimensions verified",
+    "Supported-browser install event is deferred until click; installed event hides the prompt (synthetic events)",
+    "iPhone guidance and session dismissal work at mobile and desktop widths (emulated user agent)",
+    "Login keeps an HttpOnly session cookie; Cache Storage contains only versioned build assets, without profile data or API URLs",
+    "Offline transition removes authenticated UI; offline deep links show a generic page without cached operational data",
+    "Reconnect revalidates the session and refetches the vendor workspace",
+    "A waiting update preserves unsaved form state until explicit Reload; activation and reload preserve the authenticated session",
+    "Logout cannot restore a cached vendor profile",
+    "No browser runtime exceptions"
+  ],
+  "errors": []
+}

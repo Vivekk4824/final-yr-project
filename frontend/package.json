@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "test": "node --test src/shared/utils/mapGrouping.test.js src/shared/utils/profileIdentity.test.js src/shared/utils/dialogFocus.test.js src/i18n/i18n.test.js src/shared/ui/ToastRegion.test.js src/features/pilot-slots/pilotState.test.js src/features/navigation/pilotNavigation.test.js src/services/api.test.js src/features/pilot-slots/slotPresentation.test.js",
+    "test": "node --test src/pwa/sw.test.js src/features/vendor/identityCard.test.js src/shared/utils/mapGrouping.test.js src/shared/utils/profileIdentity.test.js src/shared/utils/dialogFocus.test.js src/i18n/i18n.test.js src/shared/ui/ToastRegion.test.js src/features/pilot-slots/pilotState.test.js src/features/navigation/pilotNavigation.test.js src/services/api.test.js src/features/pilot-slots/slotPresentation.test.js",
+    "test:pwa:browser": "node tests/pwa-browser.mjs",
+    "pwa:icons": "node tools/generate-pwa-icons.mjs",
     "test:pilot:browser": "node tests/pilot-browser-smoke.mjs",
     "test:maps": "node --test src/shared/utils/mapGrouping.test.js",
     "test:i18n": "node --test src/i18n/i18n.test.js",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
     "react": "^18.3.1",

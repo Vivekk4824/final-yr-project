@@ -1,0 +1,16 @@
+/* Business colour identifies the category; the separate badge identifies allocation. */
+.vm-directory-results .vm-business-icon[data-category="food"],
+.vm-directory-results .vm-business-icon[data-category="flower"]{background:var(--vm-terra-soft);color:var(--vm-orange)}
+.vm-directory-results .vm-business-icon[data-category="vegetable_fruit"]{background:var(--vm-lime);color:var(--vm-green)}
+.vm-directory-results .vm-business-icon[data-category="clothing"],
+.vm-directory-results .vm-business-icon[data-category="general_goods"]{background:var(--vm-blue-soft);color:var(--vm-blue)}
+.vm-directory-results .vm-business-icon[data-category="other"],
+.vm-directory-results .vm-business-icon[data-category="unknown"]{background:var(--vm-paper);color:var(--vm-muted)}
+.vm-vendor-row.has-allocation{background:var(--vm-allocation-surface);border-left:3px solid var(--vm-green);padding-left:12px}
+.vm-vendor-row.has-allocation:hover{background:var(--vm-allocation-background)}
+.vm-allocation-badge{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:7px 10px;border:1px solid var(--vm-line);border-radius:9px;font-size:12px;font-weight:600;line-height:1.5}
+.vm-allocation-badge svg{flex:none}.vm-allocation-badge>span{min-width:0;overflow-wrap:anywhere}
+.vm-allocation-badge.is-active{background:var(--vm-allocation-background);color:var(--vm-green);border-color:var(--vm-allocation-border)}
+.vm-allocation-badge.is-unallocated{background:var(--vm-paper);color:var(--vm-muted)}
+.vm-vendor-row .vm-allocation-zone{margin-top:7px;padding-left:2px;color:var(--vm-green);font-size:13px}
+@media(max-width:767px){.vm-vendor-row.has-allocation{padding-left:10px;padding-right:10px}.vm-vendor-allocation{min-width:0}.vm-allocation-badge{font-size:11px;padding:6px 8px}}

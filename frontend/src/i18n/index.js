@@ -1,4 +1,5 @@
 import displayLabels from "./displayLabels.js";
+import brand from "./brand.js";
 import en from "./en.js";
 import mr from "./mr.js";
 import hi from "./hi.js";
@@ -8,7 +9,7 @@ export const SUPPORTED_LANGUAGES = ["en", "mr", "hi"];
 export const LANGUAGE_STORAGE_KEY = "nmc_vendor_language";
 export const LANGUAGE_OVERRIDE_KEY = "nmc_vendor_language_deliberate";
 export const LOCALES = {en: "en-IN", mr: "mr-IN", hi: "hi-IN"};
-export const dictionaries = {en: {...en,...displayLabels.en}, mr: {...mr,...displayLabels.mr}, hi: {...hi,...displayLabels.hi}};
+export const dictionaries = {en: {...en,...displayLabels.en,...brand.en}, mr: {...mr,...displayLabels.mr,...brand.mr}, hi: {...hi,...displayLabels.hi,...brand.hi}};
 
 export function normalizeLanguage(language) {
   return SUPPORTED_LANGUAGES.includes(language) ? language : DEFAULT_LANGUAGE;

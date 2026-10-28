@@ -5,11 +5,8 @@ import ImplementationApp from "../src/app/ImplementationApp.jsx";
 import AuthLanding from "../src/features/auth/AuthLanding.jsx";
 import AdminDashboard from "../src/features/admin/AdminDashboard.jsx";
 import PilotSlotMap from "../src/features/pilot-slots/PilotSlotMap.jsx";
-import RecommendationPage from "../src/features/recommendations/RecommendationPage.jsx";
-import {OverviewPage,ZoneRegistryPage,AnalysisPage,ReviewPage} from "../src/pages/ImplementationPages.jsx";
 import VendorPortal from "../src/features/vendor/VendorPortal.jsx";
 import {I18nProvider} from "../src/i18n/react.jsx";
-import "../src/features/recommendations/RecommendationPage.css";
 
 const fixture = await fetch("/__pilot_fixture__").then(response => response.json());
 const mode = new URLSearchParams(location.search).get("mode") || "admin";
@@ -55,6 +52,8 @@ window.fetch = async (url, options = {}) => {
   } else throw new Error(`Unexpected review API: ${path}`);
   return new Response(JSON.stringify(body), {status: 200, headers: {"Content-Type": "application/json"}});
 };
-createRoot(document.getElementById("root")).render(<I18nProvider>{mode.startsWith("shell-") ? <ImplementationApp/> : mode === "auth" ? <AuthLanding onAuthenticated={() => {}}/> : mode === "admin" ? <AdminDashboard/> : mode === "overview" ? <OverviewPage navigate={() => {}}/> : mode === "registry" ? <ZoneRegistryPage openZone={() => {}}/> : mode === "analysis" ? <AnalysisPage/> : mode === "review" ? <ReviewPage/> : mode === "research-recommendations" ? <RecommendationPage/> : mode.startsWith("portal-") ? <VendorPortal sessionProfile={profile} view={mode === "portal-profile" ? "vendor-profile" : mode === "portal-requests" ? "vendor-requests" : "vendor-dashboard"}/> : <PilotSlotMap onBack={() => {}}/>}</I18nProvider>);
+createRoot(document.getElementById("root")).render(<I18nProvider><React.Suspense fallback={<p>Loading workspace?</p>}>{mode.startsWith("shell-") ? <ImplementationApp/> : mode === "auth" ? <AuthLanding onAuthenticated={() => {}}/> : mode === "admin" ? <AdminDashboard/> : mode.startsWith("portal-") ? <VendorPortal sessionProfile={profile} view={mode === "portal-profile" ? "vendor-profile" : mode === "portal-requests" ? "vendor-requests" : "vendor-dashboard"}/> : <PilotSlotMap onBack={() => {}}/>}</React.Suspense></I18nProvider>);
 
 import "../src/styles/foundation.css";
+
+import "../src/styles/vendormap.css";

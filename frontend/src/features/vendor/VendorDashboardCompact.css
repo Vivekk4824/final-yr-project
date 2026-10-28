@@ -1,3 +1,4 @@
+@layer features {
 
 /* ==========================================
    Vendor Dashboard — Reference-Inspired UI
@@ -509,4 +510,6 @@
   .service-vendor .vendor-dashboard-redesign .request-summary-card strong {
     text-align: left;
   }
+}
+
 }

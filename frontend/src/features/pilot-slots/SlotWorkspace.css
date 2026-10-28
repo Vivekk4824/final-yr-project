@@ -1,3 +1,4 @@
+@layer features {
 /* Scoped GIS workspace: existing service/authentication pages retain their styling. */
 .pilot-panel.pilot-geographic{margin:0;padding:12px;background:#f1f5f7;border:1px solid #d3dfe7;border-radius:12px;min-width:0}
 .pilot-panel.pilot-geographic .pilot-header{margin:0 0 6px;gap:8px;flex-wrap:nowrap}
@@ -46,3 +47,5 @@
 
 .pilot-zone-selector{display:grid;grid-template-columns:50px minmax(0,520px);align-items:center;gap:10px;font-size:12px;margin:8px 0}.pilot-zone-selector select{padding:8px 10px;border:1px solid #d8e1e6;border-radius:6px;background:#fff;max-width:100%;min-width:0}.pilot-zone-counts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:11px;padding:5px 0 9px;color:#71808b}.pilot-zone-counts b{color:#19374e}.pilot-review-status{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 8px;padding:7px 0;border-top:1px solid #e4eaed;border-bottom:1px solid #e4eaed;color:#687985;font-size:11px}.pilot-review-status button{padding:6px 10px;font-size:11px}.pilot-panel.pilot-geographic .pilot-draw-toolbar{margin:5px 0 10px;padding:0;border:0;border-radius:0;background:transparent;font-size:12px}.pilot-panel.pilot-geographic .pilot-draw-toolbar button{padding:7px 11px}.pilot-panel.pilot-geographic .pilot-header{align-items:center}.pilot-panel.pilot-geographic .pilot-header button{background:transparent;border-color:transparent;color:#526a7b}.pilot-panel.pilot-geographic .pilot-header button:hover{background:#e8eef1}
 .pilot-panel.pilot-geographic .slot-delete-button{margin-top:10px;border-color:#e6c6c2;background:#fff7f6;color:#a33e35}.pilot-panel.pilot-geographic .slot-delete-button:hover{background:#fce9e6}
+
+}

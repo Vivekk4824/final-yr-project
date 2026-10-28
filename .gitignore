@@ -74,3 +74,6 @@ test-results/
 data/**/vendors.csv
 data/archive/**/vendor*.csv
 reports/migrations/
+
+.worktrees/
+reports/vendormap-frontend-before.zip

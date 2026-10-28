@@ -15,9 +15,9 @@ function memoryStorage() {
 }
 
 test("renders English, Marathi, and Hindi interface strings", () => {
-  assert.equal(translate("en", "nav.dashboard"), "Dashboard");
-  assert.equal(translate("mr", "nav.dashboard"), "डॅशबोर्ड");
-  assert.equal(translate("hi", "nav.dashboard"), "डैशबोर्ड");
+  assert.equal(translate("en", "nav.dashboard"), "Home");
+  assert.equal(translate("mr", "nav.dashboard"), "मुख्यपृष्ठ");
+  assert.equal(translate("hi", "nav.dashboard"), "होम");
   assert.equal(translate("mr", "identity.fullName"), "पूर्ण नाव");
   assert.equal(translate("hi", "confirm.cancelRequestTitle"), "यह आवेदन रद्द करें?");
 });
@@ -60,8 +60,8 @@ test("canonical status values are localized for display only", () => {
 
 test("canonical category values are localized for display only", () => {
   const canonical = "vegetable_fruit";
-  assert.equal(categoryLabel("mr", canonical), "भाजीपाला व फळे");
-  assert.equal(categoryLabel("hi", canonical), "सब्ज़ियाँ और फल");
+  assert.equal(categoryLabel("mr", canonical), "भाजीपाला व फळांचा स्टॉल");
+  assert.equal(categoryLabel("hi", canonical), "सब्ज़ी और फल का स्टॉल");
   assert.equal(canonical, "vegetable_fruit");
 });
 
@@ -72,5 +72,5 @@ test("dates and numbers use the selected Indian locale", () => {
 });
 
 test("unknown backend values remain visible through safe display fallback", () => {
-  assert.equal(statusLabel("mr", "FUTURE_STATUS"), "FUTURE_STATUS");
+  assert.equal(statusLabel("mr", "FUTURE_STATUS"), "Future Status");
 });

@@ -1,8 +1,9 @@
 import React from "react";
+import logoMark from "../../assets/vendormap-mark.svg";
 
 export default function BrandIdentity({subtitle, compact = false}) {
   return <div className={`municipal-brand ${compact ? "compact" : ""}`}>
-    <span className="municipal-brand-mark"><img src="/nmc-logo.jpg" alt="Nashik Municipal Corporation emblem"/></span>
-    <span className="municipal-wordmark"><strong>Nashik Municipal Corporation</strong><span>Street Vendor Management System</span>{subtitle && <small>{subtitle}</small>}</span>
+    <span className="municipal-brand-mark"><img src={logoMark} alt="" width="44" height="44"/></span>
+    <span className="municipal-wordmark"><strong>VendorMap<span className="brand-period">.</span></strong><small>{subtitle || "A place for your business"}</small></span>
   </div>;
 }

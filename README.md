@@ -56,6 +56,37 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. Unauthenticated visitors enter through `/login`; server sessions determine whether the application shows `/vendor` or `/admin` experiences.
 
+### Access from a phone or another computer on the same network
+
+Keep FastAPI running on `127.0.0.1:8000` using the command above, then run `npm run dev` in `frontend`. Open the **Network** URL printed by Vite (for example, `http://<computer-ip>:5173`) on the other device. Use the port Vite actually prints.
+
+The frontend listens on all network interfaces and forwards `/api` requests to FastAPI. Browser API calls and session cookies use the same origin as the website, so LAN access does not require adding each changing IP to CORS or exposing port 8000.
+
+Leave `VITE_API_BASE` empty or unset in frontend environment files. An explicit `http://localhost:8000` or `http://127.0.0.1:8000` points to the visiting device and breaks LAN access. If FastAPI runs on a different port, set `API_PROXY_TARGET` in `frontend/.env.local` and restart Vite. `npm run preview` also supports the proxy after a production build.
+
+If the Network URL itself cannot be reached, allow Node.js through Windows Firewall on your private network and confirm both devices are on the same network without client isolation. For production hosting, configure the host's `/api` reverse proxy or set `VITE_API_BASE` and explicit backend CORS origins for the deployed API.
+
+## Install VendorMap as a PWA
+
+The installable application and service worker are enabled in production builds. From `frontend`:
+
+```powershell
+npm run build
+npm run preview
+```
+
+Keep FastAPI running. Preview forwards `/api` to the local backend. Desktop installation can be checked at the printed `http://localhost:4173` or loopback URL. Real phones require a trusted **HTTPS** origin; a plain HTTP LAN IP does not enable the service worker or in-app install promotion. Serve the complete `frontend/dist` directory behind HTTPS with the existing `/api` proxy, or an explicitly configured API origin. Do not expose backend credentials in Vite variables.
+
+Supported browsers receive a dismissible Install action after their native installability event. On iPhone/iPad, the app provides Share → Add to Home Screen guidance; it is hidden when already running standalone. No background push service or new notification permissions were added: existing in-app notifications remain unchanged.
+
+The worker caches only an explicit build-generated allowlist of fingerprinted JS, CSS, logo assets and a fingerprinted generic offline page. API requests use `cache: no-store` in both the client and worker. Authenticated HTML, profiles, photos, allocations, tokens, map tiles and navigation URLs are never stored in Cache Storage. Losing connectivity removes the in-memory workspace; reconnecting revalidates the session and reloads current data. Offline writes are not queued or replayed.
+
+Updates wait for a Reload action or for older app windows to close. Old immutable chunks remain available to older open windows; once a sole current-build window confirms readiness, obsolete VendorMap caches are removed. Session cookies and language preferences are preserved. No forced reload interrupts an open form.
+
+For hosting, serve `/sw.js`, `/manifest.webmanifest` and the HTML entry with revalidation (`Cache-Control: no-cache`). Fingerprinted `/assets/*` files may be served as immutable. Keep the `/sw.js` path serving JavaScript rather than the SPA fallback, and preserve SPA routing for `/vendor/*` and `/admin/*`. Changing the logo's install icons is reproducible with `npm run pwa:icons` (uses installed Edge for SVG-to-PNG rendering; no additional UI dependencies).
+
+`npm test` includes worker cache/privacy/update-policy tests. `npm run test:pwa:browser` requires a production build and installed Edge, uses a disposable backend database, and checks Chromium installability, registration, offline navigation/privacy, authentication, update activation and session preservation. Native Android/desktop install dialogs, iPhone Home Screen installation, OS icon cropping and installed-app lifecycle still need physical-device verification over HTTPS.
+
 ## Direct Meta WhatsApp Cloud API
 
 The vendor bot uses Meta's WhatsApp Cloud API directly. It does not use Twilio, browser automation, WhatsApp Web, or an unofficial WhatsApp client. Add these values to the project-root `.env` file:

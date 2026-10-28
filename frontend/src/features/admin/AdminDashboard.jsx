@@ -19,8 +19,15 @@ import {TABS, STATUS_COLORS, pretty, display, when} from "./viewModel.js";
 import {StatusBadge} from "./AdminPrimitives.jsx";
 const ALLOCATION_PAGE_SIZE = 50;
 
-export default function AdminDashboard({adminId = "Officer", slotTarget = null}) {
-  const [tab, setTab] = useState("overview");
+export default function AdminDashboard({adminId = "Officer", slotTarget = null, section, onSectionChange}) {
+  const [localTab, setLocalTab] = useState("overview");
+  const [zoneView, setZoneView] = useState("list");
+  const tab = section || localTab;
+  const setTab = next => {setLocalTab(next); onSectionChange?.(next);};
+  useEffect(() => {
+    if (section === "map") dispatchPilot({type: "open"});
+    else if (section) dispatchPilot({type: "close"});
+  }, [section]);
   const [overview, setOverview] = useState(null);
   const [pending, setPending] = useState([]);
   const [zones, setZones] = useState([]);
@@ -145,14 +152,14 @@ export default function AdminDashboard({adminId = "Officer", slotTarget = null})
     return () => controller.abort();
   }, [tab, allocationFilter, allocationPage]);
   useEffect(() => {
-    if (tab !== "map" || geometry) return undefined;
+    if ((tab !== "map" && !(tab === "zones" && zoneView === "map")) || geometry) return undefined;
     const controller = new AbortController();
     setGeometryError("");
     getZoneGeometry(controller.signal).then(setGeometry).catch(err => {
       if (err.name !== "AbortError") setGeometryError(err.message || "GIS references are unavailable. Use the zone list below.");
     });
     return () => controller.abort();
-  }, [tab, geometry]);
+  }, [tab, zoneView, geometry]);
 
   const divisions = useMemo(() => [...new Set(zones.map(zone => zone.division).filter(Boolean))].sort(), [zones]);
   const filteredZones = useMemo(() => zones.filter(zone =>
@@ -234,8 +241,8 @@ export default function AdminDashboard({adminId = "Officer", slotTarget = null})
   ];
 
   return <main className="admin-dashboard" aria-busy={loading}>
-    <header className="admin-header"><div className="admin-header-identity"><img src="/nmc-logo.jpg" alt="Nashik Municipal Corporation emblem"/><div><span className="admin-eyebrow">NASHIK MUNICIPAL CORPORATION</span><h1>Vendor operations</h1><p>Street Vendor Management — Officer Portal</p></div></div><div className="admin-controls"><div className="admin-session-id"><span>Signed in officer</span><strong>{adminId}</strong></div><button onClick={() => refresh("Dashboard data refreshed.")} disabled={loading}><RefreshCw size={15}/>{loading ? "Refreshing…" : "Refresh data"}</button></div></header>
-    <nav className="admin-tabs" aria-label="Administration sections">{TABS.map(item => <button key={item.id} className={tab === item.id ? "active" : ""} aria-current={tab === item.id ? "page" : undefined} onClick={() => setTab(item.id)}><item.icon size={16}/>{item.label}{item.id === "requests" && <b>{pending.length}</b>}</button>)}</nav>
+    <header className="admin-header"><div><span className="admin-eyebrow">NASHIK · OPERATIONS</span><h1>{({overview:"A better place to do business.",requests:"Application inbox",zones:"Places across the city",map:"Every spot, clearly mapped",allocations:"Current allocations"})[tab]}</h1></div><button className="vm-refresh" onClick={() => refresh("Workspace refreshed.")} disabled={loading}><RefreshCw size={16}/>Refresh</button></header>
+    {!section && <nav className="admin-tabs" aria-label="Administration sections">{TABS.map(item => <button key={item.id} className={tab === item.id ? "active" : ""} aria-current={tab === item.id ? "page" : undefined} onClick={() => setTab(item.id)}><item.icon size={16}/>{item.label}{item.id === "requests" && <b>{pending.length}</b>}</button>)}</nav>}
     <ToastRegion success={notice} error={error} onDismissSuccess={() => setNotice("")} onDismissError={() => setError("")} retry={() => refresh()}/>
     {loading && !overview && <div className="admin-loading-state" role="status"><RefreshCw size={20}/><div><strong>Loading operational dashboard</strong><span>Retrieving requests, allocations, live zone status, and map references.</span></div></div>}
 
@@ -243,11 +250,12 @@ export default function AdminDashboard({adminId = "Officer", slotTarget = null})
 
     {tab === "requests" && <PendingRequests pending={pending} zones={zones} openRequest={openRequest} setDialog={setDialog}/>}
 
-    {tab === "zones" && <ZoneManagement filteredZones={filteredZones} zoneFilters={zoneFilters} setZoneFilters={setZoneFilters} divisions={divisions} setSelectedZone={setSelectedZone}/>}
+    {tab === "zones" && <div className="vm-view-switch" role="group" aria-label="Zone view"><button aria-pressed={zoneView === "list"} onClick={() => setZoneView("list")}>Zone list</button><button aria-pressed={zoneView === "map"} onClick={() => setZoneView("map")}>City map</button></div>}
+    {tab === "zones" && zoneView === "list" && <ZoneManagement filteredZones={filteredZones} zoneFilters={zoneFilters} setZoneFilters={setZoneFilters} divisions={divisions} setSelectedZone={setSelectedZone}/>}
 
     {tab === "allocations" && <AllocationRecords filteredAllocations={filteredAllocations} allocationFilter={allocationFilter} setAllocationFilter={changeAllocationFilter} setRequestDetail={setRequestDetail} zones={zones} setSelectedZone={setSelectedZone} loading={allocationsLoading || (loading && tab === "allocations")} loaded={allocationsLoaded} error={allocationsError} onRetry={() => refresh()} total={allocationTotal} page={allocationPage} pageSize={ALLOCATION_PAGE_SIZE} onPageChange={setAllocationPage}/>}
 
-    {tab === "map" && !pilot.open && <ZoneExplorer zoneLoad={zoneLoad} geometryError={geometryError} onRetry={() => refresh()} zones={zones} division={explorerDivision} setDivision={setExplorerDivision} onPilot={openPilot} zoneFilters={zoneFilters} setZoneFilters={setZoneFilters} mapStatuses={mapStatuses} setMapStatuses={setMapStatuses} geometry={geometry} setSelectedZone={setSelectedZone}/>}
+    {(tab === "map" && !pilot.open || tab === "zones" && zoneView === "map") && <ZoneExplorer zoneLoad={zoneLoad} geometryError={geometryError} onRetry={() => refresh()} zones={zones} division={explorerDivision} setDivision={setExplorerDivision} onPilot={openPilot} zoneFilters={zoneFilters} setZoneFilters={setZoneFilters} mapStatuses={mapStatuses} setMapStatuses={setMapStatuses} geometry={geometry} setSelectedZone={setSelectedZone}/>}
 
     {pilot.visited && <React.Suspense fallback={<p role="status">Loading geographic pilot…</p>}><PilotSlotMap zoneId={pilotZone} zone={zones.find(zone => zone.zone_id === pilotZone)} zones={zones} onZoneChange={zoneId => {setPilotZone(zoneId); setExplorerDivision(officialZoneDivision(zoneId));}} onViewVendor={allocation => setRequestDetail({vendor_id: allocation.vendor_id})} focusSlotId={focusedSlot?.zone_id === pilotZone ? focusedSlot.slot_id : null} admin session={pilot} dispatch={dispatchPilot} visible={tab === "map" && pilot.open} onBack={() => dispatchPilot({type: "close"})} allocations={allocations}/></React.Suspense>}
 
