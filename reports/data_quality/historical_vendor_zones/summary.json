@@ -1,0 +1,42 @@
+{
+  "processed": 7259,
+  "auto_matched": 1671,
+  "review_required": 5587,
+  "unmatched": 1,
+  "accepted_zone_count": 45,
+  "accepted_by_division": {
+    "Nashik East": 250,
+    "Nashik Road": 49,
+    "Nashik West": 190,
+    "New Nashik": 125,
+    "Panchavati": 574,
+    "Satpur": 483
+  },
+  "preserved_reviewed": 0,
+  "top_ambiguity_patterns": [
+    [
+      "explicit_location_alias",
+      3593
+    ],
+    [
+      "fuzzy_candidate",
+      1777
+    ],
+    [
+      "candidate_only",
+      137
+    ],
+    [
+      "unique_source_phrase",
+      46
+    ],
+    [
+      "missing_location",
+      35
+    ],
+    [
+      "missing vending location",
+      1
+    ]
+  ]
+}

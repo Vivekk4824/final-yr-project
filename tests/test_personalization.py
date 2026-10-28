@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 import backend.api as api
 from backend.database import initialize_database
 from backend.mcda_engine import WEIGHTS, derive_mcda_weights
+from backend.decision_policy import neutralize_constrained_division_weight
 
 
 class RecommendationPersonalizationTests(unittest.TestCase):
@@ -60,8 +61,10 @@ class RecommendationPersonalizationTests(unittest.TestCase):
         self.assertFalse(anonymous["personalization_applied"])
         self.assertTrue(personalized["personalization_applied"])
         self.assertEqual(anonymous["base_factor_weights"], WEIGHTS)
-        self.assertEqual(anonymous["effective_factor_weights"], WEIGHTS)
-        self.assertEqual(personalized["effective_factor_weights"], WEIGHTS)
+        expected = neutralize_constrained_division_weight(WEIGHTS)
+        self.assertEqual(anonymous["effective_factor_weights"], expected)
+        self.assertEqual(personalized["effective_factor_weights"], expected)
+        self.assertEqual(anonymous["effective_factor_weights"]["preference"], 0)
         self.assertEqual(
             [(row["zone_id"], row["score"]) for row in anonymous["recommendations"]],
             [(row["zone_id"], row["score"]) for row in personalized["recommendations"]],

@@ -5,14 +5,16 @@ import csv
 import hashlib
 import json
 import math
-import sqlite3
 from pathlib import Path
+from functools import lru_cache
 
 from pyproj import Transformer
 from shapely.geometry import Point, shape
 from shapely.ops import transform, unary_union
+from sqlalchemy.exc import SQLAlchemyError
 
 from backend.core.data_paths import CATALOG, ROOT, dataset_path
+from backend.repositories.database import connect
 
 METRIC_CRS = "EPSG:32643"
 PILOT_COUNTS = {"NN_F_013": 10, "PAN_F_019": 10, "SAT_F_014": 35, "NR_F_003": 30}
@@ -20,7 +22,8 @@ TO_METRIC = Transformer.from_crs("EPSG:4326", METRIC_CRS, always_xy=True)
 TO_WGS84 = Transformer.from_crs(METRIC_CRS, "EPSG:4326", always_xy=True)
 
 
-def _records(path):
+@lru_cache(maxsize=16)
+def _records_versioned(path: str, modified_ns: int, size: int):
     with Path(path).open(encoding="utf-8-sig", newline="") as source:
         rows = list(csv.DictReader(source))
     result = {row["zone_id"]: row for row in rows}
@@ -29,32 +32,47 @@ def _records(path):
     return result
 
 
+def _records(path):
+    source = Path(path).resolve()
+    stat = source.stat()
+    return _records_versioned(str(source), stat.st_mtime_ns, stat.st_size)
+
+
 def saved_pilot_areas(database_path=None):
     """Require existing saved WGS84 layouts; never initialize operational data."""
-    path = Path(database_path or dataset_path("database")).resolve()
+    database = database_path or dataset_path("database")
     try:
-        db = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)
+        db = connect(database)
         areas = {}
+        placeholders = ",".join("?" for _ in PILOT_COUNTS)
+        rows = {row["zone_id"]: row for row in db.execute(
+            f"""SELECT l.zone_id, l.metadata_json, COUNT(s.slot_id) AS slot_count,
+                       SUM(CASE WHEN s.geometry_crs != 'EPSG:4326' THEN 1 ELSE 0 END) AS invalid_crs
+                FROM pilot_slot_layouts AS l
+                LEFT JOIN pilot_slots AS s ON s.zone_id = l.zone_id AND s.is_deleted = 0
+                WHERE l.zone_id IN ({placeholders})
+                GROUP BY l.zone_id, l.metadata_json""",
+            tuple(PILOT_COUNTS),
+        )}
         for zone_id, count in PILOT_COUNTS.items():
-            row = db.execute("SELECT metadata_json FROM pilot_slot_layouts WHERE zone_id=?", (zone_id,)).fetchone()
+            row = rows.get(zone_id)
             if row is None:
                 raise ValueError(f"{zone_id}: saved pilot layout is missing")
-            metadata = json.loads(row[0])
+            metadata = json.loads(row["metadata_json"])
             if not metadata.get("georeferenced") or metadata.get("coordinate_system") != "EPSG:4326":
                 raise ValueError(f"{zone_id}: saved pilot layout is not WGS84 geographic geometry")
             boundaries = metadata.get("boundaries", {}).get("features", [])
             polygons = [shape(feature["geometry"]) for feature in boundaries]
             if not polygons or any(g.is_empty or not g.is_valid or g.geom_type not in ("Polygon", "MultiPolygon") for g in polygons):
                 raise ValueError(f"{zone_id}: saved vending boundary is missing or invalid")
-            slots = db.execute("SELECT geometry_crs FROM pilot_slots WHERE zone_id=? AND is_deleted=0", (zone_id,)).fetchall()
-            if len(slots) != count or any(s[0] != "EPSG:4326" for s in slots):
-                raise ValueError(f"{zone_id}: expected {count} saved geographic slots, found {len(slots)}")
+            if row["slot_count"] != count or row["invalid_crs"]:
+                raise ValueError(f"{zone_id}: expected {count} saved geographic slots, found {row['slot_count']}")
             area = unary_union([transform(TO_METRIC.transform, g) for g in polygons])
             if area.is_empty or not area.is_valid:
                 raise ValueError(f"{zone_id}: saved boundary union is invalid")
             areas[zone_id] = (area, hashlib.sha256(json.dumps(metadata["boundaries"], sort_keys=True).encode()).hexdigest())
         return areas
-    except sqlite3.Error as exc:
+    except SQLAlchemyError as exc:
         raise ValueError(f"Saved pilot layout database unavailable: {exc}") from exc
     finally:
         if "db" in locals():

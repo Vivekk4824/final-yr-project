@@ -15,6 +15,7 @@ export async function apiRequest(path, options = {}) {
     const error = new Error("Unable to reach the service. Check that the backend is running and try again.");
     error.code = "NETWORK_UNAVAILABLE"; throw error;
   }
+  if (response.status === 204) return null;
   let body;
   try {
     body = await response.json();
@@ -45,6 +46,14 @@ export const getPilotRoute = p => apiRequest("/api/pilot/route", jsonOptions("PO
 export const initializePilotLayout = zoneId => apiRequest(pilotPath("/api/pilot/initialize",zoneId), {method: "POST"});
 export const updatePilotSlot = (slotId, body, zoneId) =>
   apiRequest(pilotPath(`/api/pilot/slots/${encodeURIComponent(slotId)}`,zoneId), jsonOptions("PATCH", body));
+export const createPilotSlot = (body, zoneId) =>
+  apiRequest(pilotPath("/api/pilot/slots", zoneId), jsonOptions("POST", body));
+export const deletePilotSlot = (slotId, expectedUpdatedAt, zoneId) =>
+  apiRequest(`${pilotPath(`/api/pilot/slots/${encodeURIComponent(slotId)}`, zoneId)}&expected_updated_at=${encodeURIComponent(expectedUpdatedAt)}`, {method: "DELETE"});
+export const getPilotEligibleVendors = (zoneId, q = "", page = 1) =>
+  apiRequest(`/api/pilot/eligible-vendors?zone_id=${encodeURIComponent(zoneId)}&q=${encodeURIComponent(q)}&page=${page}`);
+export const movePilotSlot = (slotId, body, zoneId) =>
+  apiRequest(pilotPath(`/api/pilot/slots/${encodeURIComponent(slotId)}/geometry`, zoneId), jsonOptions("PATCH", body));
 export const registerVendor = profile => apiRequest("/api/vendors", jsonOptions("POST", profile));
 export const getVendorProfile = vendorId => apiRequest(`/api/vendors/${encodeURIComponent(vendorId)}`);
 export const updateVendorProfile = (vendorId, updates) =>
@@ -61,13 +70,15 @@ export const getRecommendations = (vendorId, excludeZone = "", preferences = {})
     division: preferences.division || "",
     top_n: 3,
   }));
+export const getRecommendationAiExplanation = zoneId =>
+  apiRequest(`/api/recommendations/${encodeURIComponent(zoneId)}/ai-explanation`);
 export const createAllocationRequest = payload =>
   apiRequest("/api/allocation-requests", jsonOptions("POST", payload));
 export const getAllocationRequest = requestId =>
   apiRequest(`/api/allocation-requests/${encodeURIComponent(requestId)}`);
 export const cancelAllocationRequest = requestId =>
   apiRequest(`/api/allocation-requests/${encodeURIComponent(requestId)}/cancel`, {method: "POST"});
-export const getZoneGeometry = () => apiRequest("/api/zones/geometry");
+export const getZoneGeometry = signal => apiRequest("/api/zones/geometry", {signal});
 export const requestVendorOtp = mobile =>
   apiRequest("/api/auth/vendor/request-otp", jsonOptions("POST", {mobile}));
 export const verifyVendorOtp = (challengeId, otp) =>
@@ -76,27 +87,34 @@ export const loginAdmin = (username, password) =>
   apiRequest("/api/auth/admin/login", jsonOptions("POST", {username, password}));
 export const getCurrentUser = () => apiRequest("/api/auth/me");
 export const logout = () => apiRequest("/api/auth/logout", {method: "POST"});
-export const getAdminOverview = () => apiRequest("/api/admin/overview");
-export const getAllocationRequests = (status = "") =>
-  apiRequest(`/api/allocation-requests${status ? `?status=${encodeURIComponent(status)}` : ""}`);
+export const getAdminOverview = signal => apiRequest("/api/admin/overview", {signal});
+export const getAllocationRequests = (status = "", signal) =>
+  apiRequest(`/api/allocation-requests${status ? `?status=${encodeURIComponent(status)}` : ""}`, {signal});
 export const approveAllocationRequest = (requestId, notes = null) =>
   apiRequest(`/api/allocation-requests/${encodeURIComponent(requestId)}/approve`,
     jsonOptions("POST", {notes}));
 export const rejectAllocationRequest = (requestId, rejectionReason, notes = null) =>
   apiRequest(`/api/allocation-requests/${encodeURIComponent(requestId)}/reject`,
     jsonOptions("POST", {rejection_reason: rejectionReason, notes}));
-export const getAllocations = (status = "") =>
-  apiRequest(`/api/allocations${status ? `?status=${encodeURIComponent(status)}` : ""}`);
+export const getAllocations = (status = "", signal, {limit, offset} = {}) => {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (limit !== undefined) params.set("limit", String(limit));
+  if (offset !== undefined) params.set("offset", String(offset));
+  const serialized = params.toString();
+  const query = serialized ? `?${serialized}` : "";
+  return apiRequest(`/api/allocations${query}`, {signal});
+};
 export const getZoneLiveStatus = zoneId =>
   apiRequest(`/api/zones/${encodeURIComponent(zoneId)}/live-status`);
 export const updateZoneLiveStatus = (zoneId, status) =>
   apiRequest(`/api/zones/${encodeURIComponent(zoneId)}/live-status`,
     jsonOptions("PATCH", {status}));
-export const getZoneCatalog = filters => {
+export const getZoneCatalog = (filters, signal) => {
   const params = new URLSearchParams();
   Object.entries(filters || {}).forEach(([key, value]) => value && params.set(key, value));
   const query = params.toString();
-  return apiRequest(`/api/admin/zones${query ? `?${query}` : ""}`);
+  return apiRequest(`/api/admin/zones${query ? `?${query}` : ""}`, {signal});
 };
 
 export const getAdminVendors = (filters = {}, signal) => {
@@ -106,8 +124,16 @@ export const getAdminVendors = (filters = {}, signal) => {
 };
 
 export const getAdminVendorDetails = (vendorId, signal) => apiRequest(`/api/admin/vendors/${encodeURIComponent(vendorId)}/details`, {signal});
+export const getVendorRelocationRecommendations = (vendorId, includeAll = false) =>
+  apiRequest(`/api/admin/vendors/${encodeURIComponent(vendorId)}/relocation-recommendations?include_all=${includeAll}`);
+export const getZoneHistoricalVendors = zoneId =>
+  apiRequest(`/api/admin/zones/${encodeURIComponent(zoneId)}/historical-vendors`);
+export const getCapacityPressure = () => apiRequest("/api/admin/capacity-pressure");
 
 export const getVendorAccountSettings = signal => apiRequest("/api/vendors/me/account-settings", {signal});
+export const getVendorProfilePhoto = signal => apiRequest("/api/vendors/me/profile-photo", {signal});
+export const saveVendorProfilePhoto = dataUrl =>
+  apiRequest("/api/vendors/me/profile-photo", jsonOptions("PUT", {data_url: dataUrl}));
 
 export const getVendorActivity = signal => apiRequest("/api/vendors/me/activity", {signal});
 

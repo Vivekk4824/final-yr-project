@@ -42,3 +42,14 @@ test("saving a slot updates cached data without losing selected slot or adjacent
   assert.equal(state.layout.slots[1], adjacent);
   assert.equal(state.selectedId, "S001");
 });
+
+test("deleting a slot removes it from the map and slot selector data", () => {
+  const stateWithSlots = {
+    ...initialPilotState,
+    layout: {slots: [{slot_id: "S001"}, {slot_id: "S002"}]},
+    selectedId: "S001",
+  };
+  const state = pilotReducer(stateWithSlots, {type: "deleted", slotId: "S001"});
+  assert.deepEqual(state.layout.slots.map(slot => slot.slot_id), ["S002"]);
+  assert.equal(state.selectedId, null);
+});

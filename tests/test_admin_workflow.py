@@ -13,6 +13,7 @@ from backend.database import (
     OperationalConflictError,
     approve_allocation_request,
     connect,
+    create_allocation_request,
     initialize_database,
     utc_now,
 )
@@ -198,6 +199,27 @@ class AdminAllocationWorkflowTests(unittest.TestCase):
         self.assertEqual(allocation_count, 0)
         self.assertIsNotNone(audit)
 
+    def test_pending_relocation_lists_vendor_current_zone(self):
+        old_zone, requested_zone = self.open_zones[3:5]
+        vendor_id = "V2024_00105"
+        self.insert_active_allocation(vendor_id, old_zone)
+        request = create_allocation_request(
+            vendor_id,
+            requested_zone,
+            "RELOCATION",
+            business_category="food",
+            database_path=self.database_path,
+        )
+
+        response = self.client.get(
+            "/api/allocation-requests",
+            params={"status": "PENDING"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["count"], 1)
+        self.assertEqual(response.json()["requests"][0]["current_zone_id"], old_zone)
+
     def test_relocation_releases_old_reopens_full_and_moves_occupancy(self):
         old_zone, new_zone = self.open_zones[3:5]
         vendor_id = "V2024_00105"
@@ -265,6 +287,15 @@ class AdminAllocationWorkflowTests(unittest.TestCase):
         listed = self.client.get("/api/allocations", params={"status": "ACTIVE"})
         self.assertEqual(listed.status_code, 200)
         self.assertEqual(listed.json()["count"], 1)
+        self.assertEqual(listed.json()["allocations"][0], approved["allocation"])
+        paged = self.client.get(
+            "/api/allocations",
+            params={"status": "ACTIVE", "limit": 1, "offset": 0},
+        )
+        self.assertEqual(paged.status_code, 200, paged.text)
+        self.assertEqual(paged.json()["count"], 1)
+        self.assertEqual(paged.json()["total_count"], 1)
+        self.assertEqual(paged.json()["allocations"][0], approved["allocation"])
         fetched = self.client.get(f"/api/allocations/{allocation_id}")
         self.assertEqual(fetched.status_code, 200)
         self.assertEqual(fetched.json(), approved["allocation"])

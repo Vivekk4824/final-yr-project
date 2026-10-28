@@ -1,0 +1,777 @@
+k,business_category,preferred_division,priority_profile,cluster,cluster_profile_name,recommendation_count,distinct_recommended_zones
+2,clothing,Nashik East,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Nashik East,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,Nashik East,BALANCED,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Nashik East,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,Nashik East,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Nashik East,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,Nashik East,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Nashik East,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,Nashik Road,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Nashik Road,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Nashik Road,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Nashik Road,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Nashik West,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Nashik West,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,Nashik West,BALANCED,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Nashik West,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,Nashik West,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Nashik West,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Nashik West,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,New Nashik,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,New Nashik,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,New Nashik,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,New Nashik,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Panchavati,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Panchavati,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Panchavati,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Panchavati,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,clothing,Satpur,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Satpur,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,Satpur,BALANCED,0,Public Transport Access with Mapped Commercial Activity,1,1
+2,clothing,Satpur,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+2,clothing,Satpur,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Satpur,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,clothing,Satpur,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,clothing,Satpur,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,food,Nashik East,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,food,Nashik East,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,food,Nashik East,BALANCED,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,food,Nashik East,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,food,Nashik East,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,food,Nashik East,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,food,Nashik East,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,food,Nashik East,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,food,Nashik Road,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Nashik Road,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Nashik Road,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Nashik Road,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Nashik West,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Nashik West,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Nashik West,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Nashik West,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,New Nashik,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,New Nashik,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,New Nashik,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,New Nashik,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Panchavati,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Panchavati,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Panchavati,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Panchavati,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,food,Satpur,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,1,1
+2,food,Satpur,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+2,food,Satpur,BALANCED,0,Public Transport Access with Mapped Commercial Activity,1,1
+2,food,Satpur,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+2,food,Satpur,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,food,Satpur,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,food,Satpur,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,1,1
+2,food,Satpur,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+2,general_goods,Nashik East,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Nashik East,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,general_goods,Nashik East,BALANCED,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Nashik East,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,general_goods,Nashik East,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Nashik East,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,general_goods,Nashik East,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Nashik East,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,general_goods,Nashik Road,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Nashik Road,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Nashik Road,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Nashik Road,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Nashik West,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Nashik West,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,general_goods,Nashik West,BALANCED,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Nashik West,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,general_goods,Nashik West,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Nashik West,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,New Nashik,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,New Nashik,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,New Nashik,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,New Nashik,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Panchavati,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Panchavati,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Panchavati,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Panchavati,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,general_goods,Satpur,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,1,1
+2,general_goods,Satpur,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+2,general_goods,Satpur,BALANCED,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Satpur,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,general_goods,Satpur,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Satpur,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,general_goods,Satpur,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,general_goods,Satpur,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,vegetable_fruit,Nashik East,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,vegetable_fruit,Nashik East,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,vegetable_fruit,Nashik East,BALANCED,0,Public Transport Access with Mapped Commercial Activity,1,1
+2,vegetable_fruit,Nashik East,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+2,vegetable_fruit,Nashik East,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,vegetable_fruit,Nashik East,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,vegetable_fruit,Nashik East,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,vegetable_fruit,Nashik East,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,vegetable_fruit,Nashik Road,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Nashik Road,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Nashik Road,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Nashik Road,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Nashik West,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Nashik West,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Nashik West,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Nashik West,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,New Nashik,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,New Nashik,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,New Nashik,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,New Nashik,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Panchavati,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Panchavati,BALANCED,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Panchavati,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Panchavati,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,3,3
+2,vegetable_fruit,Satpur,ACCESSIBILITY,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,vegetable_fruit,Satpur,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,vegetable_fruit,Satpur,BALANCED,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,vegetable_fruit,Satpur,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,vegetable_fruit,Satpur,COMMERCIAL,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,vegetable_fruit,Satpur,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+2,vegetable_fruit,Satpur,FACILITIES,0,Public Transport Access with Mapped Commercial Activity,2,2
+2,vegetable_fruit,Satpur,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Nashik East,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Nashik East,ACCESSIBILITY,2,Public Transport Access,2,2
+3,clothing,Nashik East,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Nashik East,BALANCED,2,Public Transport Access,2,2
+3,clothing,Nashik East,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Nashik East,COMMERCIAL,2,Public Transport Access,2,2
+3,clothing,Nashik East,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Nashik East,FACILITIES,2,Public Transport Access,2,2
+3,clothing,Nashik Road,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,clothing,Nashik Road,ACCESSIBILITY,2,Public Transport Access,1,1
+3,clothing,Nashik Road,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,clothing,Nashik Road,BALANCED,2,Public Transport Access,1,1
+3,clothing,Nashik Road,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,clothing,Nashik Road,COMMERCIAL,2,Public Transport Access,1,1
+3,clothing,Nashik Road,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,clothing,Nashik Road,FACILITIES,2,Public Transport Access,1,1
+3,clothing,Nashik West,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,clothing,Nashik West,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Nashik West,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,clothing,Nashik West,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Nashik West,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,clothing,Nashik West,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,clothing,Nashik West,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,New Nashik,ACCESSIBILITY,2,Public Transport Access,3,3
+3,clothing,New Nashik,BALANCED,2,Public Transport Access,3,3
+3,clothing,New Nashik,COMMERCIAL,2,Public Transport Access,3,3
+3,clothing,New Nashik,FACILITIES,2,Public Transport Access,3,3
+3,clothing,Panchavati,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,clothing,Panchavati,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,clothing,Panchavati,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,clothing,Panchavati,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,clothing,Satpur,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Satpur,ACCESSIBILITY,2,Public Transport Access,2,2
+3,clothing,Satpur,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Satpur,BALANCED,2,Public Transport Access,2,2
+3,clothing,Satpur,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Satpur,COMMERCIAL,2,Public Transport Access,2,2
+3,clothing,Satpur,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,clothing,Satpur,FACILITIES,2,Public Transport Access,2,2
+3,food,Nashik East,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,food,Nashik East,ACCESSIBILITY,2,Public Transport Access,2,2
+3,food,Nashik East,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,food,Nashik East,BALANCED,2,Public Transport Access,2,2
+3,food,Nashik East,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,food,Nashik East,COMMERCIAL,2,Public Transport Access,2,2
+3,food,Nashik East,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,food,Nashik East,FACILITIES,2,Public Transport Access,2,2
+3,food,Nashik Road,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,food,Nashik Road,ACCESSIBILITY,2,Public Transport Access,1,1
+3,food,Nashik Road,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,food,Nashik Road,BALANCED,2,Public Transport Access,1,1
+3,food,Nashik Road,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,food,Nashik Road,COMMERCIAL,2,Public Transport Access,1,1
+3,food,Nashik Road,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,food,Nashik Road,FACILITIES,2,Public Transport Access,1,1
+3,food,Nashik West,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,food,Nashik West,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,food,Nashik West,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,food,Nashik West,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,food,New Nashik,ACCESSIBILITY,2,Public Transport Access,3,3
+3,food,New Nashik,BALANCED,2,Public Transport Access,3,3
+3,food,New Nashik,COMMERCIAL,2,Public Transport Access,3,3
+3,food,New Nashik,FACILITIES,2,Public Transport Access,3,3
+3,food,Panchavati,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,food,Panchavati,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,food,Panchavati,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,food,Panchavati,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,food,Satpur,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,food,Satpur,ACCESSIBILITY,2,Public Transport Access,2,2
+3,food,Satpur,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,food,Satpur,BALANCED,2,Public Transport Access,2,2
+3,food,Satpur,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,food,Satpur,COMMERCIAL,2,Public Transport Access,2,2
+3,food,Satpur,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,food,Satpur,FACILITIES,2,Public Transport Access,2,2
+3,general_goods,Nashik East,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Nashik East,ACCESSIBILITY,2,Public Transport Access,2,2
+3,general_goods,Nashik East,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Nashik East,BALANCED,2,Public Transport Access,2,2
+3,general_goods,Nashik East,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Nashik East,COMMERCIAL,2,Public Transport Access,2,2
+3,general_goods,Nashik East,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Nashik East,FACILITIES,2,Public Transport Access,2,2
+3,general_goods,Nashik Road,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,general_goods,Nashik Road,ACCESSIBILITY,2,Public Transport Access,1,1
+3,general_goods,Nashik Road,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,general_goods,Nashik Road,BALANCED,2,Public Transport Access,1,1
+3,general_goods,Nashik Road,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,general_goods,Nashik Road,COMMERCIAL,2,Public Transport Access,1,1
+3,general_goods,Nashik Road,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,general_goods,Nashik Road,FACILITIES,2,Public Transport Access,1,1
+3,general_goods,Nashik West,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,general_goods,Nashik West,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Nashik West,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,general_goods,Nashik West,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Nashik West,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,general_goods,Nashik West,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,general_goods,New Nashik,ACCESSIBILITY,2,Public Transport Access,3,3
+3,general_goods,New Nashik,BALANCED,2,Public Transport Access,3,3
+3,general_goods,New Nashik,COMMERCIAL,2,Public Transport Access,3,3
+3,general_goods,New Nashik,FACILITIES,2,Public Transport Access,3,3
+3,general_goods,Panchavati,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,general_goods,Panchavati,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,general_goods,Panchavati,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,general_goods,Panchavati,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,general_goods,Satpur,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Satpur,ACCESSIBILITY,2,Public Transport Access,2,2
+3,general_goods,Satpur,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Satpur,BALANCED,2,Public Transport Access,2,2
+3,general_goods,Satpur,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Satpur,COMMERCIAL,2,Public Transport Access,2,2
+3,general_goods,Satpur,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,general_goods,Satpur,FACILITIES,2,Public Transport Access,2,2
+3,vegetable_fruit,Nashik East,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,vegetable_fruit,Nashik East,ACCESSIBILITY,2,Public Transport Access,2,2
+3,vegetable_fruit,Nashik East,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+3,vegetable_fruit,Nashik East,BALANCED,2,Public Transport Access,1,1
+3,vegetable_fruit,Nashik East,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,vegetable_fruit,Nashik East,COMMERCIAL,2,Public Transport Access,2,2
+3,vegetable_fruit,Nashik East,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,vegetable_fruit,Nashik East,FACILITIES,2,Public Transport Access,2,2
+3,vegetable_fruit,Nashik Road,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,vegetable_fruit,Nashik Road,ACCESSIBILITY,2,Public Transport Access,1,1
+3,vegetable_fruit,Nashik Road,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,vegetable_fruit,Nashik Road,BALANCED,2,Public Transport Access,1,1
+3,vegetable_fruit,Nashik Road,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,vegetable_fruit,Nashik Road,COMMERCIAL,2,Public Transport Access,1,1
+3,vegetable_fruit,Nashik Road,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,2,2
+3,vegetable_fruit,Nashik Road,FACILITIES,2,Public Transport Access,1,1
+3,vegetable_fruit,Nashik West,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,vegetable_fruit,Nashik West,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,vegetable_fruit,Nashik West,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,vegetable_fruit,Nashik West,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,vegetable_fruit,New Nashik,ACCESSIBILITY,2,Public Transport Access,3,3
+3,vegetable_fruit,New Nashik,BALANCED,2,Public Transport Access,3,3
+3,vegetable_fruit,New Nashik,COMMERCIAL,2,Public Transport Access,3,3
+3,vegetable_fruit,New Nashik,FACILITIES,2,Public Transport Access,3,3
+3,vegetable_fruit,Panchavati,ACCESSIBILITY,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,vegetable_fruit,Panchavati,BALANCED,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,vegetable_fruit,Panchavati,COMMERCIAL,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,vegetable_fruit,Panchavati,FACILITIES,0,Mapped Commercial Activity with Mapped Public Facilities,3,3
+3,vegetable_fruit,Satpur,ACCESSIBILITY,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,vegetable_fruit,Satpur,ACCESSIBILITY,2,Public Transport Access,2,2
+3,vegetable_fruit,Satpur,BALANCED,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,vegetable_fruit,Satpur,BALANCED,2,Public Transport Access,2,2
+3,vegetable_fruit,Satpur,COMMERCIAL,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,vegetable_fruit,Satpur,COMMERCIAL,2,Public Transport Access,2,2
+3,vegetable_fruit,Satpur,FACILITIES,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+3,vegetable_fruit,Satpur,FACILITIES,2,Public Transport Access,2,2
+4,clothing,Nashik East,ACCESSIBILITY,0,Public Transport Access,2,2
+4,clothing,Nashik East,ACCESSIBILITY,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,clothing,Nashik East,BALANCED,0,Public Transport Access,2,2
+4,clothing,Nashik East,BALANCED,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,clothing,Nashik East,COMMERCIAL,0,Public Transport Access,2,2
+4,clothing,Nashik East,COMMERCIAL,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,clothing,Nashik East,FACILITIES,0,Public Transport Access,2,2
+4,clothing,Nashik East,FACILITIES,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,clothing,Nashik Road,ACCESSIBILITY,0,Public Transport Access,1,1
+4,clothing,Nashik Road,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,clothing,Nashik Road,BALANCED,0,Public Transport Access,1,1
+4,clothing,Nashik Road,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,clothing,Nashik Road,COMMERCIAL,0,Public Transport Access,1,1
+4,clothing,Nashik Road,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,clothing,Nashik Road,FACILITIES,0,Public Transport Access,1,1
+4,clothing,Nashik Road,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,clothing,Nashik West,ACCESSIBILITY,0,Public Transport Access,1,1
+4,clothing,Nashik West,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,clothing,Nashik West,ACCESSIBILITY,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,clothing,Nashik West,BALANCED,0,Public Transport Access,1,1
+4,clothing,Nashik West,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,clothing,Nashik West,BALANCED,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,clothing,Nashik West,COMMERCIAL,0,Public Transport Access,1,1
+4,clothing,Nashik West,COMMERCIAL,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,clothing,Nashik West,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,clothing,Nashik West,FACILITIES,0,Public Transport Access,1,1
+4,clothing,Nashik West,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,clothing,Nashik West,FACILITIES,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,clothing,New Nashik,ACCESSIBILITY,0,Public Transport Access,3,3
+4,clothing,New Nashik,BALANCED,0,Public Transport Access,3,3
+4,clothing,New Nashik,COMMERCIAL,0,Public Transport Access,3,3
+4,clothing,New Nashik,FACILITIES,0,Public Transport Access,3,3
+4,clothing,Panchavati,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,clothing,Panchavati,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,clothing,Panchavati,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,clothing,Panchavati,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,clothing,Satpur,ACCESSIBILITY,0,Public Transport Access,2,2
+4,clothing,Satpur,ACCESSIBILITY,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,clothing,Satpur,BALANCED,0,Public Transport Access,2,2
+4,clothing,Satpur,BALANCED,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,clothing,Satpur,COMMERCIAL,0,Public Transport Access,2,2
+4,clothing,Satpur,COMMERCIAL,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,clothing,Satpur,FACILITIES,0,Public Transport Access,2,2
+4,clothing,Satpur,FACILITIES,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,food,Nashik East,ACCESSIBILITY,0,Public Transport Access,2,2
+4,food,Nashik East,ACCESSIBILITY,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,food,Nashik East,BALANCED,0,Public Transport Access,2,2
+4,food,Nashik East,BALANCED,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,food,Nashik East,COMMERCIAL,0,Public Transport Access,2,2
+4,food,Nashik East,COMMERCIAL,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,food,Nashik East,FACILITIES,0,Public Transport Access,2,2
+4,food,Nashik East,FACILITIES,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,food,Nashik Road,ACCESSIBILITY,0,Public Transport Access,1,1
+4,food,Nashik Road,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,food,Nashik Road,BALANCED,0,Public Transport Access,1,1
+4,food,Nashik Road,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,food,Nashik Road,COMMERCIAL,0,Public Transport Access,1,1
+4,food,Nashik Road,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,food,Nashik Road,FACILITIES,0,Public Transport Access,1,1
+4,food,Nashik Road,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,food,Nashik West,ACCESSIBILITY,0,Public Transport Access,1,1
+4,food,Nashik West,ACCESSIBILITY,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,food,Nashik West,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,food,Nashik West,BALANCED,0,Public Transport Access,1,1
+4,food,Nashik West,BALANCED,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,food,Nashik West,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,food,Nashik West,COMMERCIAL,1,Mapped Commercial Activity with Road and Pedestrian Access,2,2
+4,food,Nashik West,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,food,Nashik West,FACILITIES,0,Public Transport Access,1,1
+4,food,Nashik West,FACILITIES,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,food,Nashik West,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,food,New Nashik,ACCESSIBILITY,0,Public Transport Access,3,3
+4,food,New Nashik,BALANCED,0,Public Transport Access,3,3
+4,food,New Nashik,COMMERCIAL,0,Public Transport Access,3,3
+4,food,New Nashik,FACILITIES,0,Public Transport Access,3,3
+4,food,Panchavati,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,food,Panchavati,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,food,Panchavati,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,food,Panchavati,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,food,Satpur,ACCESSIBILITY,0,Public Transport Access,2,2
+4,food,Satpur,ACCESSIBILITY,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,food,Satpur,BALANCED,0,Public Transport Access,2,2
+4,food,Satpur,BALANCED,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,food,Satpur,COMMERCIAL,0,Public Transport Access,2,2
+4,food,Satpur,COMMERCIAL,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,food,Satpur,FACILITIES,0,Public Transport Access,2,2
+4,food,Satpur,FACILITIES,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,general_goods,Nashik East,ACCESSIBILITY,0,Public Transport Access,2,2
+4,general_goods,Nashik East,ACCESSIBILITY,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,general_goods,Nashik East,BALANCED,0,Public Transport Access,2,2
+4,general_goods,Nashik East,BALANCED,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,general_goods,Nashik East,COMMERCIAL,0,Public Transport Access,2,2
+4,general_goods,Nashik East,COMMERCIAL,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,general_goods,Nashik East,FACILITIES,0,Public Transport Access,2,2
+4,general_goods,Nashik East,FACILITIES,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,general_goods,Nashik Road,ACCESSIBILITY,0,Public Transport Access,1,1
+4,general_goods,Nashik Road,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,general_goods,Nashik Road,BALANCED,0,Public Transport Access,1,1
+4,general_goods,Nashik Road,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,general_goods,Nashik Road,COMMERCIAL,0,Public Transport Access,1,1
+4,general_goods,Nashik Road,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,general_goods,Nashik Road,FACILITIES,0,Public Transport Access,1,1
+4,general_goods,Nashik Road,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,general_goods,Nashik West,ACCESSIBILITY,0,Public Transport Access,1,1
+4,general_goods,Nashik West,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,general_goods,Nashik West,ACCESSIBILITY,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,general_goods,Nashik West,BALANCED,0,Public Transport Access,1,1
+4,general_goods,Nashik West,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,general_goods,Nashik West,BALANCED,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,general_goods,Nashik West,COMMERCIAL,1,Mapped Commercial Activity with Road and Pedestrian Access,2,2
+4,general_goods,Nashik West,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,general_goods,Nashik West,FACILITIES,0,Public Transport Access,1,1
+4,general_goods,Nashik West,FACILITIES,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,general_goods,Nashik West,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,general_goods,New Nashik,ACCESSIBILITY,0,Public Transport Access,3,3
+4,general_goods,New Nashik,BALANCED,0,Public Transport Access,3,3
+4,general_goods,New Nashik,COMMERCIAL,0,Public Transport Access,3,3
+4,general_goods,New Nashik,FACILITIES,0,Public Transport Access,3,3
+4,general_goods,Panchavati,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,general_goods,Panchavati,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,general_goods,Panchavati,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,general_goods,Panchavati,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,general_goods,Satpur,ACCESSIBILITY,0,Public Transport Access,2,2
+4,general_goods,Satpur,ACCESSIBILITY,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,general_goods,Satpur,BALANCED,0,Public Transport Access,2,2
+4,general_goods,Satpur,BALANCED,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,general_goods,Satpur,COMMERCIAL,0,Public Transport Access,2,2
+4,general_goods,Satpur,COMMERCIAL,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,general_goods,Satpur,FACILITIES,0,Public Transport Access,2,2
+4,general_goods,Satpur,FACILITIES,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,vegetable_fruit,Nashik East,ACCESSIBILITY,0,Public Transport Access,2,2
+4,vegetable_fruit,Nashik East,ACCESSIBILITY,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,vegetable_fruit,Nashik East,BALANCED,0,Public Transport Access,1,1
+4,vegetable_fruit,Nashik East,BALANCED,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+4,vegetable_fruit,Nashik East,COMMERCIAL,0,Public Transport Access,2,2
+4,vegetable_fruit,Nashik East,COMMERCIAL,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,vegetable_fruit,Nashik East,FACILITIES,0,Public Transport Access,2,2
+4,vegetable_fruit,Nashik East,FACILITIES,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+4,vegetable_fruit,Nashik Road,ACCESSIBILITY,0,Public Transport Access,1,1
+4,vegetable_fruit,Nashik Road,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,vegetable_fruit,Nashik Road,BALANCED,0,Public Transport Access,1,1
+4,vegetable_fruit,Nashik Road,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,vegetable_fruit,Nashik Road,COMMERCIAL,0,Public Transport Access,1,1
+4,vegetable_fruit,Nashik Road,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,vegetable_fruit,Nashik Road,FACILITIES,0,Public Transport Access,1,1
+4,vegetable_fruit,Nashik Road,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+4,vegetable_fruit,Nashik West,ACCESSIBILITY,0,Public Transport Access,1,1
+4,vegetable_fruit,Nashik West,ACCESSIBILITY,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,vegetable_fruit,Nashik West,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,vegetable_fruit,Nashik West,BALANCED,0,Public Transport Access,1,1
+4,vegetable_fruit,Nashik West,BALANCED,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,vegetable_fruit,Nashik West,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,vegetable_fruit,Nashik West,COMMERCIAL,1,Mapped Commercial Activity with Road and Pedestrian Access,2,2
+4,vegetable_fruit,Nashik West,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,vegetable_fruit,Nashik West,FACILITIES,1,Mapped Commercial Activity with Road and Pedestrian Access,2,2
+4,vegetable_fruit,Nashik West,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+4,vegetable_fruit,New Nashik,ACCESSIBILITY,0,Public Transport Access,3,3
+4,vegetable_fruit,New Nashik,BALANCED,0,Public Transport Access,3,3
+4,vegetable_fruit,New Nashik,COMMERCIAL,0,Public Transport Access,3,3
+4,vegetable_fruit,New Nashik,FACILITIES,0,Public Transport Access,3,3
+4,vegetable_fruit,Panchavati,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,vegetable_fruit,Panchavati,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,vegetable_fruit,Panchavati,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,vegetable_fruit,Panchavati,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+4,vegetable_fruit,Satpur,ACCESSIBILITY,0,Public Transport Access,2,2
+4,vegetable_fruit,Satpur,ACCESSIBILITY,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,vegetable_fruit,Satpur,BALANCED,0,Public Transport Access,2,2
+4,vegetable_fruit,Satpur,BALANCED,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,vegetable_fruit,Satpur,COMMERCIAL,0,Public Transport Access,2,2
+4,vegetable_fruit,Satpur,COMMERCIAL,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+4,vegetable_fruit,Satpur,FACILITIES,0,Public Transport Access,2,2
+4,vegetable_fruit,Satpur,FACILITIES,1,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,clothing,Nashik East,ACCESSIBILITY,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,clothing,Nashik East,ACCESSIBILITY,2,Public Transport Access,2,2
+5,clothing,Nashik East,BALANCED,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,clothing,Nashik East,BALANCED,2,Public Transport Access,2,2
+5,clothing,Nashik East,COMMERCIAL,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,clothing,Nashik East,COMMERCIAL,2,Public Transport Access,2,2
+5,clothing,Nashik East,FACILITIES,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,clothing,Nashik East,FACILITIES,2,Public Transport Access,2,2
+5,clothing,Nashik Road,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,clothing,Nashik Road,ACCESSIBILITY,2,Public Transport Access,1,1
+5,clothing,Nashik Road,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,clothing,Nashik Road,BALANCED,2,Public Transport Access,1,1
+5,clothing,Nashik Road,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,clothing,Nashik Road,COMMERCIAL,2,Public Transport Access,1,1
+5,clothing,Nashik Road,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,clothing,Nashik Road,FACILITIES,2,Public Transport Access,1,1
+5,clothing,Nashik West,ACCESSIBILITY,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,clothing,Nashik West,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,clothing,Nashik West,BALANCED,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,clothing,Nashik West,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,clothing,Nashik West,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,clothing,Nashik West,FACILITIES,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,clothing,Nashik West,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,clothing,New Nashik,ACCESSIBILITY,2,Public Transport Access,3,3
+5,clothing,New Nashik,BALANCED,2,Public Transport Access,3,3
+5,clothing,New Nashik,COMMERCIAL,2,Public Transport Access,3,3
+5,clothing,New Nashik,FACILITIES,2,Public Transport Access,3,3
+5,clothing,Panchavati,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,clothing,Panchavati,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,clothing,Panchavati,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,clothing,Panchavati,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,clothing,Satpur,ACCESSIBILITY,2,Public Transport Access,2,2
+5,clothing,Satpur,ACCESSIBILITY,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,clothing,Satpur,BALANCED,2,Public Transport Access,2,2
+5,clothing,Satpur,BALANCED,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,clothing,Satpur,COMMERCIAL,2,Public Transport Access,2,2
+5,clothing,Satpur,COMMERCIAL,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,clothing,Satpur,FACILITIES,2,Public Transport Access,2,2
+5,clothing,Satpur,FACILITIES,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,food,Nashik East,ACCESSIBILITY,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,food,Nashik East,ACCESSIBILITY,2,Public Transport Access,2,2
+5,food,Nashik East,BALANCED,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,food,Nashik East,BALANCED,2,Public Transport Access,2,2
+5,food,Nashik East,COMMERCIAL,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,food,Nashik East,COMMERCIAL,2,Public Transport Access,2,2
+5,food,Nashik East,FACILITIES,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,food,Nashik East,FACILITIES,2,Public Transport Access,2,2
+5,food,Nashik Road,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,food,Nashik Road,ACCESSIBILITY,2,Public Transport Access,1,1
+5,food,Nashik Road,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,food,Nashik Road,BALANCED,2,Public Transport Access,1,1
+5,food,Nashik Road,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,food,Nashik Road,COMMERCIAL,2,Public Transport Access,1,1
+5,food,Nashik Road,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,food,Nashik Road,FACILITIES,2,Public Transport Access,1,1
+5,food,Nashik West,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,food,Nashik West,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,food,Nashik West,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,food,Nashik West,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,food,New Nashik,ACCESSIBILITY,2,Public Transport Access,3,3
+5,food,New Nashik,BALANCED,2,Public Transport Access,3,3
+5,food,New Nashik,COMMERCIAL,2,Public Transport Access,3,3
+5,food,New Nashik,FACILITIES,2,Public Transport Access,3,3
+5,food,Panchavati,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,food,Panchavati,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,food,Panchavati,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,food,Panchavati,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,food,Satpur,ACCESSIBILITY,2,Public Transport Access,2,2
+5,food,Satpur,ACCESSIBILITY,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,food,Satpur,BALANCED,2,Public Transport Access,2,2
+5,food,Satpur,BALANCED,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,food,Satpur,COMMERCIAL,2,Public Transport Access,2,2
+5,food,Satpur,COMMERCIAL,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,food,Satpur,FACILITIES,2,Public Transport Access,2,2
+5,food,Satpur,FACILITIES,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,general_goods,Nashik East,ACCESSIBILITY,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,general_goods,Nashik East,ACCESSIBILITY,2,Public Transport Access,2,2
+5,general_goods,Nashik East,BALANCED,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,general_goods,Nashik East,BALANCED,2,Public Transport Access,2,2
+5,general_goods,Nashik East,COMMERCIAL,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,general_goods,Nashik East,COMMERCIAL,2,Public Transport Access,2,2
+5,general_goods,Nashik East,FACILITIES,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,general_goods,Nashik East,FACILITIES,2,Public Transport Access,2,2
+5,general_goods,Nashik Road,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,general_goods,Nashik Road,ACCESSIBILITY,2,Public Transport Access,1,1
+5,general_goods,Nashik Road,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,general_goods,Nashik Road,BALANCED,2,Public Transport Access,1,1
+5,general_goods,Nashik Road,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,general_goods,Nashik Road,COMMERCIAL,2,Public Transport Access,1,1
+5,general_goods,Nashik Road,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,general_goods,Nashik Road,FACILITIES,2,Public Transport Access,1,1
+5,general_goods,Nashik West,ACCESSIBILITY,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,general_goods,Nashik West,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,general_goods,Nashik West,BALANCED,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,general_goods,Nashik West,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,general_goods,Nashik West,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,general_goods,Nashik West,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,general_goods,New Nashik,ACCESSIBILITY,2,Public Transport Access,3,3
+5,general_goods,New Nashik,BALANCED,2,Public Transport Access,3,3
+5,general_goods,New Nashik,COMMERCIAL,2,Public Transport Access,3,3
+5,general_goods,New Nashik,FACILITIES,2,Public Transport Access,3,3
+5,general_goods,Panchavati,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,general_goods,Panchavati,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,general_goods,Panchavati,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,general_goods,Panchavati,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,general_goods,Satpur,ACCESSIBILITY,2,Public Transport Access,2,2
+5,general_goods,Satpur,ACCESSIBILITY,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,general_goods,Satpur,BALANCED,2,Public Transport Access,2,2
+5,general_goods,Satpur,BALANCED,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,general_goods,Satpur,COMMERCIAL,2,Public Transport Access,2,2
+5,general_goods,Satpur,COMMERCIAL,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,general_goods,Satpur,FACILITIES,2,Public Transport Access,2,2
+5,general_goods,Satpur,FACILITIES,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,vegetable_fruit,Nashik East,ACCESSIBILITY,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,vegetable_fruit,Nashik East,ACCESSIBILITY,2,Public Transport Access,2,2
+5,vegetable_fruit,Nashik East,BALANCED,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,2,2
+5,vegetable_fruit,Nashik East,BALANCED,2,Public Transport Access,1,1
+5,vegetable_fruit,Nashik East,COMMERCIAL,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,vegetable_fruit,Nashik East,COMMERCIAL,2,Public Transport Access,2,2
+5,vegetable_fruit,Nashik East,FACILITIES,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+5,vegetable_fruit,Nashik East,FACILITIES,2,Public Transport Access,2,2
+5,vegetable_fruit,Nashik Road,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,vegetable_fruit,Nashik Road,ACCESSIBILITY,2,Public Transport Access,1,1
+5,vegetable_fruit,Nashik Road,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,vegetable_fruit,Nashik Road,BALANCED,2,Public Transport Access,1,1
+5,vegetable_fruit,Nashik Road,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,vegetable_fruit,Nashik Road,COMMERCIAL,2,Public Transport Access,1,1
+5,vegetable_fruit,Nashik Road,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,2,2
+5,vegetable_fruit,Nashik Road,FACILITIES,2,Public Transport Access,1,1
+5,vegetable_fruit,Nashik West,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,vegetable_fruit,Nashik West,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,vegetable_fruit,Nashik West,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,vegetable_fruit,Nashik West,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,vegetable_fruit,New Nashik,ACCESSIBILITY,2,Public Transport Access,3,3
+5,vegetable_fruit,New Nashik,BALANCED,2,Public Transport Access,3,3
+5,vegetable_fruit,New Nashik,COMMERCIAL,2,Public Transport Access,3,3
+5,vegetable_fruit,New Nashik,FACILITIES,2,Public Transport Access,3,3
+5,vegetable_fruit,Panchavati,ACCESSIBILITY,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,vegetable_fruit,Panchavati,BALANCED,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,vegetable_fruit,Panchavati,COMMERCIAL,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,vegetable_fruit,Panchavati,FACILITIES,1,Mapped Public Facilities with Mapped Commercial Activity,3,3
+5,vegetable_fruit,Satpur,ACCESSIBILITY,2,Public Transport Access,2,2
+5,vegetable_fruit,Satpur,ACCESSIBILITY,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,vegetable_fruit,Satpur,BALANCED,2,Public Transport Access,2,2
+5,vegetable_fruit,Satpur,BALANCED,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,vegetable_fruit,Satpur,COMMERCIAL,2,Public Transport Access,2,2
+5,vegetable_fruit,Satpur,COMMERCIAL,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+5,vegetable_fruit,Satpur,FACILITIES,2,Public Transport Access,2,2
+5,vegetable_fruit,Satpur,FACILITIES,3,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,clothing,Nashik East,ACCESSIBILITY,1,Public Transport Access,2,2
+6,clothing,Nashik East,ACCESSIBILITY,3,Road and Pedestrian Access,1,1
+6,clothing,Nashik East,BALANCED,1,Public Transport Access,2,2
+6,clothing,Nashik East,BALANCED,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+6,clothing,Nashik East,COMMERCIAL,1,Public Transport Access,2,2
+6,clothing,Nashik East,COMMERCIAL,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+6,clothing,Nashik East,FACILITIES,1,Public Transport Access,2,2
+6,clothing,Nashik East,FACILITIES,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+6,clothing,Nashik Road,ACCESSIBILITY,1,Public Transport Access,1,1
+6,clothing,Nashik Road,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,clothing,Nashik Road,BALANCED,1,Public Transport Access,1,1
+6,clothing,Nashik Road,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,clothing,Nashik Road,COMMERCIAL,1,Public Transport Access,1,1
+6,clothing,Nashik Road,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,clothing,Nashik Road,FACILITIES,1,Public Transport Access,1,1
+6,clothing,Nashik Road,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,clothing,Nashik West,ACCESSIBILITY,1,Public Transport Access,1,1
+6,clothing,Nashik West,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,clothing,Nashik West,ACCESSIBILITY,3,Road and Pedestrian Access,1,1
+6,clothing,Nashik West,BALANCED,1,Public Transport Access,1,1
+6,clothing,Nashik West,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,clothing,Nashik West,BALANCED,3,Road and Pedestrian Access,1,1
+6,clothing,Nashik West,COMMERCIAL,1,Public Transport Access,1,1
+6,clothing,Nashik West,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,clothing,Nashik West,COMMERCIAL,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,clothing,Nashik West,FACILITIES,1,Public Transport Access,1,1
+6,clothing,Nashik West,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,clothing,Nashik West,FACILITIES,3,Road and Pedestrian Access,1,1
+6,clothing,New Nashik,ACCESSIBILITY,1,Public Transport Access,3,3
+6,clothing,New Nashik,BALANCED,1,Public Transport Access,3,3
+6,clothing,New Nashik,COMMERCIAL,1,Public Transport Access,3,3
+6,clothing,New Nashik,FACILITIES,1,Public Transport Access,3,3
+6,clothing,Panchavati,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,clothing,Panchavati,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,clothing,Panchavati,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,clothing,Panchavati,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,clothing,Satpur,ACCESSIBILITY,1,Public Transport Access,2,2
+6,clothing,Satpur,ACCESSIBILITY,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,clothing,Satpur,BALANCED,1,Public Transport Access,2,2
+6,clothing,Satpur,BALANCED,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,clothing,Satpur,COMMERCIAL,1,Public Transport Access,2,2
+6,clothing,Satpur,COMMERCIAL,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,clothing,Satpur,FACILITIES,1,Public Transport Access,2,2
+6,clothing,Satpur,FACILITIES,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,food,Nashik East,ACCESSIBILITY,1,Public Transport Access,2,2
+6,food,Nashik East,ACCESSIBILITY,3,Road and Pedestrian Access,1,1
+6,food,Nashik East,BALANCED,1,Public Transport Access,2,2
+6,food,Nashik East,BALANCED,3,Road and Pedestrian Access,1,1
+6,food,Nashik East,COMMERCIAL,1,Public Transport Access,2,2
+6,food,Nashik East,COMMERCIAL,3,Road and Pedestrian Access,1,1
+6,food,Nashik East,FACILITIES,1,Public Transport Access,2,2
+6,food,Nashik East,FACILITIES,3,Road and Pedestrian Access,1,1
+6,food,Nashik Road,ACCESSIBILITY,1,Public Transport Access,1,1
+6,food,Nashik Road,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,food,Nashik Road,BALANCED,1,Public Transport Access,1,1
+6,food,Nashik Road,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,food,Nashik Road,COMMERCIAL,1,Public Transport Access,1,1
+6,food,Nashik Road,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,food,Nashik Road,FACILITIES,1,Public Transport Access,1,1
+6,food,Nashik Road,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,food,Nashik West,ACCESSIBILITY,1,Public Transport Access,1,1
+6,food,Nashik West,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,food,Nashik West,ACCESSIBILITY,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,food,Nashik West,BALANCED,1,Public Transport Access,1,1
+6,food,Nashik West,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,food,Nashik West,BALANCED,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,food,Nashik West,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,food,Nashik West,COMMERCIAL,5,Mapped Commercial Activity with Road and Pedestrian Access,2,2
+6,food,Nashik West,FACILITIES,1,Public Transport Access,1,1
+6,food,Nashik West,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,food,Nashik West,FACILITIES,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,food,New Nashik,ACCESSIBILITY,1,Public Transport Access,3,3
+6,food,New Nashik,BALANCED,1,Public Transport Access,3,3
+6,food,New Nashik,COMMERCIAL,1,Public Transport Access,3,3
+6,food,New Nashik,FACILITIES,1,Public Transport Access,3,3
+6,food,Panchavati,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,food,Panchavati,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,food,Panchavati,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,food,Panchavati,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,food,Satpur,ACCESSIBILITY,1,Public Transport Access,2,2
+6,food,Satpur,ACCESSIBILITY,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,food,Satpur,BALANCED,1,Public Transport Access,2,2
+6,food,Satpur,BALANCED,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,food,Satpur,COMMERCIAL,1,Public Transport Access,2,2
+6,food,Satpur,COMMERCIAL,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,food,Satpur,FACILITIES,1,Public Transport Access,2,2
+6,food,Satpur,FACILITIES,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,general_goods,Nashik East,ACCESSIBILITY,1,Public Transport Access,2,2
+6,general_goods,Nashik East,ACCESSIBILITY,3,Road and Pedestrian Access,1,1
+6,general_goods,Nashik East,BALANCED,1,Public Transport Access,2,2
+6,general_goods,Nashik East,BALANCED,3,Road and Pedestrian Access,1,1
+6,general_goods,Nashik East,COMMERCIAL,1,Public Transport Access,2,2
+6,general_goods,Nashik East,COMMERCIAL,3,Road and Pedestrian Access,1,1
+6,general_goods,Nashik East,FACILITIES,1,Public Transport Access,2,2
+6,general_goods,Nashik East,FACILITIES,3,Road and Pedestrian Access,1,1
+6,general_goods,Nashik Road,ACCESSIBILITY,1,Public Transport Access,1,1
+6,general_goods,Nashik Road,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,general_goods,Nashik Road,BALANCED,1,Public Transport Access,1,1
+6,general_goods,Nashik Road,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,general_goods,Nashik Road,COMMERCIAL,1,Public Transport Access,1,1
+6,general_goods,Nashik Road,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,general_goods,Nashik Road,FACILITIES,1,Public Transport Access,1,1
+6,general_goods,Nashik Road,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,general_goods,Nashik West,ACCESSIBILITY,1,Public Transport Access,1,1
+6,general_goods,Nashik West,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,general_goods,Nashik West,ACCESSIBILITY,3,Road and Pedestrian Access,1,1
+6,general_goods,Nashik West,BALANCED,1,Public Transport Access,1,1
+6,general_goods,Nashik West,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,general_goods,Nashik West,BALANCED,3,Road and Pedestrian Access,1,1
+6,general_goods,Nashik West,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,general_goods,Nashik West,COMMERCIAL,5,Mapped Commercial Activity with Road and Pedestrian Access,2,2
+6,general_goods,Nashik West,FACILITIES,1,Public Transport Access,1,1
+6,general_goods,Nashik West,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,general_goods,Nashik West,FACILITIES,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,general_goods,New Nashik,ACCESSIBILITY,1,Public Transport Access,3,3
+6,general_goods,New Nashik,BALANCED,1,Public Transport Access,3,3
+6,general_goods,New Nashik,COMMERCIAL,1,Public Transport Access,3,3
+6,general_goods,New Nashik,FACILITIES,1,Public Transport Access,3,3
+6,general_goods,Panchavati,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,general_goods,Panchavati,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,general_goods,Panchavati,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,general_goods,Panchavati,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,general_goods,Satpur,ACCESSIBILITY,1,Public Transport Access,2,2
+6,general_goods,Satpur,ACCESSIBILITY,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,general_goods,Satpur,BALANCED,1,Public Transport Access,2,2
+6,general_goods,Satpur,BALANCED,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,general_goods,Satpur,COMMERCIAL,1,Public Transport Access,2,2
+6,general_goods,Satpur,COMMERCIAL,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,general_goods,Satpur,FACILITIES,1,Public Transport Access,2,2
+6,general_goods,Satpur,FACILITIES,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,vegetable_fruit,Nashik East,ACCESSIBILITY,1,Public Transport Access,2,2
+6,vegetable_fruit,Nashik East,ACCESSIBILITY,3,Road and Pedestrian Access,1,1
+6,vegetable_fruit,Nashik East,BALANCED,1,Public Transport Access,1,1
+6,vegetable_fruit,Nashik East,BALANCED,3,Road and Pedestrian Access,1,1
+6,vegetable_fruit,Nashik East,BALANCED,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,1,1
+6,vegetable_fruit,Nashik East,COMMERCIAL,1,Public Transport Access,2,2
+6,vegetable_fruit,Nashik East,COMMERCIAL,3,Road and Pedestrian Access,1,1
+6,vegetable_fruit,Nashik East,FACILITIES,1,Public Transport Access,2,2
+6,vegetable_fruit,Nashik East,FACILITIES,3,Road and Pedestrian Access,1,1
+6,vegetable_fruit,Nashik Road,ACCESSIBILITY,1,Public Transport Access,1,1
+6,vegetable_fruit,Nashik Road,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,vegetable_fruit,Nashik Road,BALANCED,1,Public Transport Access,1,1
+6,vegetable_fruit,Nashik Road,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,vegetable_fruit,Nashik Road,COMMERCIAL,1,Public Transport Access,1,1
+6,vegetable_fruit,Nashik Road,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,vegetable_fruit,Nashik Road,FACILITIES,1,Public Transport Access,1,1
+6,vegetable_fruit,Nashik Road,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,2,2
+6,vegetable_fruit,Nashik West,ACCESSIBILITY,1,Public Transport Access,1,1
+6,vegetable_fruit,Nashik West,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,vegetable_fruit,Nashik West,ACCESSIBILITY,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,vegetable_fruit,Nashik West,BALANCED,1,Public Transport Access,1,1
+6,vegetable_fruit,Nashik West,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,vegetable_fruit,Nashik West,BALANCED,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,vegetable_fruit,Nashik West,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,vegetable_fruit,Nashik West,COMMERCIAL,5,Mapped Commercial Activity with Road and Pedestrian Access,2,2
+6,vegetable_fruit,Nashik West,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,1,1
+6,vegetable_fruit,Nashik West,FACILITIES,5,Mapped Commercial Activity with Road and Pedestrian Access,2,2
+6,vegetable_fruit,New Nashik,ACCESSIBILITY,1,Public Transport Access,3,3
+6,vegetable_fruit,New Nashik,BALANCED,1,Public Transport Access,3,3
+6,vegetable_fruit,New Nashik,COMMERCIAL,1,Public Transport Access,3,3
+6,vegetable_fruit,New Nashik,FACILITIES,1,Public Transport Access,3,3
+6,vegetable_fruit,Panchavati,ACCESSIBILITY,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,vegetable_fruit,Panchavati,BALANCED,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,vegetable_fruit,Panchavati,COMMERCIAL,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,vegetable_fruit,Panchavati,FACILITIES,2,Mapped Public Facilities with Mapped Commercial Activity,3,3
+6,vegetable_fruit,Satpur,ACCESSIBILITY,1,Public Transport Access,2,2
+6,vegetable_fruit,Satpur,ACCESSIBILITY,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,vegetable_fruit,Satpur,BALANCED,1,Public Transport Access,2,2
+6,vegetable_fruit,Satpur,BALANCED,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,vegetable_fruit,Satpur,COMMERCIAL,1,Public Transport Access,2,2
+6,vegetable_fruit,Satpur,COMMERCIAL,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1
+6,vegetable_fruit,Satpur,FACILITIES,1,Public Transport Access,2,2
+6,vegetable_fruit,Satpur,FACILITIES,5,Mapped Commercial Activity with Road and Pedestrian Access,1,1

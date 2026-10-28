@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import numpy as np
+from backend.business_aware_mcda import category_gis_evidence
 
 
 FACTOR_WEIGHTS = {
@@ -94,6 +95,20 @@ def explain(record, factor_weights=None):
             ],
         },
     }
+    if bool(record.get("business_aware_mcda_experiment_enabled", False)):
+        category = str(record.get("requested_business_category") or "unknown")
+        evidence = category_gis_evidence(record)
+        items["commercial"] = {
+            "title": "Category-relevant GIS context",
+            "summary": (
+                f"Mapped commercial-context indicators configured for the {category} "
+                "category were used in this experimental score."
+                if evidence
+                else "The baseline Commercial calculation was retained because no supported category-specific indicator was available."
+            ),
+            "details": "This disabled-by-default experiment replaces only the Commercial factor. Mapped POIs are not verified demand, footfall, sales, or profitability.",
+            "evidence": evidence or [{"label": "Scoring method", "value": record.get("category_gis_method")}],
+        }
     weights = factor_weights or {key: value / 100 for key, value in FACTOR_WEIGHTS.items()}
     return [{
         "key": key,

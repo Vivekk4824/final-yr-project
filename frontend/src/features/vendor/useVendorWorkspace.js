@@ -93,7 +93,7 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
   }, [sessionProfile?.vendor_id]);
   useEffect(() => {
     if (!onboarding && sessionProfile?.vendor_id) refreshDashboard();
-  }, [onboarding, sessionProfile?.vendor_id, view, refreshDashboard]);
+  }, [onboarding, sessionProfile?.vendor_id, refreshDashboard]);
   const hydrateVendor = async vendor => {
     setProfile(vendor); setDraft(draftFromProfile(vendor)); selectLanguage(vendor.preferred_language, {deliberate: false});
     setProfileReady(true);
@@ -160,6 +160,7 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
     const requestType = activeAllocation ? "RELOCATION" : "NEW_ALLOCATION";
     const created = await createAllocationRequest({
       vendor_id: profile.vendor_id, zone_id: confirmZone.zone_id, request_type: requestType,
+      slot_id: confirmZone.slot_id || null,
       business_category: profile.business_category, preferred_division: profile.preferred_division,
       notes: "Submitted through vendor portal",
     });

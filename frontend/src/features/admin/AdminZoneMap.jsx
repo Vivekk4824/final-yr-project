@@ -1,4 +1,3 @@
-import {getZoneDisplayGeometry} from "../../services/api.js";
 import {zoneName, officialZoneDivision, zoneMapLocation, zoneDisplayGeometry, illustrativeDivisions} from "../../shared/utils/displayLabels.js";
 import React, {useEffect, useMemo, useState} from "react";
 import {CircleMarker, Polygon, LayersControl, LayerGroup, MapContainer, Popup, TileLayer, Tooltip, useMap} from "react-leaflet";
@@ -69,10 +68,8 @@ export function AdminMapFocus({groups, resetVersion}) {
 }
 
 export function AdminZoneMap({zones, geometry, onZone, division = "", onDivision, selectedZoneId, referenceEnabled, onReferenceChange}) {
-  const [apiDisplay, setApiDisplay] = useState(null), [displayError, setDisplayError] = useState("");
-  useEffect(() => {let active = true; getZoneDisplayGeometry().then(data => {if (active) setApiDisplay(data);}).catch(error => {if (active) setDisplayError(error.message);}); return () => {active = false;};}, []);
   const [resetVersion, setResetVersion] = useState(0);
-  const displayGeometry = useMemo(() => ({type: "FeatureCollection", features: (apiDisplay || zoneDisplayGeometry(zones)).features.filter(feature => feature.geometry?.type === "Point" && zones.some(zone => zone.zone_id === feature.properties.zone_id) && insideDivision(feature.geometry.coordinates, division))}), [zones, division, apiDisplay]);
+  const displayGeometry = useMemo(() => ({type: "FeatureCollection", features: zoneDisplayGeometry(zones).features.filter(feature => feature.geometry?.type === "Point" && insideDivision(feature.geometry.coordinates, division))}), [zones, division]);
   const model = useMemo(() => buildAdminMapModel(zones, displayGeometry), [zones, displayGeometry]);
   const referenceModel = useMemo(() => {
     const reference = analyticalDisplayGeometry(zones, geometry);
@@ -81,7 +78,6 @@ export function AdminZoneMap({zones, geometry, onZone, division = "", onDivision
   }, [zones, geometry, division]);
   const focusGroups = useMemo(() => referenceEnabled ? [...model.groups, ...referenceModel.groups] : model.groups, [model.groups, referenceModel.groups, referenceEnabled]);
   return <div className="admin-map-shell">
-    {displayError && <p role="alert" className="admin-map-disclaimer">Display API unavailable: {displayError}. Local handoff display data is being used.</p>}
     <button className="admin-map-reset" onClick={() => setResetVersion(value => value + 1)}>{division ? "Recenter division" : "View city"}</button>
     <MapContainer center={[19.9975, 73.7898]} zoom={12} scrollWheelZoom className="admin-map-canvas">
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
@@ -91,16 +87,20 @@ export function AdminZoneMap({zones, geometry, onZone, division = "", onDivision
         eventHandlers={{click: () => {if (!group.shared) onZone(primary);}}}
         pathOptions={{color: selected ? "#0f172a" : pilot ? "#075985" : group.shared ? "#3f586c" : "#fff", weight: selected ? 4 : pilot ? 3 : group.shared ? 2 : 1.5, dashArray: location.kind === "approximate" ? "3 3" : undefined, fillOpacity: location.kind === "approximate" ? .35 : .85, fillColor: location.kind === "pilot" ? "#075985" : location.kind === "manual" ? "#087f72" : location.kind === "landmark" ? "#b45309" : "#718596"}}>
         <Tooltip direction="top">{group.shared ? `${group.zones.length} zones share this display location` : `${zoneName(primary)} - ${location.label}`}</Tooltip>
-        <Popup className="admin-shared-popup" minWidth={group.shared ? 310 : 235}>
-          <strong>{group.shared ? "Shared display location" : primary.zone_id}</strong>
-          <div className="admin-shared-list">{group.zones.map(zone => <button key={zone.zone_id} onClick={() => onZone(zone)}><span><i style={{background: STATUS_COLORS[zone.live_status] || "#64748b"}}/><b>{zone.zone_id}{PILOT_ZONE_IDS.includes(zone.zone_id) ? " - Geographic pilot" : ""}</b></span><em>{pretty(zone.live_status)}</em><small>Official division: {officialZoneDivision(zone)}</small>{officialZoneDivision(zone) !== division && <small>Shown inside {division} illustrative polygon; official division differs.</small>}<small>{zoneMapLocation(zone).label}</small><small>Confidence: {pretty(zoneMapLocation(zone).record?.confidence)}</small><small>{pretty(zone.zone_type)} | Capacity: {zone.official_capacity ?? "Not recorded"}</small><small>{zone.available_capacity == null ? "Capacity unknown" : `${zone.available_capacity} available`}</small></button>)}</div>
-          {group.shared && <p>These official zones share the same unverified display location. They remain separate NMC zone records.</p>}
+        <Popup className="admin-zone-map-popup" minWidth={280} maxWidth={360}>
+          <strong>{group.shared ? `${group.zones.length} zones at this map location` : "Zone"}</strong>
+          <div className="admin-shared-list">{group.zones.map(zone => <button key={zone.zone_id} onClick={() => onZone(zone)}>
+            <span className="admin-popup-zone-title"><b>{zone.zone_id}</b><em><i style={{background: STATUS_COLORS[zone.live_status] || "#64748b"}}/>{pretty(zone.live_status)}</em></span>
+            <span className="admin-popup-zone-name">{zoneName(zone)}</span>
+            <small>{pretty(zone.zone_type)} · {zone.operational_available == null ? "Availability not recorded" : `${zone.operational_available} available`}</small>
+            {officialZoneDivision(zone) !== division && <small>Officially listed in {officialZoneDivision(zone)}</small>}
+            <span className="admin-popup-action">View zone</span>
+          </button>)}</div>
         </Popup>
       </CircleMarker>;})}
-      {division && <LayersControl position="topright"><LayersControl.Overlay name="Unverified reference locations" checked={referenceEnabled}><LayerGroup eventHandlers={{add: () => onReferenceChange?.(true), remove: () => onReferenceChange?.(false)}}>{referenceModel.groups.map(group => <CircleMarker key={`reference-${group.key}`} center={group.position} radius={6} pathOptions={{color: "#64748b", fillOpacity: .12, dashArray: "2 4"}}><Tooltip>Unverified analytical reference - not an exact vending site</Tooltip><Popup><strong>Unverified reference locations</strong><p>Analytical points only. These do not establish actual vending locations.</p>{group.zones.map(zone => <button key={zone.zone_id} onClick={() => onZone(zone)}>{zoneName(zone)} - Official division: {officialZoneDivision(zone)} - Capacity: {zone.official_capacity ?? "Not recorded"} - {pretty(zone.live_status)}{officialZoneDivision(zone) !== division ? ` (inside ${division} illustrative polygon)` : ""}</button>)}</Popup></CircleMarker>)}</LayerGroup></LayersControl.Overlay></LayersControl>}
+      {division && <LayersControl position="topright"><LayersControl.Overlay name="Unverified reference locations" checked={referenceEnabled}><LayerGroup eventHandlers={{add: () => onReferenceChange?.(true), remove: () => onReferenceChange?.(false)}}>{referenceModel.groups.map(group => <CircleMarker key={`reference-${group.key}`} center={group.position} radius={6} pathOptions={{color: "#64748b", fillOpacity: .12, dashArray: "2 4"}}><Tooltip>Unverified analytical reference - not an exact vending site</Tooltip><Popup><strong>Unverified reference locations</strong><p>Analytical points only. These do not establish actual vending locations.</p>{group.zones.map(zone => <button key={zone.zone_id} onClick={() => onZone(zone)}>{zoneName(zone)} - Official division: {officialZoneDivision(zone)} - Listed capacity: {zone.listed_official_capacity ?? "Not recorded"} - Operationally available: {zone.operational_available ?? "unknown"} - {pretty(zone.live_status)}{officialZoneDivision(zone) !== division ? ` (inside ${division} illustrative polygon)` : ""}</button>)}</Popup></CircleMarker>)}</LayerGroup></LayersControl.Overlay></LayersControl>}
     </MapContainer>
     {division && <div className="admin-map-legend">{Object.keys(STATUS_COLORS).map(status => <span key={status}><i style={{background: STATUS_COLORS[status]}}/>{pretty(status)}</span>)}<span><i style={{background: "#b45309"}}/>Landmark candidate</span><span><i style={{background: "#087f72"}}/>Manual reference (unverified)</span><span><i style={{background: "#718596"}}/>Approximate reference</span><span><i style={{background: "#075985"}}/>Provisional pilot</span></div>}
-    <div className="admin-map-disclaimer">Illustrative divisions - not verified NMC boundaries. Spatial inclusion is display-only and does not establish official administrative membership.{division && ` Display locations are unverified candidates; ${model.unavailableZoneIds.length} locations unavailable.`}</div>
+    <div className="admin-map-disclaimer">Map pins are approximate references, not confirmed vending spots. Zone records determine official division and status.{division && model.unavailableZoneIds.length > 0 && ` ${model.unavailableZoneIds.length} zones have no map pin.`}</div>
   </div>;
 }
-

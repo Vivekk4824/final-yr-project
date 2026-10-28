@@ -7,18 +7,21 @@ import json
 import math
 import uuid
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 
 from pyproj import Geod
-from shapely.geometry import Point, box, mapping, shape
+from shapely.geometry import Point, Polygon, box, mapping, shape
+from shapely.validation import explain_validity
 from sqlalchemy.exc import IntegrityError
 
 import backend.geo.pilot_geometry as gis
 
-from backend.repositories.database import ROOT, DATABASE_PATH, OFFICIAL_ZONES_PATH, connect, for_update, transaction, utc_now, OperationalConflictError, OperationalNotFoundError, OperationalValidationError
+from backend.repositories.database import ROOT, DATABASE_PATH, OFFICIAL_ZONES_PATH, connect, for_update, transaction, utc_now, release_allocation_in_transaction, OperationalConflictError, OperationalNotFoundError, OperationalValidationError
 
 PILOT_ZONE_ID = "NN_F_013"
-PILOT_ZONES = {PILOT_ZONE_ID: 10, **gis.IMPORTED_ZONE_CAPACITIES}
+INTERACTIVE_DRAW_ZONE_ID = "PAN_F_031"
+PILOT_ZONES = {PILOT_ZONE_ID: 10, **gis.IMPORTED_ZONE_CAPACITIES, INTERACTIVE_DRAW_ZONE_ID: 30}
 STATUSES = ("AVAILABLE", "RESERVED", "OCCUPIED", "BLOCKED")
 SURVEY_POINTS = [
     {"id": "A", "latitude": 19.975052, "longitude": 73.771769},
@@ -77,6 +80,10 @@ def generate_layout(*, width=2.0, depth=2.0, spacing=0.5, clearance=1.2, count=1
 
 def initialize_demo(database_path=DATABASE_PATH, zone_id=PILOT_ZONE_ID):
     validate_zone(zone_id)
+    if zone_id == INTERACTIVE_DRAW_ZONE_ID:
+        return initialize_drawn_zone(database_path, zone_id)
+    if zone_id not in PILOT_ZONES:
+        return initialize_drawn_zone(database_path, zone_id)
     if zone_id != PILOT_ZONE_ID:
         return initialize_imported(database_path, zone_id)
     evidence = pilot_evidence()
@@ -131,10 +138,20 @@ def get_layout(database_path=DATABASE_PATH, zone_id=PILOT_ZONE_ID):
         for slot in layout["slots"]:
             slot["public_business_category"] = categories.get(slot["assigned_vendor_id"])
         official = next((r for r in layout["evidence"]["official_records"] if r["zone_id"] == zone_id), {})
+        active_allocations = db.execute(
+            "SELECT COUNT(*) AS total FROM allocations WHERE zone_id=? AND status='ACTIVE'", (zone_id,)
+        ).fetchone()["total"]
+        mapped_allocations = sum(bool(s.get("assigned_vendor_id")) for s in layout["slots"])
+        authoritative_available = None if not official.get("capacity") else max(0, int(float(official["capacity"])) - active_allocations)
+        raw_available_slots = sum(s["status"] == "AVAILABLE" for s in layout["slots"])
         layout["summary"] = {"listed_capacity": int(float(official["capacity"])) if official.get("capacity") else None,
             "mapped_slots": len(layout["slots"]), "occupied_slots": sum(s["status"] == "OCCUPIED" for s in layout["slots"]),
             "reserved_slots": sum(s["status"] == "RESERVED" for s in layout["slots"]),
-            "available_slots": sum(s["status"] == "AVAILABLE" for s in layout["slots"])}
+            "available_slots": raw_available_slots,
+            "active_allocations": active_allocations,
+            "unmapped_active_allocations": max(0, active_allocations - mapped_allocations),
+            "remaining_uncreated_capacity": None if authoritative_available is None else max(0, int(float(official["capacity"])) - len(layout["slots"])),
+            "requestable_slots": raw_available_slots if authoritative_available is None else min(raw_available_slots, authoritative_available)}
         layout["pilot_zones"] = [{"zone_id": z, "mapped_capacity": capacity} for z,capacity in PILOT_ZONES.items()]
         return layout
     finally:
@@ -165,18 +182,89 @@ def update_slot(slot_id, status, vendor_id, *, actor, expected_updated_at, datab
                 if not current["assigned_vendor_id"] and current["status"] != "AVAILABLE":
                     raise OperationalConflictError("A new vendor assignment requires an AVAILABLE slot")
                 approved = db.execute("""SELECT a.allocation_id FROM allocations a
-                    JOIN allocation_requests r ON r.request_id = a.request_id
                     WHERE a.vendor_id = ? AND a.zone_id = ? AND a.status = 'ACTIVE'
-                    AND r.status = 'APPROVED' AND r.vendor_id = a.vendor_id AND r.zone_id = a.zone_id""",
+                    AND (a.allocation_source='LEGACY_IMPORT' OR EXISTS (
+                        SELECT 1 FROM allocation_requests r WHERE r.request_id=a.request_id
+                        AND r.status='APPROVED' AND r.vendor_id=a.vendor_id AND r.zone_id=a.zone_id))""",
                     (vendor_id, zone_id)).fetchone()
                 if not approved:
                     raise OperationalValidationError("Vendor needs a current approved allocation for the pilot zone")
+                db.execute(
+                    "UPDATE allocations SET slot_id = ?, updated_at = ? WHERE allocation_id = ? AND status = 'ACTIVE'",
+                    (slot_id, datetime.now(timezone.utc).isoformat(timespec="microseconds"), approved["allocation_id"]),
+                )
             timestamp = datetime.now(timezone.utc).isoformat(timespec="microseconds")
-            db.execute("""UPDATE pilot_slots SET status = ?, assigned_vendor_id = ?, updated_at = ?
-                WHERE zone_id = ? AND slot_id = ?""", (status, vendor_id, timestamp, zone_id, slot_id))
+            released_allocation_id = None
+            detached_allocation_id = None
+            allocation = None
+            if not vendor_id and (current["assigned_vendor_id"] or current["active_allocation_id"]):
+                if current["active_allocation_id"]:
+                    allocation = db.execute(
+                        """SELECT * FROM allocations WHERE allocation_id = ?
+                           AND zone_id = ? AND status = 'ACTIVE'""",
+                        (current["active_allocation_id"], zone_id),
+                    ).fetchone()
+                elif current["assigned_vendor_id"]:
+                    allocation = db.execute(
+                        """SELECT * FROM allocations
+                           WHERE vendor_id = ? AND zone_id = ? AND status = 'ACTIVE'
+                           LIMIT 1""",
+                        (current["assigned_vendor_id"], zone_id),
+                    ).fetchone()
+            if not vendor_id and allocation is None:
+                allocation = db.execute(
+                    """SELECT * FROM allocations WHERE zone_id = ? AND slot_id = ?
+                       AND status = 'ACTIVE'""",
+                    (zone_id, slot_id),
+                ).fetchone()
+            if not vendor_id and allocation is None and status in ("AVAILABLE", "BLOCKED"):
+                history = db.execute(
+                    """SELECT before_json, after_json FROM pilot_slot_events
+                       WHERE zone_id = ? AND slot_id = ? ORDER BY event_id DESC""",
+                    (zone_id, slot_id),
+                ).fetchall()
+                for event in history:
+                    before = json.loads(event["before_json"] or "{}")
+                    after = json.loads(event["after_json"] or "{}")
+                    if after.get("status") != "AVAILABLE" or after.get("assigned_vendor_id") is not None:
+                        continue
+                    previous_vendor_id = before.get("assigned_vendor_id")
+                    previous_allocation_id = before.get("active_allocation_id")
+                    if previous_allocation_id:
+                        allocation = db.execute(
+                            """SELECT * FROM allocations WHERE allocation_id = ?
+                               AND zone_id = ? AND status = 'ACTIVE'""",
+                            (previous_allocation_id, zone_id),
+                        ).fetchone()
+                    elif previous_vendor_id:
+                        allocation = db.execute(
+                            """SELECT * FROM allocations WHERE vendor_id = ? AND zone_id = ?
+                               AND status = 'ACTIVE'
+                               LIMIT 1""",
+                            (previous_vendor_id, zone_id),
+                        ).fetchone()
+                    break
+            if not vendor_id and allocation is not None:
+                if status == "AVAILABLE":
+                    db.execute(
+                        """UPDATE allocations SET slot_id = NULL, updated_at = ?
+                           WHERE allocation_id = ? AND status = 'ACTIVE'""",
+                        (timestamp, allocation["allocation_id"]),
+                    )
+                    detached_allocation_id = allocation["allocation_id"]
+                else:
+                    release_allocation_in_transaction(db, allocation["allocation_id"], actor, timestamp)
+                    released_allocation_id = allocation["allocation_id"]
+            db.execute("""UPDATE pilot_slots SET status = ?, assigned_vendor_id = ?,
+                active_allocation_id = ?, pending_request_id = NULL, updated_at = ?
+                WHERE zone_id = ? AND slot_id = ?""",
+                (status, vendor_id, approved["allocation_id"] if vendor_id else None,
+                 timestamp, zone_id, slot_id))
             db.execute("""INSERT INTO pilot_slot_events(zone_id, slot_id, actor, before_json, after_json, created_at)
                 VALUES (?, ?, ?, ?, ?, ?)""", (zone_id, slot_id, actor, json.dumps(dict(current)),
-                json.dumps({"status": status, "assigned_vendor_id": vendor_id}), timestamp))
+                json.dumps({"status": status, "assigned_vendor_id": vendor_id,
+                            "released_allocation_id": released_allocation_id,
+                            "detached_allocation_id": detached_allocation_id}), timestamp))
     except IntegrityError as exc:
         raise OperationalConflictError("Vendor already has an active demonstration slot") from exc
     return next(s for s in get_layout(database_path, zone_id)["slots"] if s["slot_id"] == slot_id)
@@ -304,8 +392,186 @@ def preview_edit(proposal, poses=None, database_path=DATABASE_PATH, zone_id=PILO
 
 
 def validate_zone(zone_id):
-    if zone_id not in PILOT_ZONES:
+    if zone_id not in PILOT_ZONES and zone_id not in _official_zone_records(str(OFFICIAL_ZONES_PATH)):
         raise OperationalValidationError("Unknown pilot zone")
+
+
+@lru_cache(maxsize=4)
+def _official_zone_records(path):
+    with Path(path).open(encoding="utf-8-sig", newline="") as source:
+        return {row["zone_id"]: row for row in csv.DictReader(source) if row.get("zone_id")}
+
+
+def _ensure_vending_zone(zone_id):
+    record = _official_zone_records(str(OFFICIAL_ZONES_PATH)).get(zone_id)
+    if not record or record.get("zone_type", "").upper() == "NO_VENDING":
+        raise OperationalValidationError("Slots cannot be created or moved in a no-vending zone")
+
+
+def initialize_drawn_zone(database_path, zone_id=INTERACTIVE_DRAW_ZONE_ID):
+    """Create an empty, explicitly provisional canvas; never invent slot positions."""
+    evidence = pilot_evidence(zone_id)
+    metadata = {
+        "zone_id": zone_id,
+        "coordinate_system": "EPSG:4326",
+        "metric_crs": "EPSG:32643",
+        "georeferenced": True,
+        "geometry_verification_status": "PROVISIONAL_NOT_SURVEYED",
+        "validation_state": "ILLUSTRATIVE_UNVERIFIED",
+        "operational_enabled": zone_id == INTERACTIVE_DRAW_ZONE_ID,
+        "boundaries": {"type": "FeatureCollection", "features": []},
+        "source_provenance": "ADMIN_DRAWN_PROVISIONAL_PLANNING_LAYOUT",
+        "warning": "No independently verified vending boundary is available. Every slot requires explicit administrator confirmation and remains provisional.",
+        "revision": uuid.uuid4().hex,
+    }
+    reference = next((f for f in evidence.get("analytical_references", []) if f.get("properties", {}).get("zone_id") == zone_id), None)
+    if reference and reference.get("geometry"):
+        center = shape(reference["geometry"]).centroid
+        metadata["reference_point"] = {"longitude": center.x, "latitude": center.y, "use": "ANALYTICAL_REFERENCE_ONLY"}
+    with transaction(database_path, immediate=True) as db:
+        db.execute("INSERT INTO pilot_slot_layouts(zone_id,metadata_json,created_at) VALUES(?,?,?) ON CONFLICT DO NOTHING",
+                   (zone_id, json.dumps(metadata), utc_now()))
+    return get_layout(database_path, zone_id)
+
+
+def _validated_drawn_rectangle(geometry, width_m=None, depth_m=None):
+    try:
+        polygon = shape(geometry)
+    except (TypeError, ValueError, KeyError) as exc:
+        raise OperationalValidationError("Slot geometry must be valid WGS84 GeoJSON") from exc
+    if polygon.geom_type != "Polygon" or polygon.is_empty or not polygon.is_valid:
+        raise OperationalValidationError(f"Slot must be one valid polygon: {explain_validity(polygon)}")
+    if not box(73.6, 19.8, 74.0, 20.2).covers(polygon):
+        raise OperationalValidationError("Slot coordinates must be WGS84 longitude/latitude within Nashik")
+    projected = gis.metric(mapping(polygon))
+    rectangle = projected.minimum_rotated_rectangle
+    if rectangle.area <= 0 or projected.area / rectangle.area < .97:
+        raise OperationalValidationError("Slot must be a square or rectangle")
+    points = list(rectangle.exterior.coords)
+    sides = sorted(math.dist(a, b) for a, b in zip(points, points[1:]))
+    actual_width, actual_depth = sides[0], sides[-1]
+    if actual_width < .5 or actual_depth > 20:
+        raise OperationalValidationError("Slot sides must be between 0.5 m and 20 m")
+    for requested, actual, label in ((width_m, actual_width, "width"), (depth_m, actual_depth, "length")):
+        if requested is not None and abs(float(requested) - actual) > max(.35, float(requested) * .15):
+            raise OperationalValidationError(f"Drawn slot {label} does not match the requested metric dimension")
+    return polygon, round(actual_width, 2), round(actual_depth, 2)
+
+
+def create_drawn_slot(geometry, *, actor, review_confirmed, width_m=None, depth_m=None,
+                      database_path=DATABASE_PATH, zone_id=INTERACTIVE_DRAW_ZONE_ID):
+    validate_zone(zone_id)
+    _ensure_vending_zone(zone_id)
+    if not review_confirmed:
+        raise OperationalValidationError("Confirm that this is a provisional planning slot, not a verified legal boundary")
+    polygon, actual_width, actual_depth = _validated_drawn_rectangle(geometry, width_m, depth_m)
+    projected = gis.metric(mapping(polygon))
+    timestamp = datetime.now(timezone.utc).isoformat(timespec="microseconds")
+    with transaction(database_path, immediate=True) as db:
+        layout = db.execute("SELECT metadata_json FROM pilot_slot_layouts WHERE zone_id=?" + for_update(db), (zone_id,)).fetchone()
+        if not layout:
+            raise OperationalNotFoundError("Initialize the slot layout before drawing")
+        capacity_row = db.execute("SELECT official_capacity FROM zone_live_status WHERE zone_id=?", (zone_id,)).fetchone()
+        existing = db.execute("SELECT * FROM pilot_slots WHERE zone_id=? AND is_deleted=0" + for_update(db), (zone_id,)).fetchall()
+        capacity = capacity_row["official_capacity"] if capacity_row else None
+        if capacity is None:
+            zone_record = _official_zone_records(str(OFFICIAL_ZONES_PATH)).get(zone_id, {})
+            raw_capacity = zone_record.get("capacity") or PILOT_ZONES.get(zone_id)
+            capacity = int(raw_capacity) if raw_capacity is not None else None
+        if capacity is None:
+            raise OperationalValidationError("Official zone capacity is unavailable")
+        if len(existing) >= capacity:
+            raise OperationalConflictError("Created slots cannot exceed the official zone capacity")
+        for row in existing:
+            if row["geometry_crs"] == "EPSG:4326" and projected.intersection(gis.metric(json.loads(row["geometry_json"]))).area > .01:
+                raise OperationalConflictError(f"Slot overlaps {row['slot_id']}")
+        active_numbers = {
+            int(row["slot_id"][1:])
+            for row in existing
+            if row["slot_id"].startswith("S") and row["slot_id"][1:].isdigit()
+        }
+        slot_number = next(
+            (number for number in range(1, capacity + 1) if number not in active_numbers),
+            None,
+        )
+        if slot_number is None:
+            raise OperationalConflictError("No slot numbers remain within the official zone capacity")
+        slot_id = f"S{slot_number:03d}"
+        center = projected.centroid
+        deleted = db.execute(
+            "SELECT * FROM pilot_slots WHERE zone_id=? AND slot_id=?",
+            (zone_id, slot_id),
+        ).fetchone()
+        if deleted:
+            db.execute("""UPDATE pilot_slots SET width_m=?,depth_m=?,x_m=?,y_m=?,geometry_json=?,
+                status='AVAILABLE',assigned_vendor_id=NULL,validation_state='ILLUSTRATIVE_UNVERIFIED',
+                updated_at=?,parent_boundary_id=NULL,geometry_crs='EPSG:4326',is_deleted=0,
+                pending_request_id=NULL,active_allocation_id=NULL,created_by=?,created_at=?
+                WHERE zone_id=? AND slot_id=?""",
+                (actual_width, actual_depth, center.x, center.y, json.dumps(mapping(polygon)),
+                 timestamp, actor, timestamp, zone_id, slot_id))
+        else:
+            db.execute("""INSERT INTO pilot_slots(zone_id,slot_id,width_m,depth_m,x_m,y_m,geometry_json,status,
+                assigned_vendor_id,validation_state,updated_at,parent_boundary_id,geometry_crs,is_deleted,
+                pending_request_id,active_allocation_id,created_by,created_at)
+                VALUES(?,?,?,?,?,?,?,'AVAILABLE',NULL,'ILLUSTRATIVE_UNVERIFIED',?,NULL,'EPSG:4326',0,NULL,NULL,?,?)""",
+                (zone_id, slot_id, actual_width, actual_depth, center.x, center.y,
+                 json.dumps(mapping(polygon)), timestamp, actor, timestamp))
+        db.execute("INSERT INTO pilot_slot_events(zone_id,slot_id,actor,before_json,after_json,created_at) VALUES(?,?,?,?,?,?)",
+                   (zone_id, slot_id, actor, json.dumps(dict(deleted)) if deleted else "{}",
+                    json.dumps({"action": "CREATED", "provisional": True,
+                                "reused_deleted_slot_id": bool(deleted)}), timestamp))
+    return next(slot for slot in get_layout(database_path, zone_id)["slots"] if slot["slot_id"] == slot_id)
+
+
+def delete_drawn_slot(slot_id, *, actor, expected_updated_at, database_path=DATABASE_PATH,
+                      zone_id=INTERACTIVE_DRAW_ZONE_ID):
+    validate_zone(zone_id)
+    _ensure_vending_zone(zone_id)
+    with transaction(database_path, immediate=True) as db:
+        row = db.execute("SELECT * FROM pilot_slots WHERE zone_id=? AND slot_id=?" + for_update(db), (zone_id, slot_id)).fetchone()
+        if not row or row["is_deleted"]:
+            raise OperationalNotFoundError("Unknown pilot slot")
+        if row["updated_at"] != expected_updated_at:
+            raise OperationalConflictError("Slot changed since it was loaded. Refresh before deleting.")
+        if row["assigned_vendor_id"] or row["pending_request_id"] or row["active_allocation_id"] or row["status"] != "AVAILABLE":
+            raise OperationalConflictError("Only an unassigned AVAILABLE slot can be deleted")
+        timestamp = datetime.now(timezone.utc).isoformat(timespec="microseconds")
+        db.execute("UPDATE pilot_slots SET is_deleted=1,updated_at=? WHERE zone_id=? AND slot_id=?", (timestamp, zone_id, slot_id))
+        db.execute("INSERT INTO pilot_slot_events(zone_id,slot_id,actor,before_json,after_json,created_at) VALUES(?,?,?,?,?,?)",
+                   (zone_id, slot_id, actor, json.dumps(dict(row)), json.dumps({"is_deleted": True}), timestamp))
+
+
+def move_drawn_slot(slot_id, *, longitude, latitude, angle, width_m, depth_m, actor,
+                    review_confirmed, expected_updated_at, database_path=DATABASE_PATH,
+                    zone_id=INTERACTIVE_DRAW_ZONE_ID):
+    validate_zone(zone_id)
+    _ensure_vending_zone(zone_id)
+    if not review_confirmed:
+        raise OperationalValidationError("Confirm the provisional planning position before moving the slot")
+    geometry = gis.pose_geometry(longitude, latitude, angle, width_m=width_m, depth_m=depth_m)
+    polygon, actual_width, actual_depth = _validated_drawn_rectangle(geometry, width_m, depth_m)
+    projected = gis.metric(mapping(polygon))
+    timestamp = datetime.now(timezone.utc).isoformat(timespec="microseconds")
+    with transaction(database_path, immediate=True) as db:
+        current = db.execute("SELECT * FROM pilot_slots WHERE zone_id=? AND slot_id=?" + for_update(db), (zone_id, slot_id)).fetchone()
+        if not current or current["is_deleted"]:
+            raise OperationalNotFoundError("Unknown pilot slot")
+        if current["updated_at"] != expected_updated_at:
+            raise OperationalConflictError("Slot changed since it was loaded. Refresh before moving.")
+        if current["assigned_vendor_id"] or current["pending_request_id"] or current["active_allocation_id"] or current["status"] != "AVAILABLE":
+            raise OperationalConflictError("Only an unassigned AVAILABLE slot can be moved")
+        others = db.execute("SELECT * FROM pilot_slots WHERE zone_id=? AND slot_id<>? AND is_deleted=0", (zone_id, slot_id)).fetchall()
+        for row in others:
+            if row["geometry_crs"] == "EPSG:4326" and projected.intersection(gis.metric(json.loads(row["geometry_json"]))).area > .01:
+                raise OperationalConflictError(f"Slot overlaps {row['slot_id']}")
+        center = projected.centroid
+        db.execute("""UPDATE pilot_slots SET width_m=?,depth_m=?,x_m=?,y_m=?,geometry_json=?,updated_at=?
+            WHERE zone_id=? AND slot_id=?""",
+            (actual_width, actual_depth, center.x, center.y, json.dumps(mapping(polygon)), timestamp, zone_id, slot_id))
+        db.execute("INSERT INTO pilot_slot_events(zone_id,slot_id,actor,before_json,after_json,created_at) VALUES(?,?,?,?,?,?)",
+                   (zone_id, slot_id, actor, json.dumps(dict(current)), json.dumps({"action": "MOVED", "geometry": mapping(polygon)}), timestamp))
+    return next(slot for slot in get_layout(database_path, zone_id)["slots"] if slot["slot_id"] == slot_id)
 
 
 def initialize_imported(database_path, zone_id):

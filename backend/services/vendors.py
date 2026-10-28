@@ -13,13 +13,16 @@ this module.
 from __future__ import annotations
 from backend.core.data_paths import dataset_path
 
+import base64
+import binascii
 import csv
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from backend.repositories.database import DATABASE_PATH, PREFERRED_LANGUAGES, PRIORITY_PROFILES, OperationalNotFoundError, OperationalValidationError, create_operational_vendor, get_operational_vendor, save_operational_vendor_profile
+from backend.repositories.database import DATABASE_PATH, PREFERRED_LANGUAGES, PRIORITY_PROFILES, OperationalNotFoundError, OperationalValidationError, connect, create_operational_vendor, get_operational_vendor, save_operational_vendor_profile
 from backend.mcda_engine import CATEGORIES, DATA
 
 
@@ -41,6 +44,20 @@ CANDIDATE_ZONE_PATH = (
     DATA
     / "candidate_zone_snapshot.csv"
 )
+
+
+@lru_cache(maxsize=4)
+def _official_zone_directory_versioned(
+    path: str, modified_ns: int, size: int,
+) -> dict[str, dict[str, str]]:
+    with Path(path).open(newline="", encoding="utf-8-sig") as source:
+        return {row["zone_id"]: row for row in csv.DictReader(source)}
+
+
+def _official_zone_directory() -> dict[str, dict[str, str]]:
+    path = Path(dataset_path("official_zones")).resolve()
+    stat = path.stat()
+    return _official_zone_directory_versioned(str(path), stat.st_mtime_ns, stat.st_size)
 
 
 EDITABLE_PROFILE_FIELDS = {
@@ -834,6 +851,44 @@ def get_vendor_profile(
     )
 
 
+def get_vendor_profiles(
+    vendor_ids: list[str],
+    database_path: str | Path = DATABASE_PATH,
+) -> dict[str, dict[str, Any]]:
+    """Resolve many vendor profiles with one operational database read."""
+    unique_ids = list(dict.fromkeys(vendor_ids))
+    if not unique_ids:
+        return {}
+
+    profiles: dict[str, dict[str, Any]] = {}
+    connection = connect(database_path)
+    try:
+        for start in range(0, len(unique_ids), 500):
+            batch = unique_ids[start:start + 500]
+            placeholders = ",".join("?" for _ in batch)
+            rows = connection.execute(
+                f"SELECT * FROM operational_vendors WHERE vendor_id IN ({placeholders})",
+                tuple(batch),
+            ).fetchall()
+            profiles.update({
+                row["vendor_id"]: _normalize_operational(row)
+                for row in rows
+            })
+    finally:
+        connection.close()
+
+    for vendor_id in unique_ids:
+        if vendor_id not in profiles:
+            profile = _historical_profile(
+                vendor_id,
+                HISTORICAL_VENDOR_PATH,
+                HISTORICAL_IDENTITY_PATH,
+            )
+            if profile is not None:
+                profiles[vendor_id] = profile
+    return profiles
+
+
 def register_vendor(
     values: dict[
         str,
@@ -981,51 +1036,139 @@ def clear_vendor_service_caches() -> None:
 
     valid_divisions.cache_clear()
 
-def list_admin_vendors(*, q="", business_category="", division="", page=1, page_size=25, database_path=DATABASE_PATH):
-    """Admin-only directory projection; existing sources remain authoritative."""
+def list_admin_vendors(*, q="", business_category="", division="", zone_id="", mapping_status="",
+                       page=1, page_size=25, database_path=DATABASE_PATH):
+    """Return one directory page and hydrate dynamic state only for that page.
+
+    Static CSV registries remain cached and authoritative. PostgreSQL is used
+    for filters and the final page rather than transferring all association,
+    identity and allocation rows for every request.
+    """
     from backend.repositories.database import connect
 
     historical = _historical_vendor_map(str(Path(HISTORICAL_VENDOR_PATH).resolve()))
     identities = _historical_identity_map(str(Path(HISTORICAL_IDENTITY_PATH).resolve()))
     connection = connect(database_path)
     try:
-        operational = {row["vendor_id"]: dict(row) for row in connection.execute("SELECT * FROM operational_vendors")}
-        accounts = {row["vendor_id"]: bool(row["verified"]) for row in connection.execute(
-            "SELECT vendor_id, MAX(is_verified) AS verified FROM vendor_auth_identities GROUP BY vendor_id"
+        operational = {row["vendor_id"]: dict(row) for row in connection.execute(
+            "SELECT vendor_id, application_vendor_id, full_name, business_name, business_category, "
+            "preferred_division FROM operational_vendors"
         )}
+        association_filter_ids = None
+        if zone_id or mapping_status:
+            clauses, parameters = [], []
+            if zone_id:
+                clauses.append("matched_zone_id = ? AND ((match_status = 'AUTO_MATCHED' AND "
+                               "review_status = 'UNREVIEWED') OR review_status IN ('CONFIRMED','CHANGED'))")
+                parameters.append(zone_id)
+            if mapping_status:
+                clauses.append("match_status = ?")
+                parameters.append(mapping_status)
+            association_filter_ids = {row["vendor_id"] for row in connection.execute(
+                "SELECT vendor_id FROM historical_vendor_zone_associations WHERE " + " AND ".join(clauses),
+                tuple(parameters),
+            )}
+
+        records = []
+        for vendor_id in historical.keys() | operational.keys():
+            source = historical.get(vendor_id)
+            overlay = operational.get(vendor_id)
+            identity = identities.get(vendor_id, {})
+            records.append({
+                "vendor_id": vendor_id,
+                "application_vendor_id": overlay.get("application_vendor_id") if overlay else None,
+                "full_name": overlay.get("full_name") if overlay else identity.get("full_name"),
+                "business_name": overlay.get("business_name") if overlay else identity.get("business_name"),
+                "business_category": overlay.get("business_category") if overlay else source.get("business_category"),
+                "source_division": (identity.get("source_division") or source.get("preferred_division")) if source else None,
+                "preferred_division": overlay.get("preferred_division") if overlay else source.get("preferred_division"),
+                "record_source": "HISTORICAL" if source else "OPERATIONAL",
+                "has_profile_overlay": bool(source and overlay),
+                "registration_status": "PROFILE_REGISTERED" if overlay else "HISTORICAL_RECORD",
+            })
+        categories = sorted({row["business_category"] for row in records if row["business_category"]})
+        divisions = sorted({row["source_division"] or row["preferred_division"] for row in records if row["source_division"] or row["preferred_division"]})
+        query = q.strip().casefold()
+        filtered = [row for row in records
+                    if (not query or any(query in str(row.get(key) or "").casefold() for key in ("vendor_id", "application_vendor_id", "full_name", "business_name")))
+                    and (not business_category or row["business_category"] == business_category)
+                    and (not division or (row["source_division"] or row["preferred_division"]) == division)
+                    and (association_filter_ids is None or row["vendor_id"] in association_filter_ids)]
+        filtered.sort(key=lambda row: (str(row["full_name"] or row["business_name"] or "").casefold(), row["vendor_id"]))
+        total = len(filtered)
+        pages = max(1, (total + page_size - 1) // page_size)
+        page = min(page, pages)
+        page_records = filtered[(page - 1) * page_size:page * page_size]
+        page_ids = [row["vendor_id"] for row in page_records]
+        dynamic = {}
+        if page_ids:
+            placeholders = ",".join("?" for _ in page_ids)
+            dynamic = {row["vendor_id"]: dict(row) for row in connection.execute(
+                f"""WITH identity_state AS (
+                         SELECT vendor_id, COUNT(*) AS identity_count,
+                                MAX(is_verified) AS verified
+                         FROM vendor_auth_identities GROUP BY vendor_id
+                       )
+                       SELECT ids.vendor_id, h.matched_zone_id, h.match_status,
+                              h.review_status, h.candidate_zone_ids_json,
+                              h.evidence_types_json, i.identity_count, i.verified,
+                              a.allocation_id, a.zone_id AS allocation_zone_id,
+                              a.allocated_at, a.allocation_source
+                       FROM (SELECT vendor_id FROM historical_vendor_zone_associations
+                             UNION SELECT vendor_id FROM operational_vendors) AS ids
+                       LEFT JOIN historical_vendor_zone_associations AS h ON h.vendor_id = ids.vendor_id
+                       LEFT JOIN identity_state AS i ON i.vendor_id = ids.vendor_id
+                       LEFT JOIN allocations AS a ON a.vendor_id = ids.vendor_id AND a.status = 'ACTIVE'
+                       WHERE ids.vendor_id IN ({placeholders})""",
+                tuple(page_ids),
+            )}
+        for record in page_records:
+            state = dynamic.get(record["vendor_id"], {})
+            identity_count = int(state.get("identity_count") or 0)
+            record["account_status"] = (
+                "PHONE_VERIFIED" if state.get("verified") else
+                "UNCLAIMED" if identity_count else "NO_LINKED_IDENTITY"
+            )
+            record["active_allocation"] = ({
+                "allocation_id": state["allocation_id"],
+                "vendor_id": record["vendor_id"],
+                "zone_id": state["allocation_zone_id"],
+                "allocated_at": state["allocated_at"],
+                "allocation_source": state["allocation_source"],
+            } if state.get("allocation_id") else None)
+            if state.get("match_status"):
+                review_status = state.get("review_status")
+                record["historical_association"] = {
+                    "matched_zone_id": state.get("matched_zone_id"),
+                    "match_status": state["match_status"],
+                    "review_status": review_status,
+                    "candidate_zone_ids": json.loads(state.get("candidate_zone_ids_json") or "[]"),
+                    "evidence_types": json.loads(state.get("evidence_types_json") or "[]"),
+                    "accepted": review_status in {"CONFIRMED", "CHANGED"} or (
+                        state["match_status"] == "AUTO_MATCHED" and review_status == "UNREVIEWED"
+                    ),
+                }
+            else:
+                record["historical_association"] = None
+        accepted_zones = [dict(row) for row in connection.execute(
+            """SELECT matched_zone_id AS zone_id, MAX(recorded_division) AS division
+               FROM historical_vendor_zone_associations
+               WHERE matched_zone_id IS NOT NULL AND
+                     ((match_status = 'AUTO_MATCHED' AND review_status = 'UNREVIEWED')
+                      OR review_status IN ('CONFIRMED','CHANGED'))
+               GROUP BY matched_zone_id ORDER BY matched_zone_id"""
+        )]
+        official_zones = _official_zone_directory()
+        for zone in accepted_zones:
+            official = official_zones.get(zone["zone_id"], {})
+            zone["division"] = official.get("division") or zone.get("division")
+            zone["official_description"] = official.get("official_description")
+        return {"vendors": page_records, "total": total, "page": page,
+                "page_size": page_size, "pages": pages, "categories": categories,
+                "divisions": divisions, "accepted_zones": accepted_zones,
+                "mapping_statuses": ["AUTO_MATCHED", "REVIEW_REQUIRED", "UNMATCHED"]}
     finally:
         connection.close()
-    records = []
-    for vendor_id in historical.keys() | operational.keys():
-        source = historical.get(vendor_id)
-        overlay = operational.get(vendor_id)
-        identity = identities.get(vendor_id, {})
-        records.append({
-            "vendor_id": vendor_id,
-            "application_vendor_id": overlay.get("application_vendor_id") if overlay else None,
-            "full_name": overlay.get("full_name") if overlay else identity.get("full_name"),
-            "business_name": overlay.get("business_name") if overlay else identity.get("business_name"),
-            "business_category": overlay.get("business_category") if overlay else source.get("business_category"),
-            "source_division": (identity.get("source_division") or source.get("preferred_division")) if source else None,
-            "preferred_division": overlay.get("preferred_division") if overlay else source.get("preferred_division"),
-            "record_source": "HISTORICAL" if source else "OPERATIONAL",
-            "has_profile_overlay": bool(source and overlay),
-            "registration_status": "PROFILE_REGISTERED" if overlay else "HISTORICAL_RECORD",
-            "account_status": "PHONE_VERIFIED" if accounts.get(vendor_id) else "UNCLAIMED" if vendor_id in accounts else "NO_LINKED_IDENTITY",
-        })
-    categories = sorted({row["business_category"] for row in records if row["business_category"]})
-    divisions = sorted({row["source_division"] or row["preferred_division"] for row in records if row["source_division"] or row["preferred_division"]})
-    query = q.strip().casefold()
-    filtered = [row for row in records
-                if (not query or any(query in str(row.get(key) or "").casefold() for key in ("vendor_id", "application_vendor_id", "full_name", "business_name")))
-                and (not business_category or row["business_category"] == business_category)
-                and (not division or (row["source_division"] or row["preferred_division"]) == division)]
-    filtered.sort(key=lambda row: (str(row["full_name"] or row["business_name"] or "").casefold(), row["vendor_id"]))
-    total = len(filtered)
-    pages = max(1, (total + page_size - 1) // page_size)
-    page = min(page, pages)
-    return {"vendors": filtered[(page - 1) * page_size:page * page_size], "total": total, "page": page,
-            "page_size": page_size, "pages": pages, "categories": categories, "divisions": divisions}
 
 
 def admin_vendor_details(vendor_id, database_path=DATABASE_PATH):
@@ -1043,7 +1186,7 @@ def admin_vendor_details(vendor_id, database_path=DATABASE_PATH):
         account = connection.execute("SELECT COUNT(*) AS total, MAX(is_verified) AS verified FROM vendor_auth_identities WHERE vendor_id = ?", (vendor_id,)).fetchone()
         allocations = [dict(row) for row in connection.execute("SELECT * FROM allocations WHERE vendor_id = ? ORDER BY allocated_at DESC, allocation_id DESC", (vendor_id,))]
         requests = [dict(row) for row in connection.execute("SELECT * FROM allocation_requests WHERE vendor_id = ? ORDER BY created_at DESC, request_id DESC", (vendor_id,))]
-        active = next((row for row in allocations if row["status"] == "ACTIVE" and any(request["request_id"] == row["request_id"] and request["status"] == "APPROVED" and request["zone_id"] == row["zone_id"] for request in requests)), None)
+        active = next((row for row in allocations if row["status"] == "ACTIVE"), None)
         slot = connection.execute("SELECT zone_id, slot_id, status, width_m, depth_m FROM pilot_slots WHERE assigned_vendor_id = ? AND is_deleted = 0 AND geometry_crs = 'EPSG:4326'", (vendor_id,)).fetchone()
         assigned = dict(slot) if slot and active and slot["zone_id"] == active["zone_id"] else None
     finally:
@@ -1053,15 +1196,18 @@ def admin_vendor_details(vendor_id, database_path=DATABASE_PATH):
         with Path(HISTORICAL_VENDOR_PATH).open(newline="", encoding="utf-8-sig") as source:
             row = next((row for row in csv.DictReader(source) if row.get("vendor_id") == vendor_id), {})
             association = _optional_text(row.get("proposed_zone_id"))
+    from backend.services.historical_associations import get_association
+    reviewed_association = get_association(vendor_id, database_path)
     return {"profile": profile, "record_source": "HISTORICAL" if historical else "OPERATIONAL",
             "source_division": identity.get("source_division") or (historical.get("preferred_division") if historical else None),
             "historical_proposed_zone_id": association,
+            "historical_association": reviewed_association,
             "registration_status": "PROFILE_REGISTERED" if operational else "HISTORICAL_RECORD",
             "account_status": "PHONE_VERIFIED" if account["verified"] else "UNCLAIMED" if account["total"] else "NO_LINKED_IDENTITY",
             "active_allocation": active, "allocations": allocations, "requests": requests, "assigned_slot": assigned}
 
 
-def vendor_account_information(vendor_id, database_path=DATABASE_PATH):
+def vendor_account_information(vendor_id, database_path=DATABASE_PATH, mobile_last4=None):
     """Own-account projection. Never return phones, hashes, sessions or secrets."""
     from backend.repositories.database import connect
     from backend.core.config import get_auth_settings
@@ -1075,7 +1221,7 @@ def vendor_account_information(vendor_id, database_path=DATABASE_PATH):
         identities = [dict(row) for row in connection.execute("SELECT phone_hash, vendor_source, is_verified FROM vendor_auth_identities WHERE vendor_id = ?", (vendor_id,))]
         overlay = bool(connection.execute("SELECT 1 FROM operational_vendors WHERE vendor_id = ?", (vendor_id,)).fetchone())
         requests = [dict(row) for row in connection.execute("SELECT request_id, zone_id, request_type, status, business_category, preferred_division, created_at, reviewed_at, rejection_reason FROM allocation_requests WHERE vendor_id = ? ORDER BY created_at DESC", (vendor_id,))]
-        allocations = [dict(row) for row in connection.execute("SELECT allocation_id, zone_id, request_id, status, allocated_at, released_at FROM allocations WHERE vendor_id = ? ORDER BY allocated_at DESC", (vendor_id,))]
+        allocations = [dict(row) for row in connection.execute("SELECT allocation_id, zone_id, request_id, status, allocated_at, released_at, allocation_source FROM allocations WHERE vendor_id = ? ORDER BY allocated_at DESC", (vendor_id,))]
     finally:
         connection.close()
     masked = set()
@@ -1091,12 +1237,65 @@ def vendor_account_information(vendor_id, database_path=DATABASE_PATH):
                 except AuthError:
                     pass
     settings = get_auth_settings()
-    return {"profile": profile, "masked_mobile": next(iter(masked)) if len(masked) == 1 else None,
+    masked_mobile = f"******{mobile_last4}" if re.fullmatch(r"\d{4}", mobile_last4 or "") else next(iter(masked)) if len(masked) == 1 else None
+    return {"profile": profile, "masked_mobile": masked_mobile,
             "authenticated": True, "development_authentication": settings.otp_provider == "development",
             "identity_verification_recorded": any(bool(row["is_verified"]) for row in identities),
             "historical_identity_linked": any(row["vendor_source"] == "HISTORICAL" for row in identities),
             "has_operational_profile": overlay, "phone_change_available": False, "recovery_available": False,
             "requests": requests, "allocations": allocations}
+
+
+_PROFILE_PHOTO_MAX_BYTES = 2 * 1024 * 1024
+def get_vendor_profile_photo(vendor_id, database_path=DATABASE_PATH):
+    from backend.repositories.database import connect
+    connection = connect(database_path)
+    try:
+        row = connection.execute(
+            "SELECT mime_type, image_base64 FROM vendor_profile_photos WHERE vendor_id = ?",
+            (vendor_id,),
+        ).fetchone()
+    finally:
+        connection.close()
+    if row is None:
+        return {"data_url": None}
+    return {"data_url": f"data:{row['mime_type']};base64,{row['image_base64']}"}
+
+
+def save_vendor_profile_photo(vendor_id, data_url, database_path=DATABASE_PATH):
+    from backend.repositories.database import transaction
+    from datetime import datetime, timezone
+    if get_vendor_profile(vendor_id, database_path=database_path) is None:
+        raise OperationalNotFoundError("Vendor profile not found")
+    match = re.fullmatch(r"data:(image/(?:jpeg|png|webp));base64,([A-Za-z0-9+/]+={0,2})", data_url or "")
+    if not match:
+        raise OperationalValidationError("Choose a JPEG, PNG, or WebP profile photo.")
+    mime_type, encoded = match.groups()
+    try:
+        image = base64.b64decode(encoded, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise OperationalValidationError("The selected profile photo is invalid.") from exc
+    if not image or len(image) > _PROFILE_PHOTO_MAX_BYTES:
+        raise OperationalValidationError("Profile photos must be smaller than 2 MB.")
+    valid_signature = (
+        mime_type == "image/jpeg" and image.startswith(b"\xff\xd8\xff")
+        or mime_type == "image/png" and image.startswith(b"\x89PNG\r\n\x1a\n")
+        or mime_type == "image/webp" and len(image) >= 12 and image.startswith(b"RIFF") and image[8:12] == b"WEBP"
+    )
+    if not valid_signature:
+        raise OperationalValidationError("The photo file does not match its image type.")
+    timestamp = datetime.now(timezone.utc).isoformat(timespec="microseconds")
+    with transaction(database_path, immediate=True) as connection:
+        connection.execute(
+            """INSERT INTO vendor_profile_photos(vendor_id, mime_type, image_base64, updated_at)
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT(vendor_id) DO UPDATE SET
+                 mime_type = excluded.mime_type,
+                 image_base64 = excluded.image_base64,
+                 updated_at = excluded.updated_at""",
+            (vendor_id, mime_type, encoded, timestamp),
+        )
+    return {"data_url": f"data:{mime_type};base64,{encoded}"}
 
 
 def vendor_activity(vendor_id, database_path=DATABASE_PATH):

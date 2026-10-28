@@ -1,0 +1,100 @@
+{
+  "planHash": "96daf7b433fbaf756304ce6aa790d03292c974485b2f4e8c1d6222b95359605b",
+  "phase": "standalone",
+  "recordedAtUtc": "2026-10-16T06:21:39.3206508Z",
+  "retryCount": 0,
+  "resetBaseline": false,
+  "complete": true,
+  "result": {
+    "setupSucceeded": true,
+    "setupDurationMs": 0,
+    "setupFailureOutput": null,
+    "assertions": [
+      {
+        "name": "frontend-build",
+        "kind": "process",
+        "verificationMethod": "exit-code",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "\r\n\u003E nashik-vendor-recommendations@0.1.0 build\r\n\u003E vite build\r\n\r\n\u001B[36mvite v6.4.3 \u001B[32mbuilding for production...\u001B[36m\u001B[39m\r\ntransforming...\r\n\u001B[32m\u2713\u001B[39m 1684 modules transformed.\r\nrendering chunks...\r\ncomputing gzip size...\r\n\u001B[2mdist/\u001B[22m\u001B[32mindex.html                        \u001B[39m\u001B[1m\u001B[2m  0.50 kB\u001B[22m\u001B[1m\u001B[22m\u001B[2m \u2502 gzip:   0.33 kB\u001B[22m\r\n\u001B[2mdist/\u001B[22m\u001B[35massets/PilotSlotMap-yFHESlNW.css  \u001B[39m\u001B[1m\u001B[2m 12.96 kB\u001B[22m\u001B[1m\u001B[22m\u001B[2m \u2502 gzip:   3.01 kB\u001B[22m\r\n\u001B[2mdist/\u001B[22m\u001B[35massets/index-zprAon6M.css         \u001B[39m\u001B[1m\u001B[2m182.85 kB\u001B[22m\u001B[1m\u001B[22m\u001B[2m \u2502 gzip:  38.92 kB\u001B[22m\r\n\u001B[2mdist/\u001B[22m\u001B[36massets/PilotSlotMap-IQG77OPC.js   \u001B[39m\u001B[1m\u001B[2m 24.89 kB\u001B[22m\u001B[1m\u001B[22m\u001B[2m \u2502 gzip:   8.37 kB\u001B[22m\r\n\u001B[2mdist/\u001B[22m\u001B[36massets/index-Djm2h7Xh.js          \u001B[39m\u001B[1m\u001B[33m886.52 kB\u001B[39m\u001B[22m\u001B[2m \u2502 gzip: 212.00 kB\u001B[22m\r\n\u001B[33m\r\n(!) Some chunks are larger than 500 kB after minification. Consider:\r\n- Using dynamic import() to code-split the application\r\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\r\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\u001B[39m\r\n\u001B[32m\u2713 built in 3.38s\u001B[39m\r\n",
+        "durationMs": 4409
+      },
+      {
+        "name": "frontend-tests-pass",
+        "kind": "process",
+        "verificationMethod": "test-results",
+        "passed": false,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 1,
+        "outputSample": "\r\n\u003E nashik-vendor-recommendations@0.1.0 test\r\n\u003E node --test src/shared/utils/mapGrouping.test.js src/shared/utils/profileIdentity.test.js src/shared/utils/dialogFocus.test.js src/i18n/i18n.test.js src/shared/ui/ToastRegion.test.js src/features/pilot-slots/pilotState.test.js src/features/navigation/pilotNavigation.test.js src/services/api.test.js src/features/pilot-slots/slotPresentation.test.js\r\n\r\n\u2714 proximity zoom requires both a nearby position and usable GPS accuracy (0.756ms)\r\n\u2714 GPS watcher is explicitly stopped once and ignores late updates (0.2143ms)\r\n\u2714 permission errors and missing GPS produce usable fallback messages (0.2046ms)\r\n\u2714 slot display centre uses longitude latitude without reversing GeoJSON (0.6223ms)\r\n\u2714 closing and reopening preserves loaded pilot, selected slot and context view (0.6583ms)\r\n\u2714 zone drawer actions are independent of pilot state (0.1141ms)\r\n\u2716 vendor starts on their assigned demonstration slot and refresh retains selection (0.7248ms)\r\n\u2714 saving a slot updates cached data without losing selected slot or adjacent slots (0.1414ms)\r\n\u2714 deleting a slot removes it from the map and slot selector data (0.6349ms)\r\n\u2714 external walking directions require own slot and observed access, never fallback centroid (0.7271ms)\r\n\u2714 other-slot presentation uses explicitly public category, not private vendor fields (0.1513ms)\r\n\u2714 renders English, Marathi, and Hindi interface strings (0.9946ms)\r\n\u2714 interpolates dynamic values without translating identifiers (0.2442ms)\r\n\u2714 falls back to English for an untranslated localized key (0.1011ms)\r\n\u2714 language preference survives navigation through storage (0.1664ms)\r\n\u2714 invalid persisted language safely falls back to English (0.105ms)\r\n\u2714 document language changes immediately without a reload (0.1014ms)\r\n\u2714 canonical status values are localized for display only (0.1882ms)\r\n\u2716 canonical category values are localized for display only (1.0033ms)\r\n\u2714 dates and numbers use the selected Indian locale (19.7336ms)\r\n\u2716 unknown backend values remain visible through safe display fallback (0.811ms)\r\n\u2714 shared client includes the session cookie and preserves the endpoint (19.8561ms)\r\n\u2714 slot deletion accepts the API\u0027s empty 204 response (0.297ms)\r\n\u2714 allocation list requests only the selected status and page (0.4217ms)\r\n\u2714 recommendation request preserves vendor ownership context and preferences (0.4019ms)\r\n\u2714 AI explanation request sends only the selected zone and session cookie (0.3556ms)\r\n\u2714 all six AI explanations remain keyed to their existing factor cards (0.2ms)\r\n\u2714 routing preserves WGS84 longitude/latitude and reviewed geometry payloads (0.51ms)\r\n\u2714 admin planning APIs are read-only GET requests (0.4482ms)\r\n\u2714 shared client reports an unavailable service (0.5131ms)\r\n\u2714 shared client retains server error detail (0.5045ms)\r\n\u2714 shared client reports malformed responses (0.3924ms)\r\n\u2714 success feedback auto-dismisses sooner than errors (0.5421ms)\r\n\u2714 dialog keyboard focus wraps in both directions (0.5501ms)\r\n\u2714 three recommendation coordinates create three visible locations (1.8561ms)\r\n\u2714 three recommendations at one coordinate stay separate inside one marker (1.5858ms)\r\n\u2714 two shared and one unique create two locations and preserve all zones (0.2409ms)\r\n\u2714 missing geometry is reported without removing the recommendation record (0.2015ms)\r\n\u2714 shared popup members retain zone identity for the selection callback (0.1883ms)\r\n\u2714 changed recommendations produce changed fit positions (0.1988ms)\r\n\u2714 admin shared marker preserves each zone\u0027s independent live status (8.0562ms)\r\n\u2714 vendor explorer keeps all eligible zones and promotes Top-3 records (0.3605ms)\r\n\u2714 vendor map defaults to current and pending context until all zones is enabled (0.2228ms)\r\n\u2714 historical vendor name is primary when available (0.5762ms)\r\n\u2714 vendor identity has safe type-specific fallbacks (0.1138ms)\r\n\u2714 public vendor identity hides the internal UUID for new vendors (0.1093ms)\r\n\u2139 tests 46\r\n\u2139 suites 0\r\n\u2139 pass 43\r\n\u2139 fail 3\r\n\u2139 cancelled 0\r\n\u2139 skipped 0\r\n\u2139 todo 0\r\n\u2139 duration_ms 537.7425\r\n\r\n\u2716 failing tests:\r\n\r\ntest at src\\features\\pilot-slots\\pilotState.test.js\n\u2026[truncated]",
+        "durationMs": 1610,
+        "testResults": {
+          "testFramework": "unknown",
+          "runnerDetectedFrom": "none",
+          "testsTotal": 0,
+          "testsPassed": 0,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "parseFailed": true
+        }
+      },
+      {
+        "name": "admin-route-served",
+        "kind": "http-probe",
+        "verificationMethod": "http-status",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": null,
+        "outputSample": "HTTP 200\n\u003C!doctype html\u003E\u003Chtml lang=\u0022en\u0022\u003E\u003Chead\u003E\n  \u003Cscript type=\u0022module\u0022 src=\u0022/@vite/client\u0022\u003E\u003C/script\u003E\n\u003Cmeta charset=\u0022UTF-8\u0022/\u003E\u003Cmeta name=\u0022viewport\u0022 content=\u0022width=device-width, initial-scale=1.0\u0022/\u003E\u003Cmeta name=\u0022description\u0022 content=\u0022Nashik municipal street-vendor services, zone recommendations, and allocation management.\u0022/\u003E\u003Ctitle\u003ENashik Street Vendor Management\u003C/title\u003E\u003C/head\u003E\u003Cbody\u003E\u003Cdiv id=\u0022root\u0022\u003E\u003C/div\u003E\u003Cscript type=\u0022module\u0022 src=\u0022/src/main.jsx\u0022\u003E\u003C/script\u003E\u003C/body\u003E\u003C/html\u003E\n\n--- server output ---\n\r\n\u003E nashik-vendor-recommendations@0.1.0 dev\r\n\u003E vite --host 127.0.0.1 --port 5174\r\n\r\n\r\n  \u001B[32m\u001B[1mVITE\u001B[22m v6.4.3\u001B[39m  \u001B[2mready in \u001B[0m\u001B[1m246\u001B[22m\u001B[2m\u001B[0m ms\u001B[22m\r\n\r\n  \u001B[32m\u279C\u001B[39m  \u001B[1mLocal\u001B[22m:   \u001B[36mhttp://127.0.0.1:\u001B[1m5174\u001B[22m/\u001B[39m\r\n",
+        "durationMs": 1762
+      }
+    ],
+    "executions": [
+      {
+        "source": "frontend-build",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "run",
+          "build"
+        ],
+        "cwd": "C:\\Users\\kalya\\vendor-map\\frontend",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "frontend-tests-pass",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "test"
+        ],
+        "cwd": "C:\\Users\\kalya\\vendor-map\\frontend",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "admin-route-served",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "run",
+          "dev",
+          "--",
+          "--port",
+          "5174"
+        ],
+        "cwd": "C:\\Users\\kalya\\vendor-map\\frontend",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      }
+    ]
+  }
+}

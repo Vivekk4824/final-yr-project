@@ -1,7 +1,7 @@
 import VendorActivity from "../features/vendor/VendorActivity.jsx";
 import {useDialogFocus} from "../shared/utils/dialogFocus.js";
 import React, {useCallback, useEffect, useState} from "react";
-import {Bell, CircleHelp, BarChart3, Building2, ChevronRight, FileText, Layers, LayoutDashboard, LogOut, MapPin, Menu, ShieldCheck, UserRound, X} from "lucide-react";
+import {Bell, Building2, CircleHelp, BarChart3, ChevronRight, FileText, LayoutDashboard, LogOut, MapPin, Menu, ShieldCheck, UserRound, X} from "lucide-react";
 import VendorDirectory from "../features/admin/VendorDirectory.jsx";
 import AdminDashboard from "../features/admin/AdminDashboard.jsx";
 import AuthLanding from "../features/auth/AuthLanding.jsx";
@@ -20,8 +20,6 @@ import {profileDisplayName, publicVendorId} from "../shared/utils/profileIdentit
 const ADMIN_NAV = [
   {id: "vendors", title: "Vendors", icon: UserRound},
   {id: "admin", title: "Admin dashboard", icon: ShieldCheck},
-  {id: "overview", title: "Research overview", icon: LayoutDashboard},
-  {id: "zones", title: "Zone registry", icon: Layers},
   {id: "recommend", title: "Research recommendations", icon: MapPin},
   {id: "analysis", title: "GIS & model insights", icon: BarChart3},
   {id: "review", title: "Expert review", icon: FileText},
@@ -145,7 +143,17 @@ export default function ImplementationApp() {
     <div className="brand"><BrandIdentity compact subtitle={session.role === "ADMIN" ? "NMC Officer Workspace" : t("nav.vendorServices")}/><button className="mobile-close" onClick={() => setMobileOpen(false)} aria-label={session.role === "ADMIN" ? "Close menu" : t("nav.close")}><X size={19}/></button></div>
     <div className="sidebar-section-label">{session.role === "ADMIN" ? "YOUR WORKSPACE" : t("portal.main")}</div><nav className="implementation-nav" aria-label={session.role === "ADMIN" ? "Main navigation" : t("portal.main")}>{nav.filter(item => session.role === "ADMIN" || item.id !== "vendor-help").map(item => {const active = page === item.id || (item.id === "vendor-recommendations" && page === "vendor-recommendation-detail") || (item.id === "vendor-profile" && page === "vendor-settings"); return <button key={item.id} className={active ? "active" : ""} aria-current={active ? "page" : undefined} onClick={() => navigate(item.id)}><item.icon size={18}/><span>{navTitle(item)}</span>{session.role === "ADMIN" && active && <ChevronRight size={15} className="nav-arrow"/>}</button>;})}</nav>
     {session.role === "VENDOR" && <><div className="sidebar-section-label">{t("portal.support")}</div><nav className="implementation-nav" aria-label={t("portal.support")}><button className={page === "vendor-help" ? "active" : ""} aria-current={page === "vendor-help" ? "page" : undefined} onClick={() => navigate("vendor-help")}><CircleHelp size={18}/><span>{t("help.title")}</span></button></nav></>}
-    <div className="sidebar-bottom auth-session-card"><div className="sidebar-bottom-label">{session.role === "ADMIN" ? "SIGNED IN AS" : t("nav.signedInAs")}</div><strong>{session.role === "ADMIN" ? session.admin_id : vendorName}</strong><p>{session.role === "ADMIN" ? "ADMIN" : onboarding ? t("nav.newOnboarding") : t(session.vendor_profile?.vendor_type === "NEW" ? "identity.applicationLabel" : "identity.registeredVendor")}</p>{session.role !== "ADMIN" && session.vendor_id && <small>{t(session.vendor_profile?.vendor_type === "NEW" ? "identity.applicationId" : "identity.vendorId", {id: publicVendorId(session.vendor_profile)})}</small>}<button onClick={signOut}><LogOut size={14}/> {session.role === "ADMIN" ? "Log out" : t("nav.logout")}</button></div>
+    <div className={`sidebar-bottom auth-session-card ${session.role === "VENDOR" ? "vendor-session-card" : ""}`}>
+      <div className="sidebar-bottom-label">{session.role === "ADMIN" ? "SIGNED IN AS" : t("nav.signedInAs")}</div>
+      {session.role === "ADMIN" ? <>
+        <strong>{session.admin_id}</strong>
+        <p>ADMIN</p>
+      </> : <>
+        <strong className="vendor-session-name">{vendorName}</strong>
+        {session.vendor_id && <small className="vendor-session-id">{t("identity.vendorId", {id: publicVendorId(session.vendor_profile)})}</small>}
+      </>}
+      <button onClick={signOut}><LogOut size={14}/>{session.role === "ADMIN" ? "Log out" : t("nav.logout")}</button>
+    </div>
   </aside>
   {mobileOpen && <button className="sidebar-backdrop" onClick={() => setMobileOpen(false)} aria-label={session.role === "ADMIN" ? "Close navigation" : t("nav.close")}/>}
   <div className="implementation-content"><header className="implementation-topbar"><button className="mobile-menu" onClick={() => setMobileOpen(true)} aria-label={session.role === "ADMIN" ? "Open navigation" : t("nav.open")}><Menu size={20}/></button>{session.role === "ADMIN" ? <><div className="topbar-breadcrumb">Officer workspace <ChevronRight size={13}/><strong>{navTitle(current)}</strong></div><div className="topbar-right"><span className="topbar-dot"/>Authenticated <span className="topbar-avatar">N</span></div></> : <div className="vendor-header-actions"><button className="vendor-notification-bell" aria-label={t("activity.title")} aria-expanded={notificationsOpen} aria-controls="vendor-notifications-dialog" aria-haspopup="dialog" onClick={() => setNotificationsOpen(value => !value)}><Bell size={20}/></button></div>}</header>

@@ -37,7 +37,18 @@ if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
 from backend.database import DATABASE_PATH, get_live_zone_status_map
-from backend.decision_policy import FACTOR_ORDER, RESEARCH_BASELINE_WEIGHTS, derive_mcda_weights, normalize_weights, active_mcda_configuration
+from backend.decision_policy import (
+    FACTOR_ORDER,
+    RESEARCH_BASELINE_WEIGHTS,
+    derive_mcda_weights,
+    neutralize_constrained_division_weight,
+    normalize_weights,
+)
+from backend.business_aware_mcda import (
+    POLICY_VERSION as BUSINESS_AWARE_POLICY_VERSION,
+    category_gis_scores,
+    experiment_enabled as business_aware_experiment_enabled,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -628,11 +639,9 @@ def _resolve_vendor_context(
             )
 
 
-        if not division:
-
-            division = str(
-                vendor_record.vendor_division
-            )
+        # Historical registry division describes past evidence; it is not an
+        # explicit current preference. Only a request/profile preference may
+        # activate strict division filtering.
 
 
     return (
@@ -647,10 +656,13 @@ def _validate_request(
     *,
     business: str,
     division: str,
+    allow_unknown_business: bool = False,
 ):
     """Validate category and division against the current datasets."""
 
-    if business not in CATEGORIES:
+    if business not in CATEGORIES and not (
+        allow_unknown_business and business == "unknown"
+    ):
 
         raise ValueError(
             "Select a known business category"
@@ -724,9 +736,9 @@ def _apply_live_filter(
 
     Missing operational rows are never interpreted as OPEN.
 
-    An explicitly OPEN zone whose capacity is unknown may remain visible as a
-    recommendation candidate, but is not considered verified availability.
-    The allocation optimiser will later require known usable capacity.
+    Production recommendations require an explicitly OPEN status and known,
+    positive available capacity.  Missing capacity is not interpreted as
+    availability.
     """
 
     zones = zones.copy()
@@ -828,19 +840,12 @@ def _apply_live_filter(
 
         # Missing operational rows are excluded because absence is not OPEN.
         #
-        # An OPEN row whose capacity is unknown may still appear as a
-        # recommendation, but it is not verified capacity and must never be
-        # interpreted as an allocatable slot.
-
         zones = zones.loc[
             zones.live_status.eq(
                 "OPEN"
             )
-            & (
-                zones.live_available.isna()
-                | zones.live_available.gt(
-                    0
-                )
+            & zones.live_available.gt(
+                0
             )
         ]
 
@@ -1339,27 +1344,21 @@ def _preference_score(
     zones: pd.DataFrame,
     division: str,
 ) -> pd.Series:
-    """Score preferred-division matching.
+    """Return the neutral division score used by the hard-constraint policy.
 
-    A missing division preference receives the existing neutral score of 0.5
-    for every candidate. Because every zone receives the same value, this does
-    not change ranking and maintains backward-compatible score semantics.
+    A missing preference is neutral.  An explicit preference is enforced by
+    candidate filtering and its factor weight is redistributed, so it must not
+    provide a second scoring advantage.
     """
 
-    if not division:
-
-        return pd.Series(
-            0.5,
-            index=zones.index,
-            dtype=float,
-        )
-
-
-    return (
-        zones.zone_division.eq(
-            division
-        )
-        .astype(float)
+    # With no preference this is neutral.  With a strict division constraint,
+    # every surviving candidate is already an exact match and the preference
+    # weight is zero, so the same neutral value truthfully avoids suggesting an
+    # additional score advantage.
+    return pd.Series(
+        0.5,
+        index=zones.index,
+        dtype=float,
     )
 
 
@@ -1506,6 +1505,7 @@ def score_candidates(
     ]
     | None = None,
     include_unscorable: bool = False,
+    business_aware_experiment: bool | None = None,
 ) -> pd.DataFrame:
     """Score every eligible zone for one vendor/request context.
 
@@ -1530,7 +1530,7 @@ def score_candidates(
     )
 
 
-    weights = normalize_weights(
+    requested_weights = normalize_weights(
 
         WEIGHTS
 
@@ -1556,6 +1556,10 @@ def score_candidates(
         vendor_id=vendor_id,
     )
 
+    business_aware_enabled = business_aware_experiment_enabled(
+        business_aware_experiment
+    )
+
 
     _validate_request(
 
@@ -1564,8 +1568,16 @@ def score_candidates(
         business=business,
 
         division=division,
+
+        allow_unknown_business=business_aware_enabled,
     )
 
+
+    weights = (
+        neutralize_constrained_division_weight(requested_weights)
+        if division
+        else requested_weights
+    )
 
     # Only legally/model-eligible FREE analytical references.
     zones = (
@@ -1607,6 +1619,28 @@ def score_candidates(
         )
     )
 
+    candidate_count_before_division_filter = len(zones)
+    if division:
+        zones = zones.loc[
+            zones.zone_division.eq(division)
+        ].copy()
+
+    metadata.update({
+        "candidate_count_before_division_filter":
+            candidate_count_before_division_filter,
+        "candidate_count_after_division_filter":
+            len(zones),
+        "strict_division_filter_applied":
+            bool(division),
+        "division_weight_handling": (
+            "PREFERENCE_WEIGHT_PROPORTIONALLY_REDISTRIBUTED"
+            if division
+            else "SOFT_FACTOR_NEUTRAL_NO_DIVISION_SELECTED"
+        ),
+        "requested_factor_weights":
+            dict(requested_weights),
+    })
+
 
     metadata.update(
         {
@@ -1625,6 +1659,15 @@ def score_candidates(
 
             "exclude_zone":
                 exclude_zone,
+
+            "business_aware_mcda_experiment_enabled":
+                business_aware_enabled,
+
+            "business_aware_mcda_policy_version": (
+                BUSINESS_AWARE_POLICY_VERSION
+                if business_aware_enabled
+                else None
+            ),
         }
     )
 
@@ -1668,6 +1711,23 @@ def score_candidates(
         )
     )
 
+    category_environment = None
+    if business_aware_enabled:
+        category_environment = category_gis_scores(
+            zones,
+            business,
+            environment["commercial"],
+        )
+        zones["category_gis_compatibility_score"] = category_environment["score"]
+        zones["category_gis_method"] = category_environment["method"]
+        zones["category_gis_fallback_used"] = category_environment["fallback"]
+        zones["category_gis_features_used"] = category_environment["features_used"]
+        zones["requested_business_category"] = business
+        zones["business_aware_mcda_experiment_enabled"] = True
+        zones["business_aware_mcda_policy_version"] = BUSINESS_AWARE_POLICY_VERSION
+        for feature, series in category_environment["components"].items():
+            zones[f"category_gis_component_{feature}"] = series
+
 
     historical = (
         _historical_factor_scores(
@@ -1692,9 +1752,11 @@ def score_candidates(
             ],
 
         "commercial":
-            environment[
-                "commercial"
-            ],
+            (
+                category_environment["score"]
+                if category_environment is not None
+                else environment["commercial"]
+            ),
 
         "access":
             environment[
@@ -1825,7 +1887,7 @@ def rank_candidates(
     division: str = "",
     top_n: int = 3,
 ) -> pd.DataFrame:
-    """Apply deterministic local-first Top-N recommendation policy."""
+    """Apply deterministic strict-division Top-N recommendation policy."""
 
     if (
         top_n < 1
@@ -1855,68 +1917,18 @@ def rank_candidates(
         return result
 
 
-    # Prefer requested division first.
-    #
-    # If fewer than Top-N local zones survive, explicitly fill with the best
-    # candidates from other divisions and mark them as fallback results.
+    # Defence in depth for callers that pass a pre-scored citywide frame.
+    # Never fill a selected division with candidates from another division.
+    if division:
+        scored = scored.loc[
+            scored.zone_division.eq(division)
+        ].copy()
 
-    if division and active_mcda_configuration() is None:
-
-        local = scored.loc[
-
-            scored.zone_division.eq(
-                division
-            )
-
-        ].head(
-            top_n
-        ).copy()
-
-
-        remaining_count = (
-            top_n
-            - len(local)
-        )
-
-
-        alternatives = scored.loc[
-
-            ~scored.zone_id.isin(
-                local.zone_id
-            )
-
-        ].head(
-            remaining_count
-        ).copy()
-
-
-        alternatives[
-            "fallback_used"
-        ] = True
-
-
-        result = pd.concat(
-
-            [
-                local,
-                alternatives,
-            ],
-
-            ignore_index=True,
-        )
-
-
-    else:
-
-        result = (
-            scored.head(
-                top_n
-            )
-            .copy()
-            .reset_index(
-                drop=True
-            )
-        )
+    result = (
+        scored.head(top_n)
+        .copy()
+        .reset_index(drop=True)
+    )
 
 
     result[
@@ -1997,6 +2009,7 @@ def recommend(
     database_path=None,
     factor_weights=None,
     include_all=False,
+    business_aware_experiment=None,
 ):
     """Return ranked Top-N recommendations.
 
@@ -2040,6 +2053,7 @@ def recommend(
             factor_weights
         ),
         include_unscorable=include_all,
+        business_aware_experiment=business_aware_experiment,
     )
 
 

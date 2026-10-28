@@ -96,6 +96,18 @@ class PilotApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         return response.json()
 
+    def test_delete_slot_cors_preflight_is_allowed(self):
+        response = self.client.options(
+            "/api/pilot/slots/S001?zone_id=PAN_F_031&expected_updated_at=2026-10-15T20%3A20%3A02.885194%2B00%3A00",
+            headers={
+                "Origin": "http://localhost:5173",
+                "Access-Control-Request-Method": "DELETE",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertIn("DELETE", response.headers["access-control-allow-methods"])
+
     def approve(self, vendor="V_PILOT_1", zone="NN_F_013"):
         request = db.create_allocation_request(vendor, zone, "NEW_ALLOCATION", database_path=self.path)
         db.approve_allocation_request(request["request_id"], "test-officer", database_path=self.path)
@@ -136,10 +148,10 @@ class PilotApiTests(unittest.TestCase):
         request = db.create_allocation_request("V_PILOT_1", "NN_F_013", "NEW_ALLOCATION", database_path=self.path)
         self.assertEqual(self.update(vendor="V_PILOT_1").status_code, 422)
         db.approve_allocation_request(request["request_id"], "test-officer", database_path=self.path)
-        before = self.snapshot()
         response = self.update(vendor="V_PILOT_1")
         self.assertEqual(response.status_code, 200, response.text)
-        self.assertEqual(self.snapshot(), before)
+        allocation = db.get_active_allocation_for_vendor("V_PILOT_1", self.path)
+        self.assertEqual(allocation["slot_id"], "S001")
 
     def test_wrong_zone_allocation_and_unapproved_active_allocation_rejected(self):
         self.initialize()
@@ -149,15 +161,22 @@ class PilotApiTests(unittest.TestCase):
             connection.execute("UPDATE allocations SET zone_id = 'NN_F_013', request_id = NULL")
         self.assertEqual(self.update(vendor="V_PILOT_1").status_code, 422)
 
-    def test_unique_vendor_and_release_without_changing_operational_allocation(self):
+    def test_making_occupied_slot_available_preserves_zone_allocation(self):
         self.initialize()
         self.approve()
-        before = self.snapshot()
         self.assertEqual(self.update(vendor="V_PILOT_1", status="OCCUPIED").status_code, 200)
         self.assertEqual(self.update(slot="S002", vendor="V_PILOT_1").status_code, 409)
+        before = db.get_zone_live_status("NN_F_013", self.path)["current_vendor_count"]
         self.assertEqual(self.update(status="AVAILABLE").status_code, 200)
+        allocation = db.get_active_allocation_for_vendor("V_PILOT_1", self.path)
+        self.assertIsNotNone(allocation)
+        self.assertEqual(allocation["zone_id"], "NN_F_013")
+        self.assertIsNone(allocation["slot_id"])
+        self.assertEqual(
+            db.get_zone_live_status("NN_F_013", self.path)["current_vendor_count"],
+            before,
+        )
         self.assertEqual(self.update(slot="S002", vendor="V_PILOT_1").status_code, 200)
-        self.assertEqual(self.snapshot(), before)
 
     def test_replacing_vendor_requires_release(self):
         self.initialize()
@@ -225,6 +244,61 @@ class PilotApiTests(unittest.TestCase):
         with db.transaction(self.path) as connection:
             connection.execute("UPDATE allocations SET status = 'RELEASED' WHERE vendor_id = 'V_PILOT_1'")
         self.assertEqual(self.client.get("/api/pilot/layout").status_code, 403)
+
+    def test_making_assigned_slot_available_keeps_vendor_in_zone_without_slot(self):
+        self.initialize()
+        self.approve()
+        self.assertEqual(self.update(vendor="V_PILOT_1").status_code, 200)
+        slot = self.client.get("/api/pilot/slots/S001").json()
+        self.assertEqual(slot["assigned_vendor_id"], "V_PILOT_1")
+        occupancy_before = db.get_zone_live_status("NN_F_013", self.path)["current_vendor_count"]
+        self.assertEqual(self.update(status="AVAILABLE", timestamp=slot["updated_at"]).status_code, 200)
+        allocation = db.get_active_allocation_for_vendor("V_PILOT_1", self.path)
+        self.assertIsNotNone(allocation)
+        self.assertEqual(allocation["zone_id"], "NN_F_013")
+        self.assertIsNone(allocation["slot_id"])
+        self.assertEqual(
+            db.get_zone_live_status("NN_F_013", self.path)["current_vendor_count"],
+            occupancy_before,
+        )
+        self.assertEqual(self.client.get("/api/pilot/layout").json()["slots"][0]["status"], "AVAILABLE")
+        dashboard_activity = db.get_vendor_dashboard_activity("V_PILOT_1", self.path)
+        self.assertIsNotNone(dashboard_activity["active_allocation"])
+        self.session = {"role": "VENDOR", "vendor_id": "V_PILOT_1"}
+        vendor_layout = self.client.get("/api/pilot/layout")
+        self.assertEqual(vendor_layout.status_code, 200, vendor_layout.text)
+        self.assertIsNone(vendor_layout.json()["my_slot_id"])
+        self.assertEqual(vendor_layout.json()["zone_id"], "NN_F_013")
+
+    def test_legacy_available_slot_detaches_its_stale_slot_assignment(self):
+        self.initialize()
+        self.approve()
+        self.assertEqual(self.update(vendor="V_PILOT_1").status_code, 200)
+        with db.transaction(self.path) as connection:
+            slot = connection.execute(
+                "SELECT * FROM pilot_slots WHERE zone_id = 'NN_F_013' AND slot_id = 'S001'"
+            ).fetchone()
+            before = dict(slot)
+            timestamp = db.utc_now()
+            connection.execute(
+                """UPDATE pilot_slots SET status = 'AVAILABLE', assigned_vendor_id = NULL,
+                   active_allocation_id = NULL, updated_at = ?
+                   WHERE zone_id = 'NN_F_013' AND slot_id = 'S001'""",
+                (timestamp,),
+            )
+            connection.execute(
+                "UPDATE allocations SET slot_id = NULL WHERE vendor_id = 'V_PILOT_1' AND status = 'ACTIVE'"
+            )
+            connection.execute(
+                """INSERT INTO pilot_slot_events(zone_id, slot_id, actor, before_json, after_json, created_at)
+                   VALUES ('NN_F_013', 'S001', 'test-officer', ?, ?, ?)""",
+                (json.dumps(before), json.dumps({"status": "AVAILABLE", "assigned_vendor_id": None}), timestamp),
+            )
+        self.assertEqual(self.update(status="AVAILABLE", timestamp=timestamp).status_code, 200)
+        allocation = db.get_active_allocation_for_vendor("V_PILOT_1", self.path)
+        self.assertIsNotNone(allocation)
+        self.assertEqual(allocation["zone_id"], "NN_F_013")
+        self.assertIsNone(allocation["slot_id"])
 
     def test_not_initialized_layout_is_explicit(self):
         self.assertEqual(self.client.get("/api/pilot/layout").status_code, 404)

@@ -13,6 +13,7 @@ from backend.repositories.database import OperationalConflictError
 from backend.repositories.database import OperationalNotFoundError
 from backend.repositories.database import OperationalValidationError
 from backend.schemas.api import VendorProfileResponse
+from backend.schemas.api import VendorProfilePhotoUpdate
 from backend.schemas.api import VendorProfileUpdateBody
 from backend.schemas.api import VendorRegistrationBody
 from backend.services.responses import allocation_response
@@ -23,6 +24,8 @@ from backend.repositories.database import get_active_allocation_for_vendor
 from backend.repositories.database import get_live_zone_status_map
 from backend.repositories.database import get_vendor_dashboard_activity
 from backend.services.vendors import get_vendor_profile
+from backend.services.vendors import get_vendor_profile_photo
+from backend.services.vendors import save_vendor_profile_photo
 from fastapi import status as http_status
 from backend.services.explanations import official_zone_descriptions
 from backend.core.security import operational_error
@@ -538,7 +541,6 @@ def unified_vendor_profile(
             f"Unknown vendor_id: {vendor_id}",
         )
 
-
     return profile
 
 @router.patch(
@@ -919,12 +921,14 @@ def vendor(
 
 @router.get("/api/admin/vendors", tags=["Vendors"])
 def admin_vendor_directory(request: FastAPIRequest, q: str = "", business_category: str = "", division: str = "",
+                           zone_id: str = "", mapping_status: str = "",
                            page: int = Query(1, ge=1),
                            page_size: int = Query(25, ge=1, le=100)):
     request_session(request, "ADMIN")
     from backend.services.vendors import list_admin_vendors
     try:
         return list_admin_vendors(q=q, business_category=business_category, division=division,
+                                  zone_id=zone_id, mapping_status=mapping_status,
                                   page=page, page_size=page_size, database_path=dependencies.DATABASE_PATH)
     except OperationalValidationError as exc:
         operational_error(exc)
@@ -940,12 +944,40 @@ def admin_vendor_management_details(vendor_id: str, request: FastAPIRequest):
         operational_error(exc)
 
 
+@router.get("/api/admin/vendors/{vendor_id}/relocation-recommendations", tags=["Vendors", "Admin"])
+def admin_vendor_relocation_recommendations(vendor_id: str, request: FastAPIRequest,
+                                             limit: int = Query(5, ge=1, le=20),
+                                             include_all: bool = False):
+    request_session(request, "ADMIN")
+    from backend.services.relocation_recommendations import relocation_recommendations
+    try:
+        return relocation_recommendations(vendor_id, limit=limit, include_all=include_all,
+                                          database_path=dependencies.DATABASE_PATH)
+    except (OperationalNotFoundError, OperationalValidationError, ValueError) as exc:
+        operational_error(exc)
+
+
 @router.get("/api/vendors/me/account-settings", tags=["Vendors"])
 def vendor_account_settings(request: FastAPIRequest):
     session = request_session(request, "VENDOR")
     from backend.services.vendors import vendor_account_information
     try:
-        return vendor_account_information(session["vendor_id"], dependencies.DATABASE_PATH)
+        return vendor_account_information(session["vendor_id"], dependencies.DATABASE_PATH, session.get("mobile_last4"))
+    except (OperationalNotFoundError, OperationalValidationError) as exc:
+        operational_error(exc)
+
+
+@router.get("/api/vendors/me/profile-photo", tags=["Vendors"])
+def vendor_profile_photo(request: FastAPIRequest):
+    session = request_session(request, "VENDOR")
+    return get_vendor_profile_photo(session["vendor_id"], dependencies.DATABASE_PATH)
+
+
+@router.put("/api/vendors/me/profile-photo", tags=["Vendors"])
+def update_vendor_profile_photo(payload: VendorProfilePhotoUpdate, request: FastAPIRequest):
+    session = request_session(request, "VENDOR")
+    try:
+        return save_vendor_profile_photo(session["vendor_id"], payload.data_url, dependencies.DATABASE_PATH)
     except (OperationalNotFoundError, OperationalValidationError) as exc:
         operational_error(exc)
 

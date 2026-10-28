@@ -18,6 +18,8 @@ app.add_middleware(
         "GET",
         "POST",
         "PATCH",
+        "DELETE",
+        "PUT",
     ],
     allow_headers=[
         "Content-Type",
@@ -88,4 +90,8 @@ from backend.routers import navigation
 app.include_router(navigation.router)
 context.pilot_navigation_destination = navigation.pilot_navigation_destination
 context.pilot_walking_route = navigation.pilot_walking_route
+from backend.whatsapp import webhook
+app.include_router(webhook.router)
+context.verify_whatsapp_webhook = webhook.verify_webhook
+context.receive_whatsapp_webhook = webhook.receive_webhook
 context.app = app

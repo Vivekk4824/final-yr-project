@@ -4,6 +4,7 @@ from backend.core import context as dependencies
 from backend.decision_policy import FACTOR_ORDER
 from backend.decision_policy import RESEARCH_BASELINE_WEIGHTS
 from backend.mcda_engine import ROOT
+from backend.business_aware_mcda import category_gis_evidence
 from functools import lru_cache
 import numpy as np
 import pandas as pd
@@ -431,6 +432,33 @@ def explain(
             ],
         },
     }
+
+    if bool(row.get("business_aware_mcda_experiment_enabled", False)):
+        category = str(row.get("requested_business_category") or "unknown")
+        evidence = category_gis_evidence(row)
+        if evidence:
+            summary = (
+                f"Mapped commercial-context indicators configured for the "
+                f"{category} category were used in this experimental score."
+            )
+        else:
+            summary = (
+                "No supported category-specific mapped indicator was available; "
+                "the baseline Commercial calculation was retained."
+            )
+        items["commercial"] = {
+            "title": "Category-relevant GIS context",
+            "summary": summary,
+            "details": (
+                "This disabled-by-default experiment replaces only the Commercial "
+                "factor. Mapped POIs provide environmental context, not verified "
+                "demand, footfall, sales, or profitability."
+            ),
+            "evidence": evidence or [{
+                "label": "Scoring method",
+                "value": row.get("category_gis_method"),
+            }],
+        }
 
 
     weights = (

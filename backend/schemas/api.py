@@ -8,6 +8,24 @@ class PilotSlotUpdate(BaseModel):
     assigned_vendor_id: str | None = Field(default=None, max_length=100)
     expected_updated_at: str = Field(min_length=1, max_length=100)
 
+class PilotSlotCreate(BaseModel):
+    geometry: dict
+    width_m: float | None = Field(default=None, gt=0, le=20)
+    depth_m: float | None = Field(default=None, gt=0, le=20)
+    review_confirmed: bool = False
+
+class PilotSlotGeometryUpdate(PilotSlotCreate):
+    expected_updated_at: str = Field(min_length=1, max_length=100)
+
+class PilotSlotMove(BaseModel):
+    longitude: float = Field(ge=-180, le=180)
+    latitude: float = Field(ge=-90, le=90)
+    angle: float = Field(default=0, ge=0, lt=360)
+    width_m: float = Field(gt=0, le=20)
+    depth_m: float = Field(gt=0, le=20)
+    review_confirmed: bool = False
+    expected_updated_at: str = Field(min_length=1, max_length=100)
+
 class PilotGeometryPreview(BaseModel):
     config: dict = Field(default_factory=dict)
     obstructions: list[dict] | None = Field(default=None, max_length=100)
@@ -128,6 +146,11 @@ class AllocationRequestCreate(
 
     zone_id: str
 
+    slot_id: (
+        str
+        | None
+    ) = None
+
     request_type: Literal[
         "NEW_ALLOCATION",
         "RELOCATION",
@@ -157,6 +180,11 @@ class AllocationRequestResponse(
     vendor_id: str
 
     zone_id: str
+
+    slot_id: (
+        str
+        | None
+    ) = None
 
     request_type: Literal[
         "NEW_ALLOCATION",
@@ -219,6 +247,11 @@ class AllocationRequestResponse(
             "NEW",
             "EXISTING_IMPORTED",
         ]
+        | None
+    ) = None
+
+    current_zone_id: (
+        str
         | None
     ) = None
 
@@ -285,6 +318,11 @@ class AllocationResponse(
 
     zone_id: str
 
+    slot_id: (
+        str
+        | None
+    ) = None
+
     request_id: (
         str
         | None
@@ -338,6 +376,12 @@ class AllocationListResponse(
     ]
 
     count: int
+
+    total_count: int | None = None
+
+    limit: int | None = None
+
+    offset: int = 0
 
     status_filter: (
         Literal[
@@ -500,6 +544,10 @@ class VendorProfileUpdateBody(
         str
         | None
     ) = None
+
+class VendorProfilePhotoUpdate(BaseModel):
+    data_url: str = Field(min_length=1, max_length=2_800_000)
+
 
 class VendorProfileResponse(
     BaseModel

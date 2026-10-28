@@ -133,9 +133,25 @@ class AuthenticationTests(unittest.TestCase):
         me = self.client.get("/api/auth/me")
         self.assertEqual(me.status_code, 200)
         self.assertEqual(me.json()["vendor_profile"]["vendor_id"], "V2024_00001")
+        account = self.client.get("/api/vendors/me/account-settings")
+        self.assertEqual(account.status_code, 200, account.text)
+        self.assertEqual(account.json()["masked_mobile"], "******3210")
         logged_out = self.client.post("/api/auth/logout")
         self.assertEqual(logged_out.status_code, 200)
         self.assertEqual(self.client.get("/api/auth/me").status_code, 401)
+
+    def test_vendor_profile_photo_put_is_allowed_by_cors_preflight(self):
+        response = self.client.options(
+            "/api/vendors/me/profile-photo",
+            headers={
+                "Origin": "http://127.0.0.1:5173",
+                "Access-Control-Request-Method": "PUT",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertIn("PUT", response.headers["access-control-allow-methods"])
 
     def test_wrong_expired_and_max_attempt_otps_are_rejected(self):
         challenge = self.request_otp()

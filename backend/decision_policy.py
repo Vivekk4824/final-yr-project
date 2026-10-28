@@ -174,6 +174,42 @@ def normalize_weights(
     return normalized
 
 
+def neutralize_constrained_division_weight(
+    weights: Mapping[str, float],
+) -> dict[str, float]:
+    """Remove the division-preference weight after division is constrained.
+
+    An explicitly selected division is a candidate eligibility constraint, not
+    ranking evidence.  Its former weight is redistributed proportionally over
+    the other five factors.  This preserves their relative policy ratios and
+    avoids both double-counting the preference and silently changing any
+    unrelated factor relationship.
+    """
+
+    normalized = normalize_weights(weights)
+    unconstrained_total = 1.0 - normalized["preference"]
+
+    if unconstrained_total <= 0:
+        raise ValueError(
+            "Division-constrained recommendations require a positive weight "
+            "for at least one non-preference factor"
+        )
+
+    adjusted = {
+        factor: (
+            0.0
+            if factor == "preference"
+            else normalized[factor] / unconstrained_total
+        )
+        for factor in FACTOR_ORDER
+    }
+
+    # Keep the same exact-sum guarantee as normalize_weights without assigning
+    # floating-point residue back to the deliberately zeroed preference factor.
+    adjusted["historical"] += 1.0 - sum(adjusted.values())
+    return adjusted
+
+
 # ---------------------------------------------------------------------------
 # Policy loading
 # ---------------------------------------------------------------------------

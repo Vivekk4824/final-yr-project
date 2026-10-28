@@ -19,7 +19,7 @@ export default function SlotInspector({selected, slots, selectedId, onSelect, ad
     </div>
     <div className="slot-inspector-extra"><label>{t("display.selectedSlot")}<select aria-label="Select pilot slot" value={selectedId || ""} onChange={e => {const slot = slots.find(s => s.slot_id === e.target.value); if(slot) onSelect(slot);}}><option value="">{t("display.chooseSlot")}</option>{slots.map(s => <option key={s.slot_id} value={s.slot_id}>{s.slot_id} · {statusLabel(language,s.status)}</option>)}</select></label>
       {!admin && assigned && <p className="slot-own-note">{t("display.ownSlot")}: <strong>{assigned.slot_id}</strong>. {t("display.slotNotice")}</p>}
-      {!selected ? <p>Click a numbered polygon or select a slot above.</p> : <><dl><div><dt>{t("display.locationEvidence")}</dt><dd>{selected.geometry ? t("display.provisional") : t("display.schematic")}</dd></div>{admin && <><div><dt>{t("display.assignedVendor")}</dt><dd>{allocation?.vendor_name || (selected.assigned_vendor_id ? t("identity.registeredVendor") : t("common.none"))}</dd></div>{allocation && <div><dt>{t("display.allocation")}</dt><dd>{allocation.allocation_id}</dd></div>}</>}</dl>
+      {!selected ? <p>Click a numbered polygon or select a slot above.</p> : <>{admin && <dl><div><dt>{t("display.assignedVendor")}</dt><dd>{allocation?.vendor_name || (selected.assigned_vendor_id ? t("identity.registeredVendor") : t("common.none"))}</dd></div>{allocation && <div><dt>{t("display.allocation")}</dt><dd>{allocation.allocation_id}</dd></div>}</dl>}
         {admin && allocation && onViewVendor && <button onClick={() => onViewVendor(allocation)}>{t("display.vendorDetails")}</button>}
         {children}
       </>}

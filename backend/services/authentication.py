@@ -240,12 +240,13 @@ def create_otp_challenge(
         otp = generate_otp()
         connection.execute(
             """INSERT INTO auth_otp_challenges
-               (challenge_id, phone_hash, purpose, otp_hash, expires_at,
+               (challenge_id, phone_hash, mobile_last4, purpose, otp_hash, expires_at,
                 attempt_count, max_attempts, created_at)
-               VALUES (?, ?, ?, ?, ?, 0, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)""",
             (
                 challenge_id,
                 hashed_phone,
+                normalized[-4:],
                 purpose,
                 _otp_hash(challenge_id, otp),
                 _timestamp(now_dt + timedelta(minutes=OTP_EXPIRY_MINUTES)),
@@ -264,6 +265,7 @@ def _create_session(
     vendor_id: str | None = None,
     admin_id: str | None = None,
     new_vendor_phone_hash: str | None = None,
+    mobile_last4: str | None = None,
 ) -> tuple[str, dict]:
     token = secrets.token_urlsafe(32)
     session_id = f"SES_{uuid.uuid4().hex}"
@@ -271,8 +273,8 @@ def _create_session(
     connection.execute(
         """INSERT INTO auth_sessions
            (session_id, session_token_hash, role, vendor_id, admin_id,
-            new_vendor_phone_hash, created_at, expires_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            new_vendor_phone_hash, mobile_last4, created_at, expires_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             session_id,
             _token_hash(token),
@@ -280,6 +282,7 @@ def _create_session(
             vendor_id,
             admin_id,
             new_vendor_phone_hash,
+            mobile_last4,
             _timestamp(now_dt),
             _timestamp(now_dt + timedelta(hours=SESSION_EXPIRY_HOURS)),
         ),
@@ -325,14 +328,18 @@ def verify_otp_challenge(
         ).fetchone()
         if identity:
             connection.execute(
-                "UPDATE vendor_auth_identities SET is_verified = 1, updated_at = ? WHERE identity_id = ?",
-                (now, identity["identity_id"]),
+                """UPDATE vendor_auth_identities
+                   SET is_verified = 1, mobile_last4 = ?, updated_at = ?
+                   WHERE identity_id = ?""",
+                (challenge["mobile_last4"], now, identity["identity_id"]),
             )
-            return _create_session(connection, "VENDOR", vendor_id=identity["vendor_id"])
+            return _create_session(connection, "VENDOR", vendor_id=identity["vendor_id"],
+                                   mobile_last4=challenge["mobile_last4"])
         return _create_session(
             connection,
             "NEW_VENDOR_ONBOARDING",
             new_vendor_phone_hash=challenge["phone_hash"],
+            mobile_last4=challenge["mobile_last4"],
         )
 
 
@@ -392,9 +399,10 @@ def bind_onboarding_session(
             raise AuthError("A verified onboarding session is required.", 403)
         connection.execute(
             """INSERT INTO vendor_auth_identities
-               (identity_id, vendor_id, phone_hash, vendor_source, is_verified, created_at, updated_at)
-               VALUES (?, ?, ?, 'OPERATIONAL', 1, ?, ?)""",
-            (f"VID_{uuid.uuid4().hex}", vendor_id, session["new_vendor_phone_hash"], now, now),
+               (identity_id, vendor_id, phone_hash, mobile_last4, vendor_source, is_verified, created_at, updated_at)
+               VALUES (?, ?, ?, ?, 'OPERATIONAL', 1, ?, ?)""",
+            (f"VID_{uuid.uuid4().hex}", vendor_id, session["new_vendor_phone_hash"],
+             session.get("mobile_last4"), now, now),
         )
         connection.execute(
             """UPDATE auth_sessions

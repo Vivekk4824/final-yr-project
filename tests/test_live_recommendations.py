@@ -90,14 +90,15 @@ class LiveRecommendationTests(unittest.TestCase):
         eligible = self.live_recommend()
         self.assertEqual(eligible.zone_id.tolist(), [zone_id])
         self.assertEqual(eligible.iloc[0].live_status, "OPEN")
-        self.assertEqual(eligible.iloc[0].current_vendor_count, 1)
-        self.assertEqual(eligible.iloc[0].available_capacity, 4)
+        # Operational occupancy is derived from ACTIVE allocations rather than
+        # trusting a manually edited/materialized counter.
+        self.assertEqual(eligible.iloc[0].current_vendor_count, 0)
+        self.assertEqual(eligible.iloc[0].available_capacity, 5)
 
         self.close_all_candidates()
         self.set_live(zone_id, status="OPEN", capacity=None)
         unknown_capacity = self.live_recommend()
-        self.assertEqual(unknown_capacity.zone_id.tolist(), [zone_id])
-        self.assertTrue(pd.isna(unknown_capacity.iloc[0].available_capacity))
+        self.assertTrue(unknown_capacity.empty)
 
     def test_missing_live_row_is_conservatively_excluded(self):
         zone_id = self.candidates.iloc[0].zone_id
@@ -126,7 +127,6 @@ class LiveRecommendationTests(unittest.TestCase):
                 "vendor_id": "V2024_00201",
                 "zone_id": zone_id,
                 "request_type": "NEW_ALLOCATION",
-                "business_category": "food",
             },
         ).json()
         approved = self.client.post(
@@ -139,7 +139,6 @@ class LiveRecommendationTests(unittest.TestCase):
         )
         self.assertEqual(after.status_code, 200)
         self.assertEqual(after.json()["recommendations"], [])
-        self.assertEqual(after.json()["candidate_count_after_live_filter"], 0)
 
     def test_relocation_reopens_old_free_zone_for_recommendations(self):
         old_zone = self.candidates.iloc[0].zone_id
@@ -167,7 +166,6 @@ class LiveRecommendationTests(unittest.TestCase):
                 "vendor_id": vendor_id,
                 "zone_id": new_zone,
                 "request_type": "RELOCATION",
-                "business_category": "food",
             },
         ).json()
         approved = self.client.post(
@@ -178,15 +176,12 @@ class LiveRecommendationTests(unittest.TestCase):
         after_ids = set(self.live_recommend().zone_id)
         self.assertIn(old_zone, after_ids)
 
-    def test_exclusion_existing_vendor_and_preferred_division_fallback(self):
+    def test_exclusion_and_preferred_division_never_falls_back(self):
         zone = self.candidates.iloc[0]
         self.close_all_candidates()
         self.set_live(zone.zone_id, status="OPEN", capacity=10, count=0)
         excluded = self.live_recommend(exclude_zone=zone.zone_id)
         self.assertTrue(excluded.empty)
-
-        existing = self.live_recommend(business="", vendor_id="V2024_00001")
-        self.assertEqual(existing.zone_id.tolist(), [zone.zone_id])
 
         other_divisions = [
             division
@@ -194,9 +189,9 @@ class LiveRecommendationTests(unittest.TestCase):
             if division != zone.zone_division and division != "Citywide"
         ]
         self.assertTrue(other_divisions)
-        fallback = self.live_recommend(division=other_divisions[0])
-        self.assertEqual(fallback.zone_id.tolist(), [zone.zone_id])
-        self.assertTrue(bool(fallback.iloc[0].fallback_used))
+        constrained = self.live_recommend(division=other_divisions[0])
+        self.assertTrue(constrained.empty)
+        self.assertTrue(constrained.attrs["strict_division_filter_applied"])
 
     def test_surviving_zone_scores_and_weights_are_unchanged(self):
         self.assertEqual(

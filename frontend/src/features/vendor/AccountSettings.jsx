@@ -6,7 +6,7 @@ import {useI18n} from "../../i18n/react.jsx";
 import {zoneName} from "../../shared/utils/displayLabels.js";
 import {LANGUAGES} from "./viewModel.js";
 
-export default function AccountSettings({profile, busy, onSaveLanguage}) {
+export default function AccountSettings({profile, busy, activeAllocation, onSaveLanguage}) {
   const {language, t} = useI18n();
   const [data, setData] = useState(null), [error, setError] = useState(""), [reload, setReload] = useState(0);
   const [chosenLanguage, setChosenLanguage] = useState(profile.preferred_language || "en");
@@ -32,7 +32,7 @@ export default function AccountSettings({profile, busy, onSaveLanguage}) {
   };
   if (!data) return <section className="vendor-panel"><h2>{t("account.settings")}</h2><p role={error ? "alert" : "status"}>{error || t("common.loading")}</p>{error && <button className="vendor-secondary" onClick={() => setReload(value => value + 1)}>{t("common.refresh")}</button>}</section>;
   const identity = data.profile;
-  const rows = [[t("account.vendorReference"), identity.vendor_id], ...(identity.application_vendor_id ? [[t("account.applicationReference"), identity.application_vendor_id]] : []), [t("account.mobile"), data.masked_mobile || t("account.mobileUnavailable")], [t("account.contact"), t(!data.identity_verification_recorded ? "account.phoneUnverified" : data.development_authentication ? "account.developmentOnly" : "account.verificationUnproven")], [t("account.linkage"), t(data.historical_identity_linked ? "account.historicalLinked" : "account.noHistoricalLink")], [t("account.registered"), t(data.has_operational_profile ? "common.yes" : "common.no")]];
+  const rows = [...(identity.application_vendor_id ? [[t("account.applicationReference"), identity.application_vendor_id]] : []), [t("account.mobile"), data.masked_mobile || t("account.mobileUnavailable")], [t("account.currentZoneId"), activeAllocation?.zone_id || t("display.noSlot")], [t("account.contact"), t(!data.identity_verification_recorded ? "account.phoneUnverified" : data.development_authentication ? "account.developmentOnly" : "account.verificationUnproven")], [t("account.linkage"), t(data.historical_identity_linked ? "account.historicalLinked" : "account.noHistoricalLink")], [t("account.registered"), t(data.has_operational_profile ? "common.yes" : "common.no")]];
   return <section className="vendor-settings-workspace">
     {error && <p role="alert" className="vendor-action-notice">{error}</p>}
     <article className="vendor-panel"><h2><Fingerprint size={18}/>{t("account.accountInformation")}</h2><dl className="vendor-settings-values">{rows.map(([label,value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></article>

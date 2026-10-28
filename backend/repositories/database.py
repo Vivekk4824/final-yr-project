@@ -11,6 +11,7 @@ import csv
 import json
 import re
 import uuid
+from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -42,6 +43,9 @@ ZONE_STATUSES = ("OPEN", "FULL", "CLOSED", "SUSPENDED", "RESTRICTED", "NO_VENDIN
 REQUEST_TYPES = ("NEW_ALLOCATION", "RELOCATION")
 REQUEST_STATUSES = ("PENDING", "APPROVED", "REJECTED", "CANCELLED")
 ALLOCATION_STATUSES = ("ACTIVE", "RELEASED")
+ALLOCATION_SOURCES = ("ADMIN_APPROVED", "LEGACY_IMPORT")
+HISTORICAL_ASSOCIATION_STATUSES = ("AUTO_MATCHED", "REVIEW_REQUIRED", "UNMATCHED")
+HISTORICAL_REVIEW_STATUSES = ("UNREVIEWED", "CONFIRMED", "CHANGED", "REJECTED")
 VENDOR_TYPES = ("NEW", "EXISTING_IMPORTED")
 PRIORITY_PROFILES = ("BALANCED", "COMMERCIAL", "ACCESSIBILITY", "FACILITIES")
 PREFERRED_LANGUAGES = ("en", "mr", "hi")
@@ -91,16 +95,20 @@ CREATE TABLE IF NOT EXISTS zone_live_status (
         (official_capacity IS NULL AND available_capacity IS NULL)
         OR
         (official_capacity IS NOT NULL
-         AND current_vendor_count <= official_capacity
-         AND available_capacity = official_capacity - current_vendor_count)
+         AND available_capacity = CASE
+             WHEN current_vendor_count >= official_capacity THEN 0
+             ELSE official_capacity - current_vendor_count
+         END)
     ),
-    CHECK (official_capacity IS NULL OR current_vendor_count != official_capacity OR status = 'FULL')
+    CHECK (official_capacity IS NULL OR current_vendor_count < official_capacity
+           OR status IN ('FULL', 'CLOSED', 'SUSPENDED', 'RESTRICTED', 'NO_VENDING'))
 );
 
 CREATE TABLE IF NOT EXISTS allocation_requests (
     request_id TEXT PRIMARY KEY,
     vendor_id TEXT NOT NULL,
     zone_id TEXT NOT NULL,
+    slot_id TEXT NULL,
     request_type TEXT NOT NULL CHECK (request_type IN ('NEW_ALLOCATION', 'RELOCATION')),
     status TEXT NOT NULL CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED')),
     business_category TEXT NULL,
@@ -117,15 +125,22 @@ CREATE TABLE IF NOT EXISTS allocation_requests (
 CREATE UNIQUE INDEX IF NOT EXISTS one_pending_request_per_vendor_zone
     ON allocation_requests(vendor_id, zone_id) WHERE status = 'PENDING';
 
+CREATE UNIQUE INDEX IF NOT EXISTS one_pending_request_per_slot
+    ON allocation_requests(zone_id, slot_id)
+    WHERE status = 'PENDING' AND slot_id IS NOT NULL;
+
 CREATE TABLE IF NOT EXISTS allocations (
     allocation_id TEXT PRIMARY KEY,
     vendor_id TEXT NOT NULL,
     zone_id TEXT NOT NULL,
+    slot_id TEXT NULL,
     request_id TEXT NULL,
     status TEXT NOT NULL CHECK (status IN ('ACTIVE', 'RELEASED')),
     allocated_at TEXT NOT NULL,
     released_at TEXT NULL,
     approved_by TEXT NULL,
+    allocation_source TEXT NOT NULL DEFAULT 'ADMIN_APPROVED'
+        CHECK (allocation_source IN ('ADMIN_APPROVED', 'LEGACY_IMPORT')),
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     FOREIGN KEY (zone_id) REFERENCES zone_live_status(zone_id),
@@ -134,6 +149,10 @@ CREATE TABLE IF NOT EXISTS allocations (
 
 CREATE UNIQUE INDEX IF NOT EXISTS one_active_allocation_per_vendor
     ON allocations(vendor_id) WHERE status = 'ACTIVE';
+
+CREATE UNIQUE INDEX IF NOT EXISTS one_active_allocation_per_slot
+    ON allocations(zone_id, slot_id)
+    WHERE status = 'ACTIVE' AND slot_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS admin_audit_log (
     audit_id TEXT PRIMARY KEY,
@@ -149,6 +168,7 @@ CREATE TABLE IF NOT EXISTS vendor_auth_identities (
     identity_id TEXT PRIMARY KEY,
     vendor_id TEXT NOT NULL,
     phone_hash TEXT NOT NULL UNIQUE,
+    mobile_last4 TEXT NULL,
     vendor_source TEXT NOT NULL CHECK (vendor_source IN ('HISTORICAL', 'OPERATIONAL')),
     is_verified INTEGER NOT NULL DEFAULT 0 CHECK (is_verified IN (0, 1)),
     created_at TEXT NOT NULL,
@@ -161,6 +181,7 @@ CREATE INDEX IF NOT EXISTS idx_vendor_auth_identities_vendor_id
 CREATE TABLE IF NOT EXISTS auth_otp_challenges (
     challenge_id TEXT PRIMARY KEY,
     phone_hash TEXT NOT NULL,
+    mobile_last4 TEXT NULL,
     purpose TEXT NOT NULL CHECK (purpose IN ('VENDOR_LOGIN', 'NEW_VENDOR_REGISTRATION')),
     otp_hash TEXT NOT NULL,
     expires_at TEXT NOT NULL,
@@ -180,6 +201,7 @@ CREATE TABLE IF NOT EXISTS auth_sessions (
     vendor_id TEXT NULL,
     admin_id TEXT NULL,
     new_vendor_phone_hash TEXT NULL,
+    mobile_last4 TEXT NULL,
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL,
     revoked_at TEXT NULL,
@@ -192,6 +214,12 @@ CREATE TABLE IF NOT EXISTS auth_sessions (
 
 CREATE INDEX IF NOT EXISTS idx_auth_sessions_token_active
     ON auth_sessions(session_token_hash, revoked_at, expires_at);
+CREATE TABLE IF NOT EXISTS vendor_profile_photos (
+    vendor_id TEXT PRIMARY KEY,
+    mime_type TEXT NOT NULL,
+    image_base64 TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS whatsapp_conversations (
     conversation_key TEXT PRIMARY KEY,
     phone_hash TEXT NOT NULL UNIQUE,
@@ -241,6 +269,10 @@ CREATE TABLE IF NOT EXISTS pilot_slots (
     geometry_json TEXT NOT NULL,
     status TEXT NOT NULL CHECK(status IN ('AVAILABLE','RESERVED','OCCUPIED','BLOCKED')),
     assigned_vendor_id TEXT,
+    pending_request_id TEXT NULL,
+    active_allocation_id TEXT NULL,
+    created_by TEXT NULL,
+    created_at TEXT NULL,
     validation_state TEXT NOT NULL CHECK(validation_state = 'ILLUSTRATIVE_UNVERIFIED'),
     updated_at TEXT NOT NULL,
     PRIMARY KEY(zone_id, slot_id),
@@ -330,14 +362,19 @@ def _build_metadata() -> MetaData:
         CheckConstraint("available_capacity IS NULL OR available_capacity >= 0"),
         CheckConstraint("status IN ('OPEN','FULL','CLOSED','SUSPENDED','RESTRICTED','NO_VENDING')"),
         CheckConstraint("(official_capacity IS NULL AND available_capacity IS NULL) OR "
-                        "(official_capacity IS NOT NULL AND current_vendor_count <= official_capacity "
-                        "AND available_capacity = official_capacity - current_vendor_count)"),
-        CheckConstraint("official_capacity IS NULL OR current_vendor_count != official_capacity OR status = 'FULL'"),
+                        "(official_capacity IS NOT NULL AND available_capacity = CASE "
+                        "WHEN current_vendor_count >= official_capacity THEN 0 "
+                        "ELSE official_capacity - current_vendor_count END)",
+                        name="ck_zone_live_status_capacity_consistency_v2"),
+        CheckConstraint("official_capacity IS NULL OR current_vendor_count < official_capacity OR "
+                        "status IN ('FULL','CLOSED','SUSPENDED','RESTRICTED','NO_VENDING')",
+                        name="ck_zone_live_status_full_at_or_over_capacity_v2"),
     )
     requests = Table(
         "allocation_requests", metadata,
         Column("request_id", Text, primary_key=True), Column("vendor_id", Text, nullable=False),
         Column("zone_id", Text, ForeignKey(zones.c.zone_id), nullable=False),
+        Column("slot_id", Text),
         Column("request_type", Text, nullable=False), Column("status", Text, nullable=False),
         Column("business_category", Text), Column("preferred_division", Text),
         Column("created_at", Text, nullable=False), Column("updated_at", Text, nullable=False),
@@ -349,27 +386,63 @@ def _build_metadata() -> MetaData:
     Index("one_pending_request_per_vendor_zone", requests.c.vendor_id, requests.c.zone_id,
           unique=True, sqlite_where=text("status = 'PENDING'"),
           postgresql_where=text("status = 'PENDING'"))
+    Index("one_pending_request_per_slot", requests.c.zone_id, requests.c.slot_id, unique=True,
+          sqlite_where=text("status = 'PENDING' AND slot_id IS NOT NULL"),
+          postgresql_where=text("status = 'PENDING' AND slot_id IS NOT NULL"))
     allocations = Table(
         "allocations", metadata,
         Column("allocation_id", Text, primary_key=True), Column("vendor_id", Text, nullable=False),
         Column("zone_id", Text, ForeignKey(zones.c.zone_id), nullable=False),
+        Column("slot_id", Text),
         Column("request_id", Text, ForeignKey(requests.c.request_id)),
         Column("status", Text, nullable=False), Column("allocated_at", Text, nullable=False),
         Column("released_at", Text), Column("approved_by", Text),
+        Column("allocation_source", Text, nullable=False, server_default="ADMIN_APPROVED"),
         Column("created_at", Text, nullable=False), Column("updated_at", Text, nullable=False),
         CheckConstraint("status IN ('ACTIVE', 'RELEASED')"),
+        CheckConstraint("allocation_source IN ('ADMIN_APPROVED', 'LEGACY_IMPORT')"),
     )
     Index("one_active_allocation_per_vendor", allocations.c.vendor_id, unique=True,
           sqlite_where=text("status = 'ACTIVE'"), postgresql_where=text("status = 'ACTIVE'"))
+    Index("one_active_allocation_per_slot", allocations.c.zone_id, allocations.c.slot_id, unique=True,
+          sqlite_where=text("status = 'ACTIVE' AND slot_id IS NOT NULL"),
+          postgresql_where=text("status = 'ACTIVE' AND slot_id IS NOT NULL"))
     Table("admin_audit_log", metadata,
           Column("audit_id", Text, primary_key=True), Column("action", Text, nullable=False),
           Column("entity_type", Text, nullable=False), Column("entity_id", Text, nullable=False),
           Column("performed_by", Text), Column("details_json", Text),
           Column("created_at", Text, nullable=False))
+    historical_associations = Table(
+        "historical_vendor_zone_associations", metadata,
+        Column("vendor_id", Text, primary_key=True),
+        Column("matched_zone_id", Text, ForeignKey(zones.c.zone_id)),
+        Column("candidate_zone_ids_json", Text, nullable=False, server_default="[]"),
+        Column("original_location_text", Text),
+        Column("location_text_english", Text),
+        Column("recorded_division", Text),
+        Column("business_category", Text),
+        Column("match_status", Text, nullable=False),
+        Column("evidence_types_json", Text, nullable=False, server_default="[]"),
+        Column("matched_landmark", Text),
+        Column("source_provenance", Text, nullable=False),
+        Column("algorithm_version", Text, nullable=False),
+        Column("review_status", Text, nullable=False, server_default="UNREVIEWED"),
+        Column("reviewed_by", Text), Column("reviewed_at", Text), Column("review_notes", Text),
+        Column("created_at", Text, nullable=False), Column("updated_at", Text, nullable=False),
+        CheckConstraint("match_status IN ('AUTO_MATCHED','REVIEW_REQUIRED','UNMATCHED')"),
+        CheckConstraint("review_status IN ('UNREVIEWED','CONFIRMED','CHANGED','REJECTED')"),
+        CheckConstraint("(review_status = 'UNREVIEWED' AND reviewed_by IS NULL AND reviewed_at IS NULL) OR "
+                        "(review_status != 'UNREVIEWED' AND reviewed_by IS NOT NULL AND reviewed_at IS NOT NULL)"),
+    )
+    Index("idx_historical_association_zone", historical_associations.c.matched_zone_id)
+    Index("idx_historical_association_status", historical_associations.c.match_status,
+          historical_associations.c.review_status)
+    Index("idx_historical_association_division", historical_associations.c.recorded_division)
     identities = Table(
         "vendor_auth_identities", metadata,
         Column("identity_id", Text, primary_key=True), Column("vendor_id", Text, nullable=False),
         Column("phone_hash", Text, nullable=False, unique=True),
+        Column("mobile_last4", Text),
         Column("vendor_source", Text, nullable=False),
         Column("is_verified", Integer, nullable=False, server_default="0"),
         Column("created_at", Text, nullable=False), Column("updated_at", Text, nullable=False),
@@ -380,6 +453,7 @@ def _build_metadata() -> MetaData:
     otp = Table(
         "auth_otp_challenges", metadata,
         Column("challenge_id", Text, primary_key=True), Column("phone_hash", Text, nullable=False),
+        Column("mobile_last4", Text),
         Column("purpose", Text, nullable=False), Column("otp_hash", Text, nullable=False),
         Column("expires_at", Text, nullable=False),
         Column("attempt_count", Integer, nullable=False, server_default="0"),
@@ -394,7 +468,8 @@ def _build_metadata() -> MetaData:
         Column("session_id", Text, primary_key=True),
         Column("session_token_hash", Text, nullable=False, unique=True),
         Column("role", Text, nullable=False), Column("vendor_id", Text), Column("admin_id", Text),
-        Column("new_vendor_phone_hash", Text), Column("created_at", Text, nullable=False),
+        Column("new_vendor_phone_hash", Text), Column("mobile_last4", Text),
+        Column("created_at", Text, nullable=False),
         Column("expires_at", Text, nullable=False), Column("revoked_at", Text),
         CheckConstraint("role IN ('VENDOR', 'ADMIN', 'NEW_VENDOR_ONBOARDING')"),
         CheckConstraint("(role = 'VENDOR' AND vendor_id IS NOT NULL AND admin_id IS NULL AND new_vendor_phone_hash IS NULL) OR "
@@ -403,6 +478,11 @@ def _build_metadata() -> MetaData:
     )
     Index("idx_auth_sessions_token_active", sessions.c.session_token_hash,
           sessions.c.revoked_at, sessions.c.expires_at)
+    Table(
+        "vendor_profile_photos", metadata,
+        Column("vendor_id", Text, primary_key=True), Column("mime_type", Text, nullable=False),
+        Column("image_base64", Text, nullable=False), Column("updated_at", Text, nullable=False),
+    )
     conversations = Table(
         "whatsapp_conversations", metadata,
         Column("conversation_key", Text, primary_key=True),
@@ -437,6 +517,8 @@ def _build_metadata() -> MetaData:
         Column("x_m", Float, nullable=False), Column("y_m", Float, nullable=False),
         Column("geometry_json", Text, nullable=False), Column("status", Text, nullable=False),
         Column("assigned_vendor_id", Text), Column("validation_state", Text, nullable=False),
+        Column("pending_request_id", Text), Column("active_allocation_id", Text),
+        Column("created_by", Text), Column("created_at", Text),
         Column("updated_at", Text, nullable=False), Column("parent_boundary_id", Text),
         Column("geometry_crs", Text, nullable=False, server_default="LOCAL_SCHEMATIC_METRES"),
         Column("is_deleted", Integer, nullable=False, server_default="0"),
@@ -738,6 +820,10 @@ def initialize_database(
             "parent_boundary_id": "TEXT NULL",
             "geometry_crs": "TEXT NOT NULL DEFAULT 'LOCAL_SCHEMATIC_METRES'",
             "is_deleted": "INTEGER NOT NULL DEFAULT 0 CHECK(is_deleted IN (0, 1))",
+            "pending_request_id": "TEXT NULL",
+            "active_allocation_id": "TEXT NULL",
+            "created_by": "TEXT NULL",
+            "created_at": "TEXT NULL",
         }.items():
             if name not in pilot_columns:
                 connection.execute(f"ALTER TABLE pilot_slots ADD COLUMN {name} {definition}")
@@ -752,6 +838,30 @@ def initialize_database(
             connection.execute(
                 "ALTER TABLE operational_vendors ADD COLUMN application_vendor_id TEXT NULL"
             )
+        allocation_columns = set(schema.get("allocations", {}).get("columns", []))
+        if "allocation_source" not in allocation_columns:
+            connection.execute(
+                "ALTER TABLE allocations ADD COLUMN allocation_source "
+                "TEXT NOT NULL DEFAULT 'ADMIN_APPROVED'"
+            )
+        if "slot_id" not in allocation_columns:
+            connection.execute("ALTER TABLE allocations ADD COLUMN slot_id TEXT NULL")
+        request_columns = set(schema.get("allocation_requests", {}).get("columns", []))
+        if "slot_id" not in request_columns:
+            connection.execute("ALTER TABLE allocation_requests ADD COLUMN slot_id TEXT NULL")
+        for table, columns in {
+            "vendor_auth_identities": set(schema.get("vendor_auth_identities", {}).get("columns", [])),
+            "auth_otp_challenges": set(schema.get("auth_otp_challenges", {}).get("columns", [])),
+            "auth_sessions": set(schema.get("auth_sessions", {}).get("columns", [])),
+        }.items():
+            if "mobile_last4" not in columns:
+                connection.execute(f"ALTER TABLE {table} ADD COLUMN mobile_last4 TEXT NULL")
+        connection.execute("""CREATE UNIQUE INDEX IF NOT EXISTS one_pending_request_per_slot
+            ON allocation_requests(zone_id, slot_id)
+            WHERE status = 'PENDING' AND slot_id IS NOT NULL""")
+        connection.execute("""CREATE UNIQUE INDEX IF NOT EXISTS one_active_allocation_per_slot
+            ON allocations(zone_id, slot_id)
+            WHERE status = 'ACTIVE' AND slot_id IS NOT NULL""")
         connection.execute(
             """CREATE UNIQUE INDEX IF NOT EXISTS idx_operational_vendors_application_vendor_id
                ON operational_vendors(application_vendor_id)
@@ -813,23 +923,79 @@ def _fetch_one(query: str, parameters: tuple[Any, ...], database_path: str | Pat
         connection.close()
 
 
+def _derived_live_rows(connection: DatabaseConnection) -> list[dict[str, Any]]:
+    """Derive occupancy and availability from unique ACTIVE allocations."""
+    rows = connection.execute(
+        """WITH active AS (
+               SELECT zone_id, COUNT(DISTINCT vendor_id) AS vendor_count
+               FROM allocations WHERE status = 'ACTIVE' GROUP BY zone_id
+           )
+           SELECT z.zone_id, z.official_capacity,
+                  COALESCE(a.vendor_count, 0) AS current_vendor_count,
+                  CASE WHEN z.official_capacity IS NULL THEN NULL
+                       WHEN COALESCE(a.vendor_count, 0) >= z.official_capacity THEN 0
+                       ELSE z.official_capacity - COALESCE(a.vendor_count, 0) END
+                       AS available_capacity,
+                  CASE WHEN z.status IN ('FULL','CLOSED','SUSPENDED','RESTRICTED','NO_VENDING')
+                       THEN z.status
+                       WHEN z.official_capacity IS NOT NULL
+                            AND COALESCE(a.vendor_count, 0) >= z.official_capacity THEN 'FULL'
+                       ELSE 'OPEN' END AS status,
+                  z.verified_at, z.verified_by, z.updated_at
+           FROM zone_live_status AS z
+           LEFT JOIN active AS a ON a.zone_id = z.zone_id
+           ORDER BY z.zone_id"""
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _zone_with_derived_occupancy(
+    connection: DatabaseConnection,
+    zone: RowMapping,
+) -> dict[str, Any]:
+    """Overlay a locked zone row with authoritative ACTIVE-allocation totals.
+
+    Approval and request validation use this inside their existing transaction,
+    so a stale materialized counter can never create an extra allocation.
+    Manual CLOSED/SUSPENDED and policy statuses remain authoritative.
+    """
+    derived = dict(zone)
+    active_count = int(connection.execute(
+        "SELECT COUNT(DISTINCT vendor_id) AS vendor_count FROM allocations "
+        "WHERE zone_id = ? AND status = 'ACTIVE'",
+        (zone["zone_id"],),
+    ).fetchone()["vendor_count"])
+    capacity = zone["official_capacity"]
+    available = None if capacity is None else max(0, int(capacity) - active_count)
+    protected_statuses = {"FULL", "CLOSED", "SUSPENDED", "RESTRICTED", "NO_VENDING"}
+    if zone["status"] in protected_statuses:
+        effective_status = zone["status"]
+    elif capacity is not None and available == 0:
+        effective_status = "FULL"
+    else:
+        effective_status = "OPEN"
+    derived.update(
+        current_vendor_count=active_count,
+        available_capacity=available,
+        status=effective_status,
+    )
+    return derived
+
+
 def get_zone_live_status(zone_id: str, database_path: str | Path = DATABASE_PATH):
-    return _fetch_one("SELECT * FROM zone_live_status WHERE zone_id = ?", (zone_id,), database_path)
+    return get_live_zone_status_map(database_path).get(zone_id)
 
 
 def list_zone_live_status(
     status: str | None = None,
     database_path: str | Path = DATABASE_PATH,
 ) -> list[RowMapping]:
-    query = "SELECT * FROM zone_live_status"
-    parameters: tuple[Any, ...] = ()
-    if status is not None:
-        query += " WHERE status = ?"
-        parameters = (status.upper(),)
-    query += " ORDER BY zone_id"
     connection = connect(database_path)
     try:
-        return connection.execute(query, parameters).fetchall()
+        rows = _derived_live_rows(connection)
+        if status is not None:
+            rows = [row for row in rows if row["status"] == status.upper()]
+        return rows
     finally:
         connection.close()
 
@@ -840,46 +1006,36 @@ def get_live_zone_status_map(
     """Return every zone's live state with one database query."""
     connection = connect(database_path)
     try:
-        rows = connection.execute(
-            """SELECT zone_id, official_capacity, current_vendor_count,
-                      available_capacity, status, verified_at, verified_by, updated_at
-               FROM zone_live_status"""
-        ).fetchall()
-        return {row["zone_id"]: dict(row) for row in rows}
+        rows = _derived_live_rows(connection)
+        return {row["zone_id"]: row for row in rows}
     finally:
         connection.close()
 
 
-def get_admin_overview(database_path: str | Path = DATABASE_PATH) -> dict[str, Any]:
+def get_admin_overview(
+    database_path: str | Path = DATABASE_PATH,
+    *,
+    zone_statuses: Sequence[str] | None = None,
+) -> dict[str, Any]:
     """Aggregate operational counts only; historical associations are excluded."""
     connection = connect(database_path)
     try:
+        zone_rows = None if zone_statuses is not None else _derived_live_rows(connection)
+        statuses = zone_statuses if zone_statuses is not None else [row["status"] for row in zone_rows]
         zone_counts = {status: 0 for status in ZONE_STATUSES}
-        zone_counts.update({
-            row["status"]: row["count"]
-            for row in connection.execute(
-                "SELECT status, COUNT(zone_id) AS count FROM zone_live_status GROUP BY status"
-            )
-        })
+        zone_counts.update(Counter(statuses))
         request_counts = {status: 0 for status in REQUEST_STATUSES}
-        request_counts.update({
-            row["status"]: row["count"]
-            for row in connection.execute(
-                "SELECT status, COUNT(request_id) AS count FROM allocation_requests GROUP BY status"
-            )
-        })
         allocation_counts = {status: 0 for status in ALLOCATION_STATUSES}
-        allocation_counts.update({
-            row["status"]: row["count"]
-            for row in connection.execute(
-                "SELECT status, COUNT(allocation_id) AS count FROM allocations GROUP BY status"
-            )
-        })
-        total_zones = connection.execute(
-            "SELECT COUNT(zone_id) AS zone_count FROM zone_live_status"
-        ).fetchone()["zone_count"]
+        for row in connection.execute(
+            "SELECT 'request' AS kind, status, COUNT(request_id) AS count "
+            "FROM allocation_requests GROUP BY status UNION ALL "
+            "SELECT 'allocation' AS kind, status, COUNT(allocation_id) AS count "
+            "FROM allocations GROUP BY status"
+        ):
+            target = request_counts if row["kind"] == "request" else allocation_counts
+            target[row["status"]] = row["count"]
         return {
-            "total_official_zones": total_zones,
+            "total_official_zones": len(statuses),
             "zone_status_counts": zone_counts,
             "request_status_counts": request_counts,
             "allocation_status_counts": allocation_counts,
@@ -981,6 +1137,8 @@ def get_allocation(allocation_id: str, database_path: str | Path = DATABASE_PATH
 def list_allocations(
     status: str | None = None,
     database_path: str | Path = DATABASE_PATH,
+    limit: int | None = None,
+    offset: int = 0,
 ) -> list[RowMapping]:
     query = "SELECT * FROM allocations"
     parameters: tuple[Any, ...] = ()
@@ -993,9 +1151,37 @@ def list_allocations(
         query += " WHERE status = ?"
         parameters = (normalized_status,)
     query += " ORDER BY allocated_at DESC, allocation_id DESC"
+    if limit is not None:
+        if isinstance(limit, bool) or limit < 1:
+            raise OperationalValidationError("limit must be a positive integer")
+        if isinstance(offset, bool) or offset < 0:
+            raise OperationalValidationError("offset must be a non-negative integer")
+        query += " LIMIT ? OFFSET ?"
+        parameters += (limit, offset)
     connection = connect(database_path)
     try:
         return connection.execute(query, parameters).fetchall()
+    finally:
+        connection.close()
+
+
+def count_allocations(
+    status: str | None = None,
+    database_path: str | Path = DATABASE_PATH,
+) -> int:
+    query = "SELECT COUNT(*) FROM allocations"
+    parameters: tuple[Any, ...] = ()
+    if status is not None:
+        normalized_status = status.upper()
+        if normalized_status not in ALLOCATION_STATUSES:
+            raise OperationalValidationError(
+                f"status must be one of: {', '.join(ALLOCATION_STATUSES)}"
+            )
+        query += " WHERE status = ?"
+        parameters = (normalized_status,)
+    connection = connect(database_path)
+    try:
+        return connection.execute(query, parameters).fetchone()[0]
     finally:
         connection.close()
 
@@ -1008,11 +1194,13 @@ def create_allocation_request(
     preferred_division: str | None = None,
     notes: str | None = None,
     database_path: str | Path = DATABASE_PATH,
+    slot_id: str | None = None,
 ) -> RowMapping:
     """Create a pending request after atomically checking operational state."""
     vendor_id = vendor_id.strip()
     zone_id = zone_id.strip()
     request_type = request_type.strip().upper()
+    slot_id = slot_id.strip().upper() if slot_id else None
     if not vendor_id:
         raise OperationalValidationError("vendor_id must not be empty")
     if request_type not in REQUEST_TYPES:
@@ -1024,13 +1212,14 @@ def create_allocation_request(
     audit_id = f"AUD_{uuid.uuid4().hex}"
     now = utc_now()
     policy_types = _official_zone_type_map(str(OFFICIAL_ZONES_PATH.resolve()))
-    with transaction(database_path) as connection:
+    with transaction(database_path, immediate=True) as connection:
         zone = connection.execute(
             "SELECT * FROM zone_live_status WHERE zone_id = ?" + for_update(connection),
             (zone_id,),
         ).fetchone()
         if zone is None:
             raise OperationalNotFoundError(f"Unknown zone_id: {zone_id}")
+        zone = _zone_with_derived_occupancy(connection, zone)
         from backend.services.eligibility import zone_ineligibility_reason
         reason = zone_ineligibility_reason(policy_types.get(zone_id), zone)
         if reason:
@@ -1063,19 +1252,33 @@ def create_allocation_request(
                 f"Vendor already has a pending request for zone {zone_id}"
             )
 
+        requested_slot = None
+        if slot_id:
+            requested_slot = connection.execute(
+                "SELECT * FROM pilot_slots WHERE zone_id=? AND slot_id=?" + for_update(connection),
+                (zone_id, slot_id),
+            ).fetchone()
+            if requested_slot is None or requested_slot["is_deleted"]:
+                raise OperationalNotFoundError(f"Unknown slot {slot_id} for zone {zone_id}")
+            if requested_slot["geometry_crs"] != "EPSG:4326":
+                raise OperationalConflictError("Only a reviewed geographic slot can be requested")
+            if requested_slot["status"] != "AVAILABLE" or requested_slot["assigned_vendor_id"] or requested_slot["pending_request_id"]:
+                raise OperationalConflictError(f"Slot {slot_id} is not available")
+
         try:
             connection.execute(
                 """
                 INSERT INTO allocation_requests (
-                    request_id, vendor_id, zone_id, request_type, status,
+                    request_id, vendor_id, zone_id, slot_id, request_type, status,
                     business_category, preferred_division, created_at,
                     updated_at, notes
-                ) VALUES (?, ?, ?, ?, 'PENDING', ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, 'PENDING', ?, ?, ?, ?, ?)
                 """,
                 (
                     request_id,
                     vendor_id,
                     zone_id,
+                    slot_id,
                     request_type,
                     business_category,
                     preferred_division,
@@ -1090,8 +1293,20 @@ def create_allocation_request(
             raise OperationalConflictError(
                 f"Vendor already has a pending request for zone {zone_id}"
             ) from exc
+        if requested_slot is not None:
+            connection.execute(
+                """UPDATE pilot_slots SET status='RESERVED', pending_request_id=?, updated_at=?
+                   WHERE zone_id=? AND slot_id=?""",
+                (request_id, now, zone_id, slot_id),
+            )
+            connection.execute(
+                """INSERT INTO pilot_slot_events(zone_id,slot_id,actor,before_json,after_json,created_at)
+                   VALUES(?,?,?,?,?,?)""",
+                (zone_id, slot_id, vendor_id, json.dumps(dict(requested_slot)),
+                 json.dumps({"status": "RESERVED", "pending_request_id": request_id}), now),
+            )
         details = json.dumps(
-            {"vendor_id": vendor_id, "zone_id": zone_id, "request_type": request_type},
+            {"vendor_id": vendor_id, "zone_id": zone_id, "slot_id": slot_id, "request_type": request_type},
             sort_keys=True,
         )
         connection.execute(
@@ -1129,6 +1344,12 @@ def cancel_allocation_request(
                WHERE request_id = ?""",
             (now, request_id),
         )
+        if request.get("slot_id"):
+            connection.execute(
+                """UPDATE pilot_slots SET status='AVAILABLE',pending_request_id=NULL,updated_at=?
+                   WHERE zone_id=? AND slot_id=? AND pending_request_id=?""",
+                (now, request["zone_id"], request["slot_id"], request_id),
+            )
         details = json.dumps(
             {
                 "vendor_id": request["vendor_id"],
@@ -1278,12 +1499,14 @@ def _decrement_zone_occupancy(
         )
     capacity = zone["official_capacity"]
     new_count = old_count - 1
-    new_available = None if capacity is None else capacity - new_count
+    new_available = None if capacity is None else max(0, capacity - new_count)
     new_status = zone["status"]
+    if capacity is not None and new_count >= capacity:
+        new_status = "FULL"
     if (
         new_status == "FULL"
         and policy_zone_type == "FREE"
-        and (new_available is None or new_available > 0)
+        and (capacity is None or new_count < capacity)
     ):
         new_status = "OPEN"
     connection.execute(
@@ -1293,6 +1516,56 @@ def _decrement_zone_occupancy(
         (new_count, new_available, new_status, now, zone["zone_id"]),
     )
     return new_count, new_available, new_status
+
+
+def release_allocation_in_transaction(
+    connection: DatabaseConnection,
+    allocation_id: str,
+    released_by: str,
+    now: str,
+    zones_path: str | Path = OFFICIAL_ZONES_PATH,
+) -> RowMapping | None:
+    """Release an allocation and update authoritative zone occupancy atomically."""
+    allocation = connection.execute(
+        "SELECT * FROM allocations WHERE allocation_id = ? AND status = 'ACTIVE'" + for_update(connection),
+        (allocation_id,),
+    ).fetchone()
+    if allocation is None:
+        return None
+    zone = connection.execute(
+        "SELECT * FROM zone_live_status WHERE zone_id = ?" + for_update(connection),
+        (allocation["zone_id"],),
+    ).fetchone()
+    if zone is None:
+        raise OperationalNotFoundError(f"Unknown zone_id: {allocation['zone_id']}")
+    zone = _zone_with_derived_occupancy(connection, zone)
+    connection.execute(
+        """UPDATE allocations
+           SET status = 'RELEASED', released_at = ?, updated_at = ?
+           WHERE allocation_id = ? AND status = 'ACTIVE'""",
+        (now, now, allocation_id),
+    )
+    new_count, available_capacity, zone_status = _decrement_zone_occupancy(
+        connection,
+        zone,
+        _official_zone_type_map(str(Path(zones_path).resolve())).get(allocation["zone_id"], ""),
+        now,
+    )
+    details = {
+        "allocation_id": allocation_id,
+        "vendor_id": allocation["vendor_id"],
+        "zone_id": allocation["zone_id"],
+        "slot_id": allocation["slot_id"],
+        "previous_count": zone["current_vendor_count"],
+        "current_count": new_count,
+        "available_capacity": available_capacity,
+        "zone_status": zone_status,
+    }
+    _audit(connection, "ALLOCATION_RELEASED", "allocation", allocation_id, released_by, details, now)
+    _audit(connection, "ZONE_OCCUPANCY_DECREMENTED", "zone", allocation["zone_id"], released_by, details, now)
+    return connection.execute(
+        "SELECT * FROM allocations WHERE allocation_id = ?", (allocation_id,)
+    ).fetchone()
 
 
 def approve_allocation_request(
@@ -1323,6 +1596,16 @@ def approve_allocation_request(
             raise OperationalConflictError(
                 f"Only PENDING requests can be approved (current status: {request['status']})"
             )
+        requested_slot = None
+        if request.get("slot_id"):
+            requested_slot = connection.execute(
+                "SELECT * FROM pilot_slots WHERE zone_id=? AND slot_id=?" + for_update(connection),
+                (request["zone_id"], request["slot_id"]),
+            ).fetchone()
+            if (not requested_slot or requested_slot["is_deleted"] or
+                    requested_slot["status"] != "RESERVED" or
+                    requested_slot["pending_request_id"] != request_id):
+                raise OperationalConflictError("Requested slot is no longer reserved for this application")
         profile = connection.execute("SELECT business_category FROM operational_vendors WHERE vendor_id=?", (request["vendor_id"],)).fetchone()
         if profile is not None and request["business_category"] and request["business_category"] != profile["business_category"]:
             raise OperationalConflictError("Vendor business category changed; submit an updated application before approval")
@@ -1333,6 +1616,7 @@ def approve_allocation_request(
         ).fetchone()
         if target_zone is None:
             raise OperationalNotFoundError(f"Unknown zone_id: {request['zone_id']}")
+        target_zone = _zone_with_derived_occupancy(connection, target_zone)
         from backend.services.eligibility import zone_ineligibility_reason
         reason = zone_ineligibility_reason(policy_types.get(request["zone_id"]), target_zone)
         if reason:
@@ -1365,6 +1649,7 @@ def approve_allocation_request(
             ).fetchone()
             if old_zone is None:
                 raise OperationalNotFoundError(f"Unknown old allocation zone: {old_zone_id}")
+            old_zone = _zone_with_derived_occupancy(connection, old_zone)
             connection.execute(
                 """UPDATE allocations
                    SET status = 'RELEASED', released_at = ?, updated_at = ?
@@ -1391,7 +1676,8 @@ def approve_allocation_request(
             for slot in old_slots:
                 connection.execute(
                     """UPDATE pilot_slots
-                       SET status = 'AVAILABLE', assigned_vendor_id = NULL, updated_at = ?
+                       SET status = 'AVAILABLE', assigned_vendor_id = NULL,
+                           pending_request_id = NULL, active_allocation_id = NULL, updated_at = ?
                        WHERE zone_id = ? AND slot_id = ?""",
                     (slot_timestamp, old_zone_id, slot["slot_id"]),
                 )
@@ -1438,13 +1724,14 @@ def approve_allocation_request(
 
         connection.execute(
             """INSERT INTO allocations
-               (allocation_id, vendor_id, zone_id, request_id, status, allocated_at,
-                released_at, approved_by, created_at, updated_at)
-               VALUES (?, ?, ?, ?, 'ACTIVE', ?, NULL, ?, ?, ?)""",
+               (allocation_id, vendor_id, zone_id, slot_id, request_id, status, allocated_at,
+                released_at, approved_by, allocation_source, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, NULL, ?, 'ADMIN_APPROVED', ?, ?)""",
             (
                 allocation_id,
                 request["vendor_id"],
                 request["zone_id"],
+                request.get("slot_id"),
                 request_id,
                 now,
                 approved_by,
@@ -1455,6 +1742,20 @@ def approve_allocation_request(
         new_count, new_available, new_status = _increment_zone_occupancy(
             connection, target_zone, now
         )
+        if requested_slot is not None:
+            connection.execute(
+                """UPDATE pilot_slots SET status='OCCUPIED',assigned_vendor_id=?,
+                   pending_request_id=NULL,active_allocation_id=?,updated_at=?
+                   WHERE zone_id=? AND slot_id=? AND pending_request_id=?""",
+                (request["vendor_id"], allocation_id, now, request["zone_id"], request["slot_id"], request_id),
+            )
+            connection.execute(
+                """INSERT INTO pilot_slot_events(zone_id,slot_id,actor,before_json,after_json,created_at)
+                   VALUES(?,?,?,?,?,?)""",
+                (request["zone_id"], request["slot_id"], approved_by, json.dumps(dict(requested_slot)),
+                 json.dumps({"status": "OCCUPIED", "assigned_vendor_id": request["vendor_id"],
+                             "active_allocation_id": allocation_id}), now),
+            )
         connection.execute(
             """UPDATE allocation_requests
                SET status = 'APPROVED', reviewed_at = ?, reviewed_by = ?,
@@ -1467,6 +1768,7 @@ def approve_allocation_request(
             "request_id": request_id,
             "vendor_id": request["vendor_id"],
             "zone_id": request["zone_id"],
+            "slot_id": request.get("slot_id"),
             "old_zone_id": old_zone_id,
             "old_count": target_zone["current_vendor_count"],
             "new_count": new_count,
@@ -1531,6 +1833,12 @@ def reject_allocation_request(
                WHERE request_id = ?""",
             (now, reviewed_by, rejection_reason, now, notes, request_id),
         )
+        if request.get("slot_id"):
+            connection.execute(
+                """UPDATE pilot_slots SET status='AVAILABLE',pending_request_id=NULL,updated_at=?
+                   WHERE zone_id=? AND slot_id=? AND pending_request_id=?""",
+                (now, request["zone_id"], request["slot_id"], request_id),
+            )
         details = {
             "request_id": request_id,
             "vendor_id": request["vendor_id"],

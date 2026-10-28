@@ -20,6 +20,56 @@ class ConfigurationError(RuntimeError):
     """Raised when required application configuration is absent or invalid."""
 
 
+@dataclass(frozen=True)
+class GeminiSettings:
+    """Server-only settings for optional recommendation explanations."""
+
+    enabled: bool
+    api_key: str | None
+    model: str
+    timeout_seconds: float
+    cache_size: int
+    requests_per_minute: int
+
+
+def _optional_boolean(name: str, default: str = "false") -> bool:
+    value = os.environ.get(name, default).strip().lower()
+    if value not in {"true", "false"}:
+        raise ConfigurationError(f"Configuration variable {name} must be true or false")
+    return value == "true"
+
+
+def get_gemini_settings() -> GeminiSettings:
+    """Validate optional Gemini configuration without revealing credentials."""
+    enabled = _optional_boolean("GEMINI_EXPLANATIONS_ENABLED")
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip() or None
+    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
+    if not model or not re.fullmatch(r"[A-Za-z0-9._-]+", model):
+        raise ConfigurationError("GEMINI_MODEL is invalid")
+    try:
+        timeout_seconds = float(os.environ.get("GEMINI_TIMEOUT_SECONDS", "15"))
+        cache_size = int(os.environ.get("GEMINI_EXPLANATION_CACHE_SIZE", "128"))
+        requests_per_minute = int(os.environ.get("GEMINI_EXPLANATION_RATE_LIMIT", "6"))
+    except ValueError as exc:
+        raise ConfigurationError("Gemini numeric configuration is invalid") from exc
+    if not 1 <= timeout_seconds <= 60:
+        raise ConfigurationError("GEMINI_TIMEOUT_SECONDS must be between 1 and 60")
+    if not 1 <= cache_size <= 1000:
+        raise ConfigurationError("GEMINI_EXPLANATION_CACHE_SIZE must be between 1 and 1000")
+    if not 1 <= requests_per_minute <= 60:
+        raise ConfigurationError("GEMINI_EXPLANATION_RATE_LIMIT must be between 1 and 60")
+    return GeminiSettings(
+        enabled=enabled,
+        api_key=api_key,
+        model=model,
+        # Gemini rejects manually supplied deadlines below ten seconds. Keep a
+        # safe provider-compatible floor while retaining a bounded timeout.
+        timeout_seconds=max(10.0, timeout_seconds),
+        cache_size=cache_size,
+        requests_per_minute=requests_per_minute,
+    )
+
+
 def get_database_url() -> str | None:
     """Return an optional operational database URL without logging it."""
     value = os.environ.get("DATABASE_URL", "").strip()

@@ -29,3 +29,7 @@ export function latestRecommendationRequest() {
   return {begin:() => ++sequence, isCurrent:id => id === sequence, invalidate:() => ++sequence};
 }
 
+export function indexAiFactorExplanations(result) {
+  return new Map((result?.factors || []).map(item => [item.factor, item.explanation]));
+}
+

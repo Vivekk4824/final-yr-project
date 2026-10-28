@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from sklearn.metrics import adjusted_rand_score
 
 from backend.core.data_paths import CATALOG, ROOT, dataset_path
-from backend.decision_policy import FACTOR_ORDER, RESEARCH_BASELINE_WEIGHTS, derive_mcda_weights
+from backend.decision_policy import FACTOR_ORDER, RESEARCH_BASELINE_WEIGHTS, derive_mcda_weights, neutralize_constrained_division_weight
 from backend.geo.zone_locations import resolve_zone_locations, saved_pilot_areas, PILOT_COUNTS
 from backend.repositories import database as db
 from backend import mcda_engine as engine
@@ -310,9 +310,16 @@ def test_saved_preferences_refresh_rankings_and_contributions(workspace):
         assert body["priority_profile"] == priority
         assert not any(body["preference_flags"].values())
         weights = derive_mcda_weights(saved.json())["final_weights"]
+        if division:
+            weights = neutralize_constrained_division_weight(weights)
         assert body["effective_factor_weights"] == pytest.approx(weights)
         ranked = body["recommendations"] + body["remaining_recommendations"]
-        assert len(ranked) == 146 and len(body["eligible_unscorable_zones"]) == 20
+        if division:
+            assert ranked
+            assert all(row["zone_division"] == division for row in ranked)
+            assert body["strict_division_filter_applied"] is True
+        else:
+            assert len(ranked) == 146 and len(body["eligible_unscorable_zones"]) == 20
         for row in ranked:
             available = [factor for factor in row["factors"] if factor["score"] is not None]
             denominator = sum(weights[factor["key"]] for factor in available)

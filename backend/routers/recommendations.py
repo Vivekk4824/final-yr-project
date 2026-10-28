@@ -14,9 +14,84 @@ import pandas as pd
 from backend.core.data_paths import CATALOG, dataset_path
 from backend.services.eligibility import zone_ineligibility_reason
 from backend.repositories.database import get_live_zone_status_map
+from backend.services.legacy_allocation_import import active_vendor_category_counts
 from backend.services.recommendation_context import resolve_recommendation_context
+from backend.services.ai_zone_explanations import generate_explanations
+from backend.core.security import request_session
+from backend.services.vendors import get_vendor_profile
+from backend.repositories.database import get_active_allocation_for_vendor
+from backend.decision_policy import FACTOR_ORDER
+from backend.services.capacity_analysis import zone_capacity_analysis
 from fastapi import APIRouter
 router = APIRouter()
+
+
+@router.get("/api/recommendations/{zone_id}/ai-explanation")
+def recommendation_ai_explanation(zone_id: str, request: FastAPIRequest):
+    """Explain one current eligible result for the signed-in vendor.
+
+    Scores and evidence are recomputed server-side.  The client cannot submit
+    factor values or ask for another vendor's recommendation context.
+    """
+    session = request_session(request, "VENDOR")
+    vendor_id = session.get("vendor_id")
+    profile = get_vendor_profile(vendor_id, database_path=dependencies.DATABASE_PATH)
+    if profile is None:
+        raise HTTPException(404, "Vendor profile not found")
+    active = get_active_allocation_for_vendor(vendor_id, dependencies.DATABASE_PATH)
+    exclude_zone = str(active["zone_id"]) if active is not None else ""
+    payload = Request(vendor_id=vendor_id, exclude_zone=exclude_zone, top_n=20)
+    context = resolve_recommendation_context(payload, request)
+    try:
+        result = recommend(
+            context["business"],
+            context["division"],
+            context["engine_vendor_id"],
+            20,
+            exclude_zone,
+            False,
+            use_live_status=True,
+            database_path=dependencies.DATABASE_PATH,
+            factor_weights=context["weight_profile"]["final_weights"],
+            include_all=True,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    candidates = result.attrs.get("all_candidates", result)
+    matching = candidates.loc[
+        candidates["zone_id"].astype(str).eq(str(zone_id)) & candidates["score"].notna()
+    ]
+    if matching.empty:
+        raise HTTPException(404, "Zone is not a current eligible recommendation for this vendor")
+    row = matching.iloc[0]
+    effective_weights = result.attrs.get(
+        "effective_factor_weights", context["weight_profile"]["final_weights"]
+    )
+    factors = explain(row, effective_weights)
+    live_evidence = active_vendor_category_counts(
+        context["business"], dependencies.DATABASE_PATH
+    ).get(str(zone_id), {})
+    capacity_evidence = zone_capacity_analysis(dependencies.DATABASE_PATH).get(str(zone_id), {})
+    business_factor = next((factor for factor in factors if factor["key"] == "business"), None)
+    if business_factor is not None:
+        business_factor["evidence"] = [
+            {"label": "Current same-category vendors", "value": live_evidence.get("current_same_category_vendors", 0)},
+            {"label": "Historical same-category records", "value": row.get("same_business_count") or 0},
+            {"label": "Historical text-associated records", "value": row.get("evidence_count") or 0},
+            {"label": "Accepted historical associations", "value": capacity_evidence.get("accepted_historical_association_count", 0)},
+        ]
+    response = generate_explanations(
+        zone_id=str(zone_id),
+        factors=factors,
+        profile=profile,
+        requester_scope=f"vendor:{vendor_id}",
+    )
+    return clean({
+        **response,
+        "zone_id": str(zone_id),
+        "factor_order": list(FACTOR_ORDER),
+        "scores_unchanged": True,
+    })
 
 @router.post(
     "/api/recommendations"
@@ -92,6 +167,14 @@ def recommendations(
                 exc
             ),
         ) from exc
+
+    # The engine removes the division factor after enforcing an explicit
+    # division as a hard candidate constraint.  Use those actual weights in
+    # explanations and response metadata so the API remains transparent.
+    effective_weights = result.attrs.get(
+        "effective_factor_weights",
+        effective_weights,
+    )
 
 
     metadata = {
@@ -179,11 +262,45 @@ def recommendations(
         "effective_factor_weights":
             effective_weights,
 
+        "strict_division_filter_applied":
+            result.attrs.get(
+                "strict_division_filter_applied",
+                False,
+            ),
+
+        "selected_division":
+            division or None,
+
+        "candidate_count_before_division_filter":
+            result.attrs.get(
+                "candidate_count_before_division_filter",
+                0,
+            ),
+
+        "candidate_count_after_division_filter":
+            result.attrs.get(
+                "candidate_count_after_division_filter",
+                0,
+            ),
+
+        "division_weight_handling":
+            result.attrs.get(
+                "division_weight_handling",
+            ),
+
         "weight_modifiers":
             weight_profile[
                 "multipliers"
             ],
     }
+
+    if result.attrs.get("business_aware_mcda_experiment_enabled", False):
+        metadata.update({
+            "business_aware_mcda_experiment_enabled": True,
+            "business_aware_mcda_policy_version": result.attrs.get(
+                "business_aware_mcda_policy_version"
+            ),
+        })
 
 
     all_candidates = result.attrs["all_candidates"]
@@ -211,6 +328,8 @@ def recommendations(
             reason = "CURRENT_ZONE_EXCLUDED"
         elif zone.zone_id in eligible_ids:
             continue
+        elif division and zone.division != division:
+            reason = "OUTSIDE_PREFERRED_DIVISION"
         else:
             reason = zone_ineligibility_reason(zone.zone_type, live.get(zone.zone_id)) or "AVAILABILITY_NOT_RECENTLY_VERIFIED"
         ineligible.append({"zone_id":zone.zone_id, "title":zone.zone_id, "description":zone.official_description,
@@ -235,9 +354,12 @@ def recommendations(
 
             "notice":
                 (
-                    "No operationally available zones "
-                    "meet the selected filters. "
-                    "No allocation is inferred."
+                    "No suitable available zones were found in the selected "
+                    f"division: {division}. No allocation is inferred."
+                    if division
+                    else
+                    "No operationally available zones meet the selected "
+                    "filters. No allocation is inferred."
                 ),
 
             **metadata,
@@ -287,6 +409,11 @@ def recommendations(
     ]
 
 
+    active_category_counts = active_vendor_category_counts(
+        business,
+        dependencies.DATABASE_PATH,
+    )
+    capacity_by_zone = zone_capacity_analysis(dependencies.DATABASE_PATH)
     records = []
 
 
@@ -311,6 +438,30 @@ def recommendations(
             row,
             effective_weights,
         )
+        live_evidence = active_category_counts.get(str(row.get("zone_id")), {})
+        capacity_evidence = capacity_by_zone.get(str(row.get("zone_id")), {})
+        item.update({
+            "current_total_vendors": live_evidence.get("current_total_vendors", 0),
+            "current_same_category_vendors": live_evidence.get("current_same_category_vendors", 0),
+            "historical_same_category_records": row.get("same_business_count"),
+            "historical_text_association_records": row.get("evidence_count"),
+            "historical_vendor_zone_associations": row.get("evidence_count"),
+            "accepted_historical_association_count": capacity_evidence.get(
+                "accepted_historical_association_count", 0
+            ),
+        })
+        if item["factors"]:
+            business_factor = next(
+                (factor for factor in item["factors"] if factor.get("key") == "business"),
+                None,
+            )
+            if business_factor is not None:
+                business_factor["evidence"] = [
+                    {"label": "Current same-category vendors", "value": item["current_same_category_vendors"]},
+                    {"label": "Historical same-category records", "value": item["historical_same_category_records"] or 0},
+                    {"label": "Historical text-associated records", "value": item["historical_text_association_records"] or 0},
+                    {"label": "Accepted historical associations", "value": item["accepted_historical_association_count"]},
+                ]
         item.update({"title":row.zone_id, "description":row.get("official_description"), "location_source":row.get("reference_location_source")})
 
 

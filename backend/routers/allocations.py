@@ -21,6 +21,7 @@ from fastapi import Query
 from backend.schemas.api import RejectionBody
 from backend.services.responses import allocation_request_response
 from backend.services.responses import allocation_response
+from backend.services.responses import allocation_responses
 from backend.repositories.database import approve_allocation_request
 from backend.repositories.database import cancel_allocation_request
 from backend.core.serialization import clean
@@ -32,6 +33,7 @@ from backend.services.vendors import get_vendor_profile
 from fastapi import status as http_status
 from backend.repositories.database import list_allocation_requests
 from backend.repositories.database import list_allocations
+from backend.repositories.database import count_allocations
 from backend.core.security import operational_error
 from backend.allocation_planning_service import plan_vendor_allocations
 from backend.repositories.database import reject_allocation_request
@@ -123,6 +125,7 @@ def submit_allocation_request(
             notes=(
                 payload.notes
             ),
+            slot_id=payload.slot_id,
             database_path=dependencies.DATABASE_PATH,
         )
 
@@ -177,16 +180,24 @@ def allocation_request_list(
         status=request_status,
         database_path=dependencies.DATABASE_PATH,
     )
+    active_zone_by_vendor = {}
+    for allocation in list_allocations(
+        status="ACTIVE",
+        database_path=dependencies.DATABASE_PATH,
+    ):
+        active_zone_by_vendor.setdefault(
+            allocation["vendor_id"],
+            allocation["zone_id"],
+        )
+    requests = []
+    for row in rows:
+        response = allocation_request_response(row)
+        response["current_zone_id"] = active_zone_by_vendor.get(row["vendor_id"])
+        requests.append(response)
 
 
     return {
-        "requests": [
-            allocation_request_response(
-                row
-            )
-            for row
-            in rows
-        ],
+        "requests": requests,
 
         "count":
             len(
@@ -468,6 +479,15 @@ def allocation_list(
         default=None,
         alias="status",
     ),
+    limit: int | None = Query(
+        default=None,
+        ge=1,
+        le=100,
+    ),
+    offset: int = Query(
+        default=0,
+        ge=0,
+    ),
 ):
 
     request_session(
@@ -475,26 +495,44 @@ def allocation_list(
         "ADMIN",
     )
 
+    if limit is None and offset:
+        raise HTTPException(
+            http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "offset requires limit",
+        )
 
     rows = list_allocations(
         status=allocation_status,
         database_path=dependencies.DATABASE_PATH,
+        limit=limit,
+        offset=offset,
+    )
+    total_count = (
+        count_allocations(
+            status=allocation_status,
+            database_path=dependencies.DATABASE_PATH,
+        )
+        if limit is not None
+        else len(rows)
     )
 
 
     return {
-        "allocations": [
-            allocation_response(
-                row
-            )
-            for row
-            in rows
-        ],
+        "allocations": allocation_responses(rows),
 
         "count":
             len(
                 rows
             ),
+
+        "total_count":
+            total_count,
+
+        "limit":
+            limit,
+
+        "offset":
+            offset,
 
         "status_filter":
             allocation_status,
@@ -647,6 +685,16 @@ def admin_overview(
     )
 
 
-    return get_admin_overview(
-        database_path=dependencies.DATABASE_PATH
+    from backend.services.capacity_analysis import capacity_pressure_summary
+    pressure = capacity_pressure_summary(dependencies.DATABASE_PATH, include_zones=False)
+    live_status_counts = pressure.pop("_live_status_counts")
+    overview = get_admin_overview(
+        database_path=dependencies.DATABASE_PATH,
+        zone_statuses=[
+            status for status, count in live_status_counts.items() for _ in range(count)
+        ],
     )
+    overview["capacity_pressure"] = {
+        key: value for key, value in pressure.items() if key != "zones"
+    }
+    return overview

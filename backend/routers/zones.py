@@ -479,6 +479,17 @@ def admin_zones(
         )
     ]
 
+    from backend.services.capacity_analysis import zone_capacity_analysis
+    capacity_analysis = zone_capacity_analysis(dependencies.DATABASE_PATH)
+    for record in records:
+        capacity = capacity_analysis.get(record["zone_id"], {})
+        record.update(capacity)
+        # Existing names remain as read-only compatibility aliases. Their
+        # values now follow the authoritative, de-duplicated planning metric.
+        record["historical_vendor_count"] = capacity.get("historical_planning_count", 0)
+        record["current_vendor_count"] = capacity.get("operational_occupancy", 0)
+        record["available_capacity"] = capacity.get("operational_available")
+
 
     if active_mcda_configuration() is not None:
         locations = resolve_zone_locations(dependencies.DATABASE_PATH)
@@ -495,6 +506,20 @@ def admin_zones(
                 records
             ),
     }
+
+
+@router.get("/api/admin/zones/{zone_id}/historical-vendors", tags=["Admin"])
+def admin_zone_historical_vendors(zone_id: str, request: FastAPIRequest):
+    request_session(request, "ADMIN")
+    from backend.services.capacity_analysis import zone_historical_vendors
+    return zone_historical_vendors(zone_id, dependencies.DATABASE_PATH)
+
+
+@router.get("/api/admin/capacity-pressure", tags=["Admin"])
+def admin_capacity_pressure(request: FastAPIRequest):
+    request_session(request, "ADMIN")
+    from backend.services.capacity_analysis import capacity_pressure_summary
+    return capacity_pressure_summary(dependencies.DATABASE_PATH)
 
 @router.get(
     "/api/official-zones"
