@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {apiRequest, deletePilotSlot, getAllocations, getCapacityPressure, getRecommendationAiExplanation, getRecommendations, getPilotRoute, getVendorRelocationRecommendations, savePilotGeometry} from "./api.js";
+import {apiRequest, deletePilotSlot, getAllocations, getCapacityPressure, getRecommendationAiExplanation, getRecommendations, getPilotRoute, getVendorRelocationRecommendations, requestVendorOtp, savePilotGeometry, verifyVendorOtp} from "./api.js";
 import {indexAiFactorExplanations} from "../features/vendor/viewModel.js";
 
 test("shared client includes the session cookie and preserves the endpoint", async t => {
@@ -19,6 +19,20 @@ test("private requests cannot opt into the browser HTTP cache", async t => {
     return new Response('{"ok":true}');
   });
   await apiRequest("/api/auth/me", {cache:"force-cache"});
+});
+
+test("vendor OTP calls use routes covered by the Vite API proxy", async t => {
+  const seen = [];
+  t.mock.method(globalThis, "fetch", async (url, options) => {
+    seen.push([url, JSON.parse(options.body)]);
+    return new Response(JSON.stringify(url.endsWith("request-otp") ? {challenge_id: "challenge-1"} : {role: "vendor"}));
+  });
+  await requestVendorOtp("9876543210");
+  await verifyVendorOtp("challenge-1", "9876543210", "1234");
+  assert.deepEqual(seen, [
+    ["http://127.0.0.1:8000/api/auth/vendor/request-otp", {mobile: "9876543210"}],
+    ["http://127.0.0.1:8000/api/auth/vendor/verify-mobile-otp", {challenge_id: "challenge-1", mobile: "9876543210", otp: "1234"}],
+  ]);
 });
 
 test("offline writes fail without being queued or sent", async t => {

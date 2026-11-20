@@ -1,4 +1,5 @@
 export default {
+  "auth.resendOtp":"Resend OTP","auth.resendCountdown":"Resend OTP in {seconds}s",
   "vm.trackIntro":"Follow your application, from submission to a place of your own.",
   "vm.explore":"Explore all suitable places",
   "vm.find":"Find a vending place",

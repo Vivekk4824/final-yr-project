@@ -16,6 +16,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Protocol
 
+import httpx
+
 from sqlalchemy import text
 
 from backend.core.config import get_auth_settings
@@ -25,10 +27,15 @@ from backend.repositories.database import DATABASE_PATH, connect, transaction, u
 ROOT = Path(__file__).resolve().parents[2]
 HISTORICAL_VENDOR_SOURCE = dataset_path("historical_vendors")
 SESSION_COOKIE_NAME = "nmc_session"
-OTP_EXPIRY_MINUTES = 5
-OTP_MAX_ATTEMPTS = 5
-OTP_COOLDOWN_SECONDS = 45
 SESSION_EXPIRY_HOURS = 12
+OTP_RATE_WINDOW_MINUTES = 60
+OTP_REQUESTS_PER_MOBILE = 5
+OTP_REQUESTS_PER_IP = 20
+MESSAGECENTRAL_BASE_URL = "https://cpaas.messagecentral.com"
+MESSAGECENTRAL_TOKEN_URL = f"{MESSAGECENTRAL_BASE_URL}/auth/v1/authentication/token"
+MESSAGECENTRAL_SEND_URL = f"{MESSAGECENTRAL_BASE_URL}/verification/v3/send"
+MESSAGECENTRAL_VERIFY_URL = f"{MESSAGECENTRAL_BASE_URL}/verification/v3/validateOtp"
+OTP_LENGTH = 4
 
 
 class AuthError(ValueError):
@@ -60,6 +67,10 @@ def normalize_indian_mobile(value: str) -> str:
 
 def phone_hmac(normalized_mobile: str) -> str:
     return hmac.new(_secret(), f"phone:{normalized_mobile}".encode(), hashlib.sha256).hexdigest()
+
+
+def _ip_hmac(request_ip: str) -> str:
+    return hmac.new(_secret(), f"ip:{request_ip}".encode(), hashlib.sha256).hexdigest()
 
 
 def _otp_hash(challenge_id: str, otp: str) -> str:
@@ -189,72 +200,264 @@ def seed_historical_vendor_identities(
     }
 
 
+class OtpProviderError(RuntimeError):
+    """Safe provider failure; never contains credentials, mobile numbers, or OTPs."""
+
+
+class InvalidProviderOtp(AuthError):
+    pass
+
+
 class OtpProvider(Protocol):
-    def send_otp(self, normalized_mobile: str, otp_code: str) -> None: ...
+    name: str
+
+    def issue_otp(self, normalized_mobile: str, challenge_id: str) -> str: ...
+
+    def verify_otp(
+        self, normalized_mobile: str, challenge_id: str, otp_code: str, otp_hash: str
+    ) -> None: ...
 
 
-class DevelopmentOtpProvider:
+class ConsoleOtpProvider:
     """Development-only provider; never includes the OTP in API responses."""
 
-    def send_otp(self, normalized_mobile: str, otp_code: str) -> None:
+    name = "console"
+
+    def issue_otp(self, normalized_mobile: str, challenge_id: str) -> str:
         settings = get_auth_settings()
+        if settings.app_env not in {"development", "test"}:
+            raise OtpProviderError("Console OTP is disabled in this environment")
+        otp_code = generate_otp()
         if settings.app_env == "development" and settings.otp_debug:
             print(f"DEVELOPMENT OTP: {otp_code}")
+        return _otp_hash(challenge_id, otp_code)
+
+    def verify_otp(
+        self, normalized_mobile: str, challenge_id: str, otp_code: str, otp_hash: str
+    ) -> None:
+        if not hmac.compare_digest(otp_hash, _otp_hash(challenge_id, otp_code)):
+            raise InvalidProviderOtp("Incorrect OTP.")
 
 
-def get_otp_provider() -> OtpProvider:
-    provider = get_auth_settings().otp_provider
-    if provider == "development":
-        return DevelopmentOtpProvider()
-    raise RuntimeError(f"Unsupported OTP_PROVIDER: {provider}")
+class MessageCentralOtpProvider:
+    """Message Central Verify Now provider-generated and verified OTPs."""
+
+    name = "messagecentral"
+
+    def __init__(self, client: httpx.Client | None = None):
+        settings = get_auth_settings()
+        if not settings.messagecentral_customer_id or not (
+            settings.messagecentral_auth_token or settings.messagecentral_auth_key
+        ):
+            raise OtpProviderError("Message Central OTP is not configured")
+        self._customer_id = settings.messagecentral_customer_id
+        # Current dashboards issue an MC_... token directly. Accept it from the
+        # explicit token variable and recognize it in the former key variable
+        # so existing local configuration keeps working during migration.
+        legacy_value = settings.messagecentral_auth_key
+        self._static_auth_token = settings.messagecentral_auth_token or (
+            legacy_value if legacy_value and legacy_value.startswith("MC_") else None
+        )
+        self._auth_key = None if self._static_auth_token else legacy_value
+        self._email = settings.messagecentral_email
+        self._client = client
+
+    def _request(
+        self,
+        method: str,
+        url: str,
+        *,
+        params: dict[str, str | int],
+        headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
+        try:
+            if self._client is not None:
+                response = self._client.request(method, url, params=params, headers=headers)
+            else:
+                response = httpx.request(
+                    method,
+                    url,
+                    params=params,
+                    headers=headers,
+                    timeout=10.0,
+                )
+        except httpx.HTTPError as exc:
+            raise OtpProviderError("OTP provider is temporarily unavailable") from exc
+        return response
+
+    @staticmethod
+    def _json_body(response: httpx.Response) -> dict:
+        try:
+            body = response.json()
+        except ValueError:
+            raise OtpProviderError("OTP provider returned an invalid response")
+        if not isinstance(body, dict):
+            raise OtpProviderError("OTP provider returned an invalid response")
+        return body
+
+    @staticmethod
+    def _response_code(body: dict) -> str:
+        data = body.get("data") if isinstance(body.get("data"), dict) else {}
+        return str(data.get("responseCode") or body.get("responseCode") or "")
+
+    def _auth_token(self) -> str:
+        if self._static_auth_token:
+            return self._static_auth_token
+        if not self._auth_key:
+            raise OtpProviderError("Message Central OTP is not configured")
+        params: dict[str, str] = {
+            "customerId": self._customer_id,
+            "key": self._auth_key,
+            "scope": "NEW",
+            "country": "91",
+        }
+        if self._email:
+            params["email"] = self._email
+        response = self._request("GET", MESSAGECENTRAL_TOKEN_URL, params=params)
+        if not 200 <= response.status_code < 300:
+            raise OtpProviderError("OTP provider authentication failed")
+        body = self._json_body(response)
+        data = body.get("data") if isinstance(body.get("data"), dict) else {}
+        token = body.get("token") or data.get("token")
+        if not isinstance(token, str) or not token.strip():
+            raise OtpProviderError("OTP provider authentication failed")
+        return token
+
+    def issue_otp(self, normalized_mobile: str, challenge_id: str) -> str:
+        response = self._request(
+            "POST",
+            MESSAGECENTRAL_SEND_URL,
+            params={
+                "countryCode": "91",
+                "customerId": self._customer_id,
+                "otpLength": OTP_LENGTH,
+                "mobileNumber": normalized_mobile,
+                "flowType": "SMS",
+            },
+            headers={"authToken": self._auth_token()},
+        )
+        if not 200 <= response.status_code < 300:
+            raise OtpProviderError("OTP provider rejected the send request")
+        body = self._json_body(response)
+        data = body.get("data") if isinstance(body.get("data"), dict) else {}
+        verification_id = data.get("verificationId")
+        if self._response_code(body) != "200" or verification_id in {None, ""}:
+            raise OtpProviderError("OTP provider rejected the send request")
+        # This opaque ID is required for validation; the OTP itself never enters VendorMap.
+        return str(verification_id)
+
+    def verify_otp(
+        self, normalized_mobile: str, challenge_id: str, otp_code: str, otp_hash: str
+    ) -> None:
+        response = self._request(
+            "GET",
+            MESSAGECENTRAL_VERIFY_URL,
+            params={"verificationId": otp_hash, "code": otp_code},
+            headers={"authToken": self._auth_token()},
+        )
+        if not 200 <= response.status_code < 300:
+            if response.status_code in {400, 404, 409}:
+                raise InvalidProviderOtp("Invalid or expired OTP.")
+            raise OtpProviderError("OTP provider is temporarily unavailable")
+        body = self._json_body(response)
+        data = body.get("data") if isinstance(body.get("data"), dict) else {}
+        code = self._response_code(body)
+        if code == "200" and data.get("verificationStatus") == "VERIFICATION_COMPLETED":
+            return
+        if code in {"505", "700", "702", "703", "705", "800"}:
+            raise InvalidProviderOtp("Invalid or expired OTP.")
+        raise OtpProviderError("OTP provider is temporarily unavailable")
+
+
+def get_otp_provider(provider_name: str | None = None) -> OtpProvider:
+    provider = provider_name or get_auth_settings().otp_provider
+    if provider == "console":
+        return ConsoleOtpProvider()
+    if provider == "messagecentral":
+        return MessageCentralOtpProvider()
+    raise OtpProviderError("Unsupported OTP provider")
 
 
 def generate_otp() -> str:
-    return f"{secrets.randbelow(1_000_000):06d}"
+    return f"{secrets.randbelow(10 ** OTP_LENGTH):0{OTP_LENGTH}d}"
 
 
 def create_otp_challenge(
     mobile: str,
     database_path: str | Path = DATABASE_PATH,
     provider: OtpProvider | None = None,
+    request_ip: str = "unknown",
 ) -> dict[str, str]:
     normalized = normalize_indian_mobile(mobile)
     hashed_phone = phone_hmac(normalized)
+    hashed_ip = _ip_hmac(request_ip or "unknown")
+    selected_provider = provider or get_otp_provider()
+    settings = get_auth_settings()
     now_dt = datetime.now(timezone.utc)
     now = _timestamp(now_dt)
     with transaction(database_path, immediate=True) as connection:
         recent = connection.execute(
             """SELECT created_at FROM auth_otp_challenges
-               WHERE phone_hash = ? AND consumed_at IS NULL
+               WHERE phone_hash = ? AND provider = ? AND consumed_at IS NULL
                ORDER BY created_at DESC LIMIT 1""",
-            (hashed_phone,),
+            (hashed_phone, selected_provider.name),
         ).fetchone()
-        if recent and datetime.fromisoformat(recent["created_at"]) > now_dt - timedelta(seconds=OTP_COOLDOWN_SECONDS):
+        if recent and datetime.fromisoformat(recent["created_at"]) > now_dt - timedelta(seconds=settings.otp_resend_cooldown_seconds):
             raise AuthError("Please wait before requesting another OTP.", 429)
+        window_start = _timestamp(now_dt - timedelta(minutes=OTP_RATE_WINDOW_MINUTES))
+        mobile_requests = connection.execute(
+            "SELECT COUNT(*) AS total FROM auth_otp_challenges "
+            "WHERE phone_hash = ? AND provider = ? AND created_at >= ?",
+            (hashed_phone, selected_provider.name, window_start),
+        ).fetchone()["total"]
+        ip_requests = connection.execute(
+            "SELECT COUNT(*) AS total FROM auth_otp_challenges "
+            "WHERE request_ip_hash = ? AND provider = ? AND created_at >= ?",
+            (hashed_ip, selected_provider.name, window_start),
+        ).fetchone()["total"]
+        if mobile_requests >= OTP_REQUESTS_PER_MOBILE or ip_requests >= OTP_REQUESTS_PER_IP:
+            raise AuthError("Too many OTP requests. Please try again later.", 429)
         identity = connection.execute(
             "SELECT vendor_id FROM vendor_auth_identities WHERE phone_hash = ?",
             (hashed_phone,),
         ).fetchone()
         purpose = "VENDOR_LOGIN" if identity else "NEW_VENDOR_REGISTRATION"
         challenge_id = f"OTP_{uuid.uuid4().hex}"
-        otp = generate_otp()
+        # Reserve the challenge before delivery. Provider failures remove it so
+        # they neither trigger cooldown nor leave a verifiable orphan record.
         connection.execute(
             """INSERT INTO auth_otp_challenges
-               (challenge_id, phone_hash, mobile_last4, purpose, otp_hash, expires_at,
+               (challenge_id, phone_hash, request_ip_hash, mobile_last4, provider,
+                purpose, otp_hash, expires_at,
                 attempt_count, max_attempts, created_at)
-               VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)""",
             (
                 challenge_id,
                 hashed_phone,
+                hashed_ip,
                 normalized[-4:],
+                selected_provider.name,
                 purpose,
-                _otp_hash(challenge_id, otp),
-                _timestamp(now_dt + timedelta(minutes=OTP_EXPIRY_MINUTES)),
-                OTP_MAX_ATTEMPTS,
+                _otp_hash(challenge_id, secrets.token_urlsafe(32)),
+                _timestamp(now_dt + timedelta(minutes=settings.otp_expiry_minutes)),
+                settings.otp_max_attempts,
                 now,
             ),
         )
-    (provider or get_otp_provider()).send_otp(normalized, otp)
+    try:
+        issued_hash = selected_provider.issue_otp(normalized, challenge_id)
+    except Exception:
+        with transaction(database_path, immediate=True) as connection:
+            connection.execute(
+                "DELETE FROM auth_otp_challenges WHERE challenge_id = ? AND consumed_at IS NULL",
+                (challenge_id,),
+            )
+        raise
+    with transaction(database_path, immediate=True) as connection:
+        connection.execute(
+            "UPDATE auth_otp_challenges SET otp_hash = ? WHERE challenge_id = ?",
+            (issued_hash, challenge_id),
+        )
     return {"challenge_id": challenge_id, "next_step": "VERIFY_OTP"}
 
 
@@ -294,8 +497,11 @@ def _create_session(
 def verify_otp_challenge(
     challenge_id: str,
     otp: str,
+    mobile: str | None = None,
     database_path: str | Path = DATABASE_PATH,
 ) -> tuple[str, dict]:
+    if not re.fullmatch(rf"[0-9]{{{OTP_LENGTH}}}", (otp or "").strip()):
+        raise AuthError(f"Enter the {OTP_LENGTH}-digit OTP.", 422)
     now_dt = datetime.now(timezone.utc)
     now = _timestamp(now_dt)
     with transaction(database_path, immediate=True) as connection:
@@ -310,7 +516,18 @@ def verify_otp_challenge(
             raise AuthError("This OTP has expired.")
         if challenge["attempt_count"] >= challenge["max_attempts"]:
             raise AuthError("Maximum OTP attempts exceeded.", 429)
-        if not hmac.compare_digest(challenge["otp_hash"], _otp_hash(challenge_id, otp.strip())):
+        provider_name = challenge.get("provider") or "console"
+        if mobile is None and provider_name == "messagecentral":
+            raise AuthError("Mobile number is required to verify this OTP.", 422)
+        normalized = normalize_indian_mobile(mobile) if mobile is not None else ""
+        if normalized and not hmac.compare_digest(phone_hmac(normalized), challenge["phone_hash"]):
+            raise AuthError("Invalid or expired OTP challenge.")
+        provider = get_otp_provider(provider_name)
+        try:
+            provider.verify_otp(
+                normalized, challenge_id, otp.strip(), challenge["otp_hash"]
+            )
+        except InvalidProviderOtp:
             connection.execute(
                 "UPDATE auth_otp_challenges SET attempt_count = attempt_count + 1 WHERE challenge_id = ?",
                 (challenge_id,),
@@ -319,7 +536,7 @@ def verify_otp_challenge(
             connection.commit()
             if challenge["attempt_count"] + 1 >= challenge["max_attempts"]:
                 raise AuthError("Maximum OTP attempts exceeded.", 429)
-            raise AuthError("Incorrect OTP.")
+            raise AuthError("Invalid or expired OTP.")
         connection.execute(
             "UPDATE auth_otp_challenges SET consumed_at = ? WHERE challenge_id = ?", (now, challenge_id)
         )

@@ -15,7 +15,7 @@ from backend.database import connect, create_allocation_request, initialize_data
 
 
 class AuthenticationTests(unittest.TestCase):
-    OTP = "123456"
+    OTP = "1234"
 
     def setUp(self):
         self.temp_directory = tempfile.TemporaryDirectory()
@@ -39,7 +39,7 @@ class AuthenticationTests(unittest.TestCase):
             "APP_ENV": "test",
             "AUTH_HMAC_SECRET": "test-secret-that-is-not-for-production",
             "SESSION_COOKIE_SECURE": "false",
-            "OTP_PROVIDER": "development",
+            "OTP_PROVIDER": "console",
             "OTP_DEBUG": "false",
             "NMC_ADMIN_USERNAME": "officer_01",
             "NMC_ADMIN_PASSWORD": "correct-password",
@@ -85,6 +85,32 @@ class AuthenticationTests(unittest.TestCase):
             ).fetchone()
         self.assertIsNotNone(challenge)
         self.assertNotEqual(challenge["otp_hash"], self.OTP)
+
+    def test_mobile_aware_auth_aliases_preserve_the_existing_session_flow(self):
+        sent = self.client.post("/auth/send-otp", json={"mobile": "9876543210"})
+        self.assertEqual(sent.status_code, 200, sent.text)
+        verified = self.client.post("/auth/verify-otp", json={
+            "mobile": "9876543210",
+            "challenge_id": sent.json()["challenge_id"],
+            "otp": self.OTP,
+        })
+        self.assertEqual(verified.status_code, 200, verified.text)
+        self.assertEqual(verified.json()["vendor_id"], "V2024_00001")
+        self.assertIn("nmc_session", verified.cookies)
+
+        proxied = self.client.post(
+            "/api/auth/vendor/request-otp", json={"mobile": "9876543210"}
+        )
+        self.assertEqual(proxied.status_code, 200, proxied.text)
+        proxied_verified = self.client.post(
+            "/api/auth/vendor/verify-mobile-otp",
+            json={
+                "mobile": "9876543210",
+                "challenge_id": proxied.json()["challenge_id"],
+                "otp": self.OTP,
+            },
+        )
+        self.assertEqual(proxied_verified.status_code, 200, proxied_verified.text)
 
     def verify(self, challenge_id, otp=None):
         return self.client.post(
@@ -155,7 +181,9 @@ class AuthenticationTests(unittest.TestCase):
 
     def test_wrong_expired_and_max_attempt_otps_are_rejected(self):
         challenge = self.request_otp()
-        wrong = self.verify(challenge, "000000")
+        malformed = self.verify(challenge, "123456")
+        self.assertEqual(malformed.status_code, 422)
+        wrong = self.verify(challenge, "0000")
         self.assertEqual(wrong.status_code, 401)
         with closing(connect(self.database_path)) as connection:
             row = connection.execute(
@@ -177,9 +205,82 @@ class AuthenticationTests(unittest.TestCase):
             connection.commit()
         locked = self.request_otp()
         for attempt in range(5):
-            response = self.verify(locked, "000000")
+            response = self.verify(locked, "0000")
             self.assertEqual(response.status_code, 429 if attempt == 4 else 401)
         self.assertEqual(self.verify(locked).status_code, 429)
+
+    def test_resend_cooldown_and_hourly_mobile_limit(self):
+        first = self.client.post(
+            "/api/auth/vendor/request-otp", json={"mobile": "9888888888"}
+        )
+        self.assertEqual(first.status_code, 200, first.text)
+        cooldown = self.client.post(
+            "/api/auth/vendor/request-otp", json={"mobile": "9888888888"}
+        )
+        self.assertEqual(cooldown.status_code, 429)
+
+        with closing(connect(self.database_path)) as connection:
+            connection.execute(
+                "UPDATE auth_otp_challenges SET created_at = ? WHERE challenge_id = ?",
+                (
+                    (datetime.now(timezone.utc) - timedelta(seconds=61)).isoformat(),
+                    first.json()["challenge_id"],
+                ),
+            )
+            connection.commit()
+        resent = self.client.post(
+            "/api/auth/vendor/request-otp", json={"mobile": "9888888888"}
+        )
+        self.assertEqual(resent.status_code, 200, resent.text)
+        self.assertNotEqual(resent.json()["challenge_id"], first.json()["challenge_id"])
+
+        # Consume each challenge to bypass only the resend cooldown. Historical
+        # sends still count toward the independent one-hour abuse limit.
+        for _ in range(3):
+            with closing(connect(self.database_path)) as connection:
+                connection.execute(
+                    "UPDATE auth_otp_challenges SET consumed_at = ? "
+                    "WHERE phone_hash = ? AND consumed_at IS NULL",
+                    (datetime.now(timezone.utc).isoformat(), auth_service.phone_hmac("9888888888")),
+                )
+                connection.commit()
+            response = self.client.post(
+                "/api/auth/vendor/request-otp", json={"mobile": "9888888888"}
+            )
+            self.assertEqual(response.status_code, 200, response.text)
+        with closing(connect(self.database_path)) as connection:
+            connection.execute(
+                "UPDATE auth_otp_challenges SET consumed_at = ? WHERE consumed_at IS NULL",
+                (datetime.now(timezone.utc).isoformat(),),
+            )
+            connection.commit()
+        limited = self.client.post(
+            "/api/auth/vendor/request-otp", json={"mobile": "9888888888"}
+        )
+        self.assertEqual(limited.status_code, 429)
+
+        class AlternateProvider:
+            name = "messagecentral"
+
+            @staticmethod
+            def issue_otp(normalized_mobile, challenge_id):
+                return "provider-verification-reference"
+
+        # Switching from local console testing to a real provider must not make
+        # the local test history consume the real SMS provider's quota.
+        switched = auth_service.create_otp_challenge(
+            "9888888888",
+            database_path=self.database_path,
+            provider=AlternateProvider(),
+            request_ip="testclient",
+        )
+        self.assertEqual(switched["next_step"], "VERIFY_OTP")
+        with closing(connect(self.database_path)) as connection:
+            provider = connection.execute(
+                "SELECT provider FROM auth_otp_challenges WHERE challenge_id = ?",
+                (switched["challenge_id"],),
+            ).fetchone()["provider"]
+        self.assertEqual(provider, "messagecentral")
 
     def test_unknown_phone_onboards_binds_and_subsequently_logs_in(self):
         mobile = "9123456780"

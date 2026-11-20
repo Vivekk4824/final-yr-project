@@ -85,8 +85,8 @@ export const cancelAllocationRequest = requestId =>
 export const getZoneGeometry = signal => apiRequest("/api/zones/geometry", {signal});
 export const requestVendorOtp = mobile =>
   apiRequest("/api/auth/vendor/request-otp", jsonOptions("POST", {mobile}));
-export const verifyVendorOtp = (challengeId, otp) =>
-  apiRequest("/api/auth/vendor/verify-otp", jsonOptions("POST", {challenge_id: challengeId, otp}));
+export const verifyVendorOtp = (challengeId, mobile, otp) =>
+  apiRequest("/api/auth/vendor/verify-mobile-otp", jsonOptions("POST", {challenge_id: challengeId, mobile, otp}));
 export const loginAdmin = (username, password) =>
   apiRequest("/api/auth/admin/login", jsonOptions("POST", {username, password}));
 export const getCurrentUser = () => apiRequest("/api/auth/me");

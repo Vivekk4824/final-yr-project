@@ -13,19 +13,19 @@ export async function checkAuthenticationUI({ev, wait, size, layout, c, shot, re
   await language("en");await size(320);
   assert.equal(await ev("document.querySelector('.auth-card form').checkValidity()"), false);
   await ev(`(()=>{const input=document.querySelector('input[type=tel]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,'9'+String(Date.now()).slice(-9));input.dispatchEvent(new Event('input',{bubbles:true}));})()`);
-  await ev("document.querySelector('.auth-card form').requestSubmit()");await wait("!!document.querySelector('.otp-input')");
+  await ev("document.querySelector('.auth-card form').requestSubmit()");await wait("!!document.querySelector('.otp-box')");
   assert.equal(await ev("document.querySelector('.auth-primary').disabled"), true);
   for (const lang of ["en", "mr", "hi"]) {
     await language(lang);
     for (const width of widths) {await size(width);await layout(`otp-${lang}`);}
     await c("Emulation.setDeviceMetricsOverride", {width:360,height:450,deviceScaleFactor:1,mobile:true});
-    await ev("document.querySelector('.otp-input').focus();document.querySelector('.otp-input').scrollIntoView({block:'center'});true");
-    assert.equal(await ev("(()=>{const r=document.querySelector('.otp-input').getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight})()"), true);
+    await ev("document.querySelector('.otp-box').focus();document.querySelector('.otp-box').scrollIntoView({block:'center'});true");
+    assert.equal(await ev("(()=>{const r=document.querySelector('.otp-box').getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight})()"), true);
   }
   await language("en");await size(320);
-  await ev(`(()=>{const input=document.querySelector('.otp-input');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,'000000');input.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+  await ev(`(()=>{document.querySelectorAll('.otp-box').forEach(input=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,'0');input.dispatchEvent(new Event('input',{bubbles:true}));});})()`);
   await ev("document.querySelector('.auth-card form').requestSubmit()");await wait("!!document.querySelector('.auth-error')");await layout("otp-validation-error");
-  await ev(`(()=>{const input=document.querySelector('.otp-input');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,'123456');input.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+  await ev(`(()=>{[1,2,3,4].forEach((digit,index)=>{const input=document.querySelectorAll('.otp-box')[index];Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,String(digit));input.dispatchEvent(new Event('input',{bubbles:true}));});})()`);
   await ev("document.querySelector('.auth-card form').requestSubmit()");await wait("!!document.querySelector('.vendor-panel.narrow')");
   report.checks.push("Login, language switching, OTP validation and OTP verification through real forms; reduced viewport remains scrollable");
 }

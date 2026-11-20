@@ -3,12 +3,14 @@ from __future__ import annotations
 from backend.core import context as dependencies
 from backend.schemas.api import AdminLoginBody
 from backend.services.authentication import AuthError
+from backend.services.authentication import OtpProviderError
 from fastapi import Request as FastAPIRequest
 from fastapi import HTTPException
 from fastapi import Response
 from backend.services.authentication import SESSION_COOKIE_NAME
 from backend.schemas.api import VendorOtpRequestBody
 from backend.schemas.api import VendorOtpVerifyBody
+from backend.schemas.api import MobileOtpVerifyBody
 from backend.core.security import auth_error
 from backend.services.authentication import create_admin_session
 from backend.services.authentication import create_otp_challenge
@@ -26,8 +28,10 @@ router = APIRouter()
         "Authentication"
     ],
 )
+@router.post("/auth/send-otp", include_in_schema=False)
 def request_vendor_otp(
     payload: VendorOtpRequestBody,
+    request: FastAPIRequest,
 ):
 
     try:
@@ -35,6 +39,7 @@ def request_vendor_otp(
         return create_otp_challenge(
             payload.mobile,
             database_path=dependencies.DATABASE_PATH,
+            request_ip=request.client.host if request.client else "unknown",
         )
 
     except AuthError as exc:
@@ -42,6 +47,13 @@ def request_vendor_otp(
         auth_error(
             exc
         )
+
+    except OtpProviderError as exc:
+
+        raise HTTPException(
+            503,
+            "Unable to send OTP right now. Please try again later.",
+        ) from exc
 
     except RuntimeError as exc:
 
@@ -80,6 +92,13 @@ def verify_vendor_otp(
             exc
         )
 
+    except OtpProviderError as exc:
+
+        raise HTTPException(
+            503,
+            "Unable to verify OTP right now. Please try again later.",
+        ) from exc
+
     except RuntimeError as exc:
 
         raise HTTPException(
@@ -100,6 +119,32 @@ def verify_vendor_otp(
     return session_payload(
         session
     )
+
+
+@router.post("/auth/verify-otp", include_in_schema=False)
+@router.post("/api/auth/vendor/verify-mobile-otp", include_in_schema=False)
+def verify_mobile_otp(
+    payload: MobileOtpVerifyBody,
+    response: Response,
+):
+    """Mobile-aware Smart OTP contract without changing the legacy API schema."""
+    try:
+        token, session = verify_otp_challenge(
+            payload.challenge_id,
+            payload.otp,
+            mobile=payload.mobile,
+            database_path=dependencies.DATABASE_PATH,
+        )
+    except AuthError as exc:
+        auth_error(exc)
+    except OtpProviderError as exc:
+        raise HTTPException(
+            503, "Unable to verify OTP right now. Please try again later."
+        ) from exc
+    except RuntimeError as exc:
+        raise HTTPException(503, "Authentication service is not configured") from exc
+    set_session_cookie(response, token)
+    return session_payload(session)
 
 @router.post(
     "/api/auth/admin/login",

@@ -181,7 +181,9 @@ CREATE INDEX IF NOT EXISTS idx_vendor_auth_identities_vendor_id
 CREATE TABLE IF NOT EXISTS auth_otp_challenges (
     challenge_id TEXT PRIMARY KEY,
     phone_hash TEXT NOT NULL,
+    request_ip_hash TEXT NULL,
     mobile_last4 TEXT NULL,
+    provider TEXT NOT NULL DEFAULT 'console',
     purpose TEXT NOT NULL CHECK (purpose IN ('VENDOR_LOGIN', 'NEW_VENDOR_REGISTRATION')),
     otp_hash TEXT NOT NULL,
     expires_at TEXT NOT NULL,
@@ -453,7 +455,9 @@ def _build_metadata() -> MetaData:
     otp = Table(
         "auth_otp_challenges", metadata,
         Column("challenge_id", Text, primary_key=True), Column("phone_hash", Text, nullable=False),
+        Column("request_ip_hash", Text),
         Column("mobile_last4", Text),
+        Column("provider", Text, nullable=False, server_default="console"),
         Column("purpose", Text, nullable=False), Column("otp_hash", Text, nullable=False),
         Column("expires_at", Text, nullable=False),
         Column("attempt_count", Integer, nullable=False, server_default="0"),
@@ -856,6 +860,20 @@ def initialize_database(
         }.items():
             if "mobile_last4" not in columns:
                 connection.execute(f"ALTER TABLE {table} ADD COLUMN mobile_last4 TEXT NULL")
+        otp_columns = set(schema.get("auth_otp_challenges", {}).get("columns", []))
+        if "request_ip_hash" not in otp_columns:
+            connection.execute(
+                "ALTER TABLE auth_otp_challenges ADD COLUMN request_ip_hash TEXT NULL"
+            )
+        if "provider" not in otp_columns:
+            connection.execute(
+                "ALTER TABLE auth_otp_challenges ADD COLUMN provider "
+                "TEXT NOT NULL DEFAULT 'console'"
+            )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_auth_otp_ip_created "
+            "ON auth_otp_challenges(request_ip_hash, created_at)"
+        )
         connection.execute("""CREATE UNIQUE INDEX IF NOT EXISTS one_pending_request_per_slot
             ON allocation_requests(zone_id, slot_id)
             WHERE status = 'PENDING' AND slot_id IS NOT NULL""")

@@ -48,7 +48,7 @@ try {
   await c("Network.setUserAgentOverride",{userAgent:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"});
   await go("/");
   const challenge=await api("/api/auth/vendor/request-otp",{mobile:"9"+String(Date.now()).slice(-9)});assert.equal(challenge.status,200);
-  assert.equal((await api("/api/auth/vendor/verify-otp",{challenge_id:challenge.body.challenge_id,otp:"123456"})).status,200);
+  assert.equal((await api("/api/auth/vendor/verify-otp",{challenge_id:challenge.body.challenge_id,otp:"1234"})).status,200);
   const created=await api("/api/vendors",{full_name:"PWA Private Test Vendor",business_name:"Private PWA Stall",business_category:"food",preferred_language:"en",priority_profile:"BALANCED",market_preference:false,transport_preference:false,parking_preference:false});assert.equal(created.status,201);
   const vendor=created.body;
   await go("/vendor/profile");await wait("!!document.querySelector('#vendor-profile-edit')");
