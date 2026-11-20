@@ -94,18 +94,8 @@ export const cancelAllocationRequest = requestId =>
 export const getZoneGeometry = signal => apiRequest("/api/zones/geometry", {signal});
 export const requestVendorOtp = mobile =>
   apiRequest("/api/auth/vendor/request-otp", jsonOptions("POST", {mobile}));
-// Confirm that the browser sends the session cookie back before entering a
-// protected workspace. A 200 login response alone cannot establish this.
-const establishSession = async (path, body) => {
-  await apiRequest(path, jsonOptions("POST", body));
-  try {return await apiRequest("/api/auth/me");}
-  catch (error) {
-    if (error.status === 401) error.message = "The browser could not retain your session. Enable cookies and try again.";
-    throw error;
-  }
-};
-export const verifyVendorOtp = (challengeId, otp) =>
-  establishSession("/api/auth/vendor/verify-otp", {challenge_id: challengeId, otp});
+export const verifyVendorOtp = (challengeId, mobile, otp) =>
+  apiRequest("/api/auth/vendor/verify-mobile-otp", jsonOptions("POST", {challenge_id: challengeId, mobile, otp}));
 export const loginAdmin = (username, password) =>
   establishSession("/api/auth/admin/login", {username, password});
 let currentUserRequest;

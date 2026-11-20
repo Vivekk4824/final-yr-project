@@ -82,3 +82,5 @@ extra/reports/migrations/
 .worktrees/
 reports/vendormap-frontend-before.zip
 extra/reports/vendormap-frontend-before.zip
+/report/
+

@@ -105,6 +105,13 @@ class AuthSettings:
     session_cookie_secure: bool
     otp_provider: str
     otp_debug: bool
+    messagecentral_customer_id: str | None
+    messagecentral_auth_token: str | None
+    messagecentral_auth_key: str | None
+    messagecentral_email: str | None
+    otp_expiry_minutes: int
+    otp_resend_cooldown_seconds: int
+    otp_max_attempts: int
     nmc_admin_username: str
     nmc_admin_password: str
 
@@ -141,12 +148,59 @@ def get_auth_settings() -> AuthSettings:
         raise ConfigurationError(
             "Missing required authentication configuration: " + ", ".join(missing)
         )
-    settings = AuthSettings(
-        app_env=_required_value("APP_ENV").strip().lower(),
+    provider = _required_value("OTP_PROVIDER").strip().lower()
+    # Preserve older local .env files while exposing only console/messagecentral
+    # as the supported names in current configuration and documentation.
+    if provider == "development":
+        provider = "console"
+    if provider not in {"console", "messagecentral"}:
+        raise ConfigurationError("OTP_PROVIDER must be console or messagecentral")
+    app_env = _required_value("APP_ENV").strip().lower()
+    if provider == "console" and app_env not in {"development", "test"}:
+        raise ConfigurationError("Console OTP is allowed only in development or test")
+    messagecentral_customer_id = (
+        os.environ.get("MESSAGECENTRAL_CUSTOMER_ID", "").strip() or None
+    )
+    messagecentral_auth_token = (
+        os.environ.get("MESSAGECENTRAL_AUTH_TOKEN", "").strip() or None
+    )
+    messagecentral_auth_key = (
+        os.environ.get("MESSAGECENTRAL_AUTH_KEY", "").strip() or None
+    )
+    messagecentral_email = os.environ.get("MESSAGECENTRAL_EMAIL", "").strip() or None
+    if provider == "messagecentral" and (
+        not messagecentral_customer_id
+        or not (messagecentral_auth_token or messagecentral_auth_key)
+    ):
+        raise ConfigurationError(
+            "MESSAGECENTRAL_CUSTOMER_ID and either MESSAGECENTRAL_AUTH_TOKEN or "
+            "MESSAGECENTRAL_AUTH_KEY are required for Message Central OTP"
+        )
+    try:
+        expiry_minutes = int(os.environ.get("OTP_EXPIRY_MINUTES", "5"))
+        cooldown_seconds = int(os.environ.get("OTP_RESEND_COOLDOWN_SECONDS", "60"))
+        max_attempts = int(os.environ.get("OTP_MAX_ATTEMPTS", "5"))
+    except ValueError as exc:
+        raise ConfigurationError("OTP numeric configuration is invalid") from exc
+    if not 1 <= expiry_minutes <= 30:
+        raise ConfigurationError("OTP_EXPIRY_MINUTES must be between 1 and 30")
+    if not 1 <= cooldown_seconds <= 3600:
+        raise ConfigurationError("OTP_RESEND_COOLDOWN_SECONDS must be between 1 and 3600")
+    if not 1 <= max_attempts <= 10:
+        raise ConfigurationError("OTP_MAX_ATTEMPTS must be between 1 and 10")
+    return AuthSettings(
+        app_env=app_env,
         auth_hmac_secret=_required_value("AUTH_HMAC_SECRET"),
         session_cookie_secure=_boolean_value("SESSION_COOKIE_SECURE"),
-        otp_provider=_required_value("OTP_PROVIDER").strip().lower(),
+        otp_provider=provider,
         otp_debug=_boolean_value("OTP_DEBUG"),
+        messagecentral_customer_id=messagecentral_customer_id,
+        messagecentral_auth_token=messagecentral_auth_token,
+        messagecentral_auth_key=messagecentral_auth_key,
+        messagecentral_email=messagecentral_email,
+        otp_expiry_minutes=expiry_minutes,
+        otp_resend_cooldown_seconds=cooldown_seconds,
+        otp_max_attempts=max_attempts,
         nmc_admin_username=_required_value("NMC_ADMIN_USERNAME"),
         nmc_admin_password=_required_value("NMC_ADMIN_PASSWORD"),
     )

@@ -1,5 +1,6 @@
 import en from "./en.js";
 export default {
+  "auth.resendOtp":"OTP फिर भेजें","auth.resendCountdown":"{seconds} सेकंड में OTP फिर भेजें",
   "vm.trackIntro":"आवेदन से जगह मिलने तक अपने आवेदन की स्थिति देखें.",
   "vm.explore":"सभी उपयुक्त जगहें देखें",
   "vm.find":"विक्रय की जगह खोजें",

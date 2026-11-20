@@ -1260,7 +1260,7 @@ def vendor_account_information(vendor_id, database_path=DATABASE_PATH, mobile_la
     settings = get_auth_settings()
     masked_mobile = f"******{mobile_last4}" if re.fullmatch(r"\d{4}", mobile_last4 or "") else next(iter(masked)) if len(masked) == 1 else None
     return {"profile": profile, "masked_mobile": masked_mobile,
-            "authenticated": True, "development_authentication": settings.otp_provider == "development",
+            "authenticated": True, "development_authentication": settings.otp_provider == "console",
             "identity_verification_recorded": any(bool(row["is_verified"]) for row in identities),
             "historical_identity_linked": any(row["vendor_source"] == "HISTORICAL" for row in identities),
             "has_operational_profile": overlay, "phone_change_available": False, "recovery_available": False,

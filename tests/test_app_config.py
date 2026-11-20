@@ -34,7 +34,7 @@ class ApplicationConfigurationTests(unittest.TestCase):
             "APP_ENV": "test",
             "AUTH_HMAC_SECRET": "unit-test-secret",
             "SESSION_COOKIE_SECURE": "sometimes",
-            "OTP_PROVIDER": "development",
+            "OTP_PROVIDER": "console",
             "OTP_DEBUG": "false",
             "NMC_ADMIN_USERNAME": "test-admin",
             "NMC_ADMIN_PASSWORD": "unit-test-password",

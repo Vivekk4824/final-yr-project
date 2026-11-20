@@ -35,7 +35,7 @@ try{
  await c('Page.enable');await c('Runtime.enable');await size(1440);await go('/');await wait("!!document.querySelector('.auth-card')");await shot('login-desktop');
  for(const width of [320,360,390,768,1024,1440]){await size(width);await layout('login');}
  if(polish)await checkAuthenticationUI({ev,wait,size,layout,c,shot,report});
- else {const challenge=await api('/api/auth/vendor/request-otp',{mobile:'9'+String(Date.now()).slice(-9)});await api('/api/auth/vendor/verify-otp',{challenge_id:challenge.challenge_id,otp:'123456'});}
+ else {const challenge=await api('/api/auth/vendor/request-otp',{mobile:'9'+String(Date.now()).slice(-9)});await api('/api/auth/vendor/verify-otp',{challenge_id:challenge.challenge_id,otp:'1234'});}
  await go('/vendor');await wait("!!document.querySelector('#vendor-profile-edit') || !!document.querySelector('.vendor-panel.narrow')");report.checks.push('OTP login reaches onboarding');
  const vendor=await api('/api/vendors',{full_name:'VendorMap Review',business_name:'Review Food Stall',business_category:'food',priority_profile:'BALANCED',preferred_language:'en',market_preference:false,transport_preference:false,parking_preference:false});
  await go('/vendor');await wait("!!document.querySelector('.vm-find')");

@@ -666,6 +666,10 @@ class VendorOtpVerifyBody(
 
     otp: str
 
+class MobileOtpVerifyBody(VendorOtpVerifyBody):
+
+    mobile: str
+
 class AdminLoginBody(
     BaseModel
 ):

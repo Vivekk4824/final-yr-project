@@ -35,7 +35,7 @@ class WhatsAppBotTests(unittest.TestCase):
             "APP_ENV": "test",
             "AUTH_HMAC_SECRET": "whatsapp-unit-test-secret-not-for-production",
             "SESSION_COOKIE_SECURE": "false",
-            "OTP_PROVIDER": "development",
+            "OTP_PROVIDER": "console",
             "OTP_DEBUG": "false",
             "NMC_ADMIN_USERNAME": "officer",
             "NMC_ADMIN_PASSWORD": "unit-test-password",

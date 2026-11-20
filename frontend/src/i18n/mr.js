@@ -1,5 +1,6 @@
 import en from "./en.js";
 export default {
+  "auth.resendOtp":"OTP पुन्हा पाठवा","auth.resendCountdown":"{seconds} सेकंदांनी OTP पुन्हा पाठवा",
   "vm.trackIntro":"अर्जापासून जागा मिळेपर्यंत तुमच्या अर्जाची स्थिती पहा.",
   "vm.explore":"सर्व योग्य जागा पहा",
   "vm.find":"विक्रीची जागा शोधा",
