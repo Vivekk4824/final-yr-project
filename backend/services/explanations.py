@@ -1,10 +1,10 @@
 """Extracted services explanations helpers; behavior retained."""
 from __future__ import annotations
 from backend.core import context as dependencies
-from backend.decision_policy import FACTOR_ORDER
-from backend.decision_policy import RESEARCH_BASELINE_WEIGHTS
-from backend.mcda_engine import ROOT
-from backend.business_aware_mcda import category_gis_evidence
+from backend.recommendation.decision_policy import FACTOR_ORDER
+from backend.recommendation.decision_policy import RESEARCH_BASELINE_WEIGHTS
+from backend.recommendation.mcda_engine import ROOT
+from backend.recommendation.business_aware_mcda import category_gis_evidence
 from functools import lru_cache
 import numpy as np
 import pandas as pd

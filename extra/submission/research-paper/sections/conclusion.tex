@@ -1,0 +1,24 @@
+\section{Conclusion and Future Scope}
+\label{sec:conclusion}
+
+This paper presented \textbf{UrbanVending AI}, an end-to-end geospatial decision-support and micro-allocation framework engineered to resolve the long-standing tension between municipal street vendor livelihood protection and urban right-of-way management. Grounded in statutory mandates under the \textit{Street Vendors Act, 2014}, the proposed seven-stage framework unifies multi-source GIS feature engineering, unsupervised environmental typology clustering, missing-data-aware MCDA, AHP consistency calibration, two-stage pre-emptive Goal Programming, and metric micro-slot packing.
+
+Evaluated on official datasets from the Nashik Municipal Corporation (NMC) encompassing 7,259 registered vendors and 308 municipal zones cross-referenced with 13,988 OpenStreetMap road geometries, the framework demonstrated exceptional technical performance:
+\begin{itemize}
+    \item \textbf{MCDA Robustness:} Across 224 weight-perturbation scenarios, the multi-criteria engine achieved 100\% Top-1 ranking stability and a mean Spearman rank correlation of $\rho = 0.9977$.
+    \item \textbf{Constrained Allocation:} The HiGHS Goal Programming solver eliminated the spatial over-allocation paradox, enforcing hard capacity ceilings while legally placing the maximum feasible vendor population.
+    \item \textbf{Physical Micro-Allocation:} Validated on the Lekha Nagar pilot (Zone \texttt{NN\_F\_013}), the metric slot generator packed 10 standardized $2\,\text{m} \times 2\,\text{m}$ vending footprints ($1.87 \times 10^{-9}\,\text{m}$ maximum edge error) while preserving an uninterrupted $1.20\,\text{m}$ pedestrian clearance corridor.
+    \item \textbf{Attribution Transparency:} Supervised benchmarking demonstrated that Random Forest regression ($R^2 = 0.7592$, $\text{MAE} = 0.2469$) achieved a 59.8\% error reduction over baselines, with TreeSHAP attributions verifying that commercial footfall and education facilities represent primary suitability drivers.
+    \item \textbf{Operational Privacy:} The full-stack deployment incorporates cryptographic HMAC-SHA256 identity hashing and direct Meta WhatsApp Cloud API integration, delivering transparent municipal services directly to informal workers without privacy compromise.
+\end{itemize}
+
+\subsection{Future Work}
+\label{sec:future_work}
+
+Future enhancements will target four promising directions:
+\begin{enumerate}
+    \item \textbf{Temporal Micro-Slot Time-Banking:} Extending the Goal Programming model to incorporate dynamic temporal constraints, enabling multiple vendors (e.g., morning agricultural producers and evening food caterers) to share the same physical $2\,\text{m}\times 2\,\text{m}$ footprint across distinct diurnal shifts.
+    \item \textbf{High-Resolution Aerial and Mobile LiDAR Surveys:} Deploying drone-based photogrammetry and vehicle-mounted LiDAR to map the 50 currently unmapped municipal zones and automate sidewalk obstruction detection.
+    \item \textbf{Longitudinal Socioeconomic Impact Evaluation:} Conducting multi-year field surveys across pilot zones to quantify the direct impact of algorithmic allocation on vendor daily earnings, customer footfall, and municipal permit revenue.
+    \item \textbf{Generalization Across Diverse Municipalities:} Validating the transferability of the UrbanVending AI framework across diverse urban contexts and metropolitan municipal corporations across India.
+\end{enumerate}

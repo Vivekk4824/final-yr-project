@@ -13,10 +13,10 @@ from fastapi.testclient import TestClient
 from sklearn.metrics import adjusted_rand_score
 
 from backend.core.data_paths import CATALOG, ROOT, dataset_path
-from backend.decision_policy import FACTOR_ORDER, RESEARCH_BASELINE_WEIGHTS, derive_mcda_weights, neutralize_constrained_division_weight
+from backend.recommendation.decision_policy import FACTOR_ORDER, RESEARCH_BASELINE_WEIGHTS, derive_mcda_weights, neutralize_constrained_division_weight
 from backend.geo.zone_locations import resolve_zone_locations, saved_pilot_areas, PILOT_COUNTS
 from backend.repositories import database as db
-from backend import mcda_engine as engine
+from backend.recommendation import mcda_engine as engine
 from backend.application import app
 from backend.core import context
 from backend.services import vendors
@@ -201,7 +201,7 @@ def test_v1_catalog_rollback_restores_policy_and_model(monkeypatch):
 
 def test_cluster_selection_and_artifact(v2):
     import joblib
-    trainer = importlib.import_module("scripts.04_train_kmeans")
+    trainer = importlib.import_module("extra.research_tools.scripts.04_train_kmeans")
     evaluation = pd.read_csv(VERSION / "kmeans/k_evaluation.csv")
     assert evaluation.k.tolist() == list(range(2,9))
     metadata = json.loads((VERSION/"metadata/kmeans/kmeans_run.json").read_text())

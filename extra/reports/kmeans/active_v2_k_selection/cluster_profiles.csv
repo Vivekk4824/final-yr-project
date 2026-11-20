@@ -1,0 +1,241 @@
+k,cluster,profile_name,zone_count,feature,raw_median,overall_raw_median,raw_mean,overall_raw_mean,standardized_mean
+2,0,Public Transport Access with Mapped Commercial Activity,83,distance_to_major_road_m,72.95642833272053,139.93235083500176,170.5564440797972,353.59165085883245,-0.2587170493046004
+2,0,Public Transport Access with Mapped Commercial Activity,83,road_density_250m_per_km2,20116.187628306227,18985.776601596877,19949.57342977221,18484.035907449193,0.24034230248113814
+2,0,Public Transport Access with Mapped Commercial Activity,83,pedestrian_road_density_250m_per_km2,293.0312471521144,0.0,1148.07343346498,583.7335128446218,0.5226278345770781
+2,0,Public Transport Access with Mapped Commercial Activity,83,commercial_poi_count_250m,2.0,0.0,3.674698795180723,1.434108527131783,0.9856834328130285
+2,0,Public Transport Access with Mapped Commercial Activity,83,market_poi_count_500m,0.0,0.0,0.8433734939759037,0.32945736434108525,0.646023698255587
+2,0,Public Transport Access with Mapped Commercial Activity,83,food_poi_count_250m,0.0,0.0,1.1927710843373494,0.43023255813953487,0.6432921713877641
+2,0,Public Transport Access with Mapped Commercial Activity,83,bus_count_500m,1.0,0.0,1.6024096385542168,0.5658914728682171,1.1895998020508105
+2,0,Public Transport Access with Mapped Commercial Activity,83,distance_to_bus_access_m,278.7465688070537,884.8326208432429,300.53922372007895,1282.5890260439373,-0.9931004990511889
+2,0,Public Transport Access with Mapped Commercial Activity,83,healthcare_count_500m,5.0,1.0,5.975903614457831,3.116279069767442,0.7670930163190274
+2,0,Public Transport Access with Mapped Commercial Activity,83,education_count_500m,0.0,0.0,0.9156626506024096,0.46511627906976744,0.4251192864094556
+2,0,Public Transport Access with Mapped Commercial Activity,83,toilet_count_500m,0.0,0.0,0.7469879518072289,0.2558139534883721,0.6949256133841004
+2,0,Public Transport Access with Mapped Commercial Activity,83,parking_count_500m,0.0,0.0,1.3855421686746987,0.4689922480620155,0.8260820615631722
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,distance_to_major_road_m,211.9370692279996,139.93235083500176,440.40263464546064,353.59165085883245,0.12270580052732422
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,road_density_250m_per_km2,18005.64008903171,18985.776601596877,17788.952396861707,18484.035907449193,-0.11399092060533897
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,pedestrian_road_density_250m_per_km2,0.0,0.0,316.07515049325207,583.7335128446218,-0.24787491582798574
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,commercial_poi_count_250m,0.0,0.0,0.37142857142857144,1.434108527131783,-0.46749557099132194
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,market_poi_count_500m,0.0,0.0,0.08571428571428572,0.32945736434108525,-0.30639981117265
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,food_poi_count_250m,0.0,0.0,0.06857142857142857,0.43023255813953487,-0.3051042870010539
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,bus_count_500m,0.0,0.0,0.07428571428571429,0.5658914728682171,-0.5642101918298132
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,distance_to_bus_access_m,1266.9410721891363,884.8326208432429,1748.361218003253,1282.5890260439373,0.47101337954999356
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,healthcare_count_500m,0.0,1.0,1.76,3.116279069767442,-0.363821259168453
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,education_count_500m,0.0,0.0,0.25142857142857145,0.46511627906976744,-0.20162800441134188
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,toilet_count_500m,0.0,0.0,0.022857142857142857,0.2558139534883721,-0.3295932909193162
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,175,parking_count_500m,0.0,0.0,0.03428571428571429,0.4689922480620155,-0.39179892062710453
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,distance_to_major_road_m,94.01148831981699,139.93235083500176,128.4347992089544,353.59165085883245,-0.2772332028354564
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,road_density_250m_per_km2,22531.525398338315,18985.776601596877,22155.8849812536,18484.035907449193,0.40369223990407943
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,pedestrian_road_density_250m_per_km2,2447.5555943513123,0.0,2702.0744715652017,583.7335128446218,1.5480184692576695
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,commercial_poi_count_250m,4.5,0.0,5.96875,1.434108527131783,1.574026851040845
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,market_poi_count_500m,1.0,0.0,1.65625,0.32945736434108525,1.4622110871400633
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,food_poi_count_250m,1.0,0.0,2.25,0.43023255813953487,1.3532105826772804
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,bus_count_500m,1.0,0.0,1.375,0.5658914728682171,1.001478280753305
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,distance_to_bus_access_m,327.2091050819557,884.8326208432429,289.6243596366411,1282.5890260439373,-1.0377303810273133
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,healthcare_count_500m,5.0,1.0,4.59375,3.116279069767442,0.7542970278155428
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,education_count_500m,1.0,0.0,1.625,0.46511627906976744,1.1166513427175495
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,toilet_count_500m,2.0,0.0,1.71875,0.2558139534883721,1.979647435270404
+3,0,Mapped Commercial Activity with Mapped Public Facilities,32,parking_count_500m,3.0,0.0,2.84375,0.4689922480620155,1.9461395846386764
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,distance_to_major_road_m,181.4486173165816,139.93235083500176,425.17264436114806,353.59165085883245,0.07344968471964607
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,road_density_250m_per_km2,18557.99031048678,18985.776601596877,17997.48930642573,18484.035907449193,-0.09971011335702289
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,pedestrian_road_density_250m_per_km2,0.0,0.0,329.71912704695563,583.7335128446218,-0.21222918273857305
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,commercial_poi_count_250m,0.0,0.0,0.4970414201183432,1.434108527131783,-0.41112627844741656
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,market_poi_count_500m,0.0,0.0,0.08875739644970414,0.32945736434108525,-0.30161363041037415
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,food_poi_count_250m,0.0,0.0,0.13609467455621302,0.43023255813953487,-0.24260865285436306
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,bus_count_500m,0.0,0.0,0.005917159763313609,0.5658914728682171,-0.6539702541101944
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,distance_to_bus_access_m,1266.9410721891363,884.8326208432429,1822.1215823777015,1282.5890260439373,0.532535766323656
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,healthcare_count_500m,0.0,1.0,1.8520710059171597,3.116279069767442,-0.35052723707849237
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,education_count_500m,0.0,0.0,0.26627218934911245,0.46511627906976744,-0.18231597384353596
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,toilet_count_500m,0.0,0.0,0.023668639053254437,0.2558139534883721,-0.3280439062247732
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,169,parking_count_500m,0.0,0.0,0.03550295857988166,0.4689922480620155,-0.39020182375963186
+3,2,Public Transport Access,57,distance_to_major_road_m,82.01765123404705,139.93235083500176,267.76413069926707,353.59165085883245,-0.06213217941904683
+3,2,Public Transport Access,57,road_density_250m_per_km2,17796.53557315386,18985.776601596877,17865.21494624261,18484.035907449193,0.06899749965625389
+3,2,Public Transport Access,57,pedestrian_road_density_250m_per_km2,0.0,0.0,147.6198377700083,583.7335128446218,-0.2398220900601159
+3,2,Public Transport Access,57,commercial_poi_count_250m,1.0,0.0,1.6666666666666667,1.434108527131783,0.3352891548123924
+3,2,Public Transport Access,57,market_poi_count_500m,0.0,0.0,0.2982456140350877,0.32945736434108525,0.07336752194510847
+3,2,Public Transport Access,57,food_poi_count_250m,0.0,0.0,0.2807017543859649,0.43023255813953487,-0.0403837949699233
+3,2,Public Transport Access,57,bus_count_500m,2.0,0.0,1.7719298245614035,0.5658914728682171,1.3767310168511768
+3,2,Public Transport Access,57,distance_to_bus_access_m,245.1811274506649,884.8326208432429,240.37617173915368,1282.5890260439373,-0.9963363564179589
+3,2,Public Transport Access,57,healthcare_count_500m,4.0,1.0,6.035087719298246,3.116279069767442,0.6158175118625937
+3,2,Public Transport Access,57,education_count_500m,0.0,0.0,0.40350877192982454,0.46511627906976744,-0.08634111205971957
+3,2,Public Transport Access,57,toilet_count_500m,0.0,0.0,0.12280701754385964,0.2558139534883721,-0.1387596101169517
+3,2,Public Transport Access,57,parking_count_500m,0.0,0.0,0.42105263157894735,0.4689922480620155,0.06434458784105476
+4,0,Public Transport Access,54,distance_to_major_road_m,129.46103560057225,139.93235083500176,285.03135707744025,353.59165085883245,-0.0009844879932373555
+4,0,Public Transport Access,54,road_density_250m_per_km2,17142.340908730424,18985.776601596877,17495.921172078684,18484.035907449193,0.0421253481394754
+4,0,Public Transport Access,54,pedestrian_road_density_250m_per_km2,0.0,0.0,141.87887344828357,583.7335128446218,-0.2187791959784271
+4,0,Public Transport Access,54,commercial_poi_count_250m,1.0,0.0,1.4814814814814814,1.434108527131783,0.25871354000383545
+4,0,Public Transport Access,54,market_poi_count_500m,0.0,0.0,0.37037037037037035,0.32945736434108525,0.1674561874845361
+4,0,Public Transport Access,54,food_poi_count_250m,0.0,0.0,0.1111111111111111,0.43023255813953487,-0.2288949852614301
+4,0,Public Transport Access,54,bus_count_500m,2.0,0.0,1.7592592592592593,0.5658914728682171,1.360997352308091
+4,0,Public Transport Access,54,distance_to_bus_access_m,259.26149128363943,884.8326208432429,242.65733050114574,1282.5890260439373,-1.0018318637640096
+4,0,Public Transport Access,54,healthcare_count_500m,4.0,1.0,5.407407407407407,3.116279069767442,0.5298992355851155
+4,0,Public Transport Access,54,education_count_500m,0.0,0.0,0.3148148148148148,0.46511627906976744,-0.0942452705117988
+4,0,Public Transport Access,54,toilet_count_500m,0.0,0.0,0.12962962962962962,0.2558139534883721,-0.12573323883739654
+4,0,Public Transport Access,54,parking_count_500m,0.0,0.0,0.46296296296296297,0.4689922480620155,0.11828807370588336
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,distance_to_major_road_m,21.54778401903493,139.93235083500176,79.6418481376352,353.59165085883245,-0.64069166815923
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,road_density_250m_per_km2,24075.372696512724,18985.776601596877,23758.297914765666,18484.035907449193,0.5013118326165182
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,pedestrian_road_density_250m_per_km2,141.86926541624152,0.0,232.3488865361172,583.7335128446218,0.22493541223209745
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,commercial_poi_count_250m,5.0,0.0,6.095238095238095,1.434108527131783,1.6950436682880172
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,market_poi_count_500m,0.0,0.0,1.0952380952380953,0.32945736434108525,0.8651284912982428
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,food_poi_count_250m,3.0,0.0,3.761904761904762,0.43023255813953487,2.487179634118801
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,bus_count_500m,1.0,0.0,0.8095238095238095,0.5658914728682171,0.37881485063682707
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,distance_to_bus_access_m,359.3191823435193,884.8326208432429,688.0421184560566,1282.5890260439373,-0.23177651241339797
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,healthcare_count_500m,5.0,1.0,7.238095238095238,3.116279069767442,0.9414801469464377
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,education_count_500m,1.0,0.0,2.1904761904761907,0.46511627906976744,1.2971813536554533
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,toilet_count_500m,0.0,0.0,0.0,0.2558139534883721,-0.3732342931489442
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,21,parking_count_500m,0.0,0.0,0.19047619047619047,0.4689922480620155,-0.23541766915689605
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,distance_to_major_road_m,72.95642833272053,139.93235083500176,128.11238835107045,353.59165085883245,-0.3021371012037369
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,road_density_250m_per_km2,22015.716428306347,18985.776601596877,21753.67947379117,18484.035907449193,0.3751654684508778
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,pedestrian_road_density_250m_per_km2,2770.0451055605863,0.0,3597.79605191859,583.7335128446218,1.7294347022093208
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,commercial_poi_count_250m,4.0,0.0,5.0,1.434108527131783,1.4232356599676586
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,market_poi_count_500m,1.0,0.0,1.5217391304347827,0.32945736434108525,1.3798989466720484
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,food_poi_count_250m,1.0,0.0,0.9130434782608695,0.43023255813953487,0.7542435682086215
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,bus_count_500m,1.0,0.0,1.434782608695652,0.5658914728682171,1.004705808122776
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,distance_to_bus_access_m,333.3367430831475,884.8326208432429,285.9046405874824,1282.5890260439373,-1.1998781739692304
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,healthcare_count_500m,5.0,1.0,4.565217391304348,3.116279069767442,0.7276249499483217
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,education_count_500m,1.0,0.0,0.7391304347826086,0.46511627906976744,0.483451782305718
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,toilet_count_500m,2.0,0.0,2.391304347826087,0.2558139534883721,2.9003402855214535
+4,2,Mapped Public Facilities with Mapped Commercial Activity,23,parking_count_500m,3.0,0.0,3.739130434782609,0.4689922480620155,2.6334464759133316
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,distance_to_major_road_m,221.6743852586966,139.93235083500176,445.0993056027002,353.59165085883245,0.12785525444165316
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,road_density_250m_per_km2,17996.580213461355,18985.776601596877,17655.266479514794,18484.035907449193,-0.13394451911780375
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,pedestrian_road_density_250m_per_km2,0.0,0.0,345.7071958519944,583.7335128446218,-0.20429103265533363
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,commercial_poi_count_250m,0.0,0.0,0.29375,1.434108527131783,-0.5143804273344477
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,market_poi_count_500m,0.0,0.0,0.04375,0.32945736434108525,-0.36842505134303244
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,food_poi_count_250m,0.0,0.0,0.03125,0.43023255813953487,-0.35761278238234945
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,bus_count_500m,0.0,0.0,0.00625,0.5658914728682171,-0.6534825154677135
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,distance_to_bus_access_m,1273.223143484431,884.8326208432429,1854.8736353199042,1282.5890260439373,0.5410214087826897
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,healthcare_count_500m,0.0,1.0,1.59375,3.116279069767442,-0.4070063478517677
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,education_count_500m,0.0,0.0,0.25,0.46511627906976744,-0.20794346757599325
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,toilet_count_500m,0.0,0.0,0.025,0.2558139534883721,-0.32550194696028856
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,160,parking_count_500m,0.0,0.0,0.0375,0.4689922480620155,-0.3875815867114344
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,distance_to_major_road_m,195.9801181633018,139.93235083500176,370.61525464915906,353.59165085883245,0.09596661213640034
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,road_density_250m_per_km2,18281.815199759243,18985.776601596877,17989.407100290442,18484.035907449193,0.007840293696582963
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,pedestrian_road_density_250m_per_km2,0.0,0.0,350.08323630581714,583.7335128446218,-0.19785459421211496
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,commercial_poi_count_250m,0.0,0.0,0.31645569620253167,1.434108527131783,-0.499994195549432
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,market_poi_count_500m,0.0,0.0,0.056962025316455694,0.32945736434108525,-0.3497629010439575
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,food_poi_count_250m,0.0,0.0,0.03164556962025317,0.43023255813953487,-0.35697521486771644
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,bus_count_500m,0.0,0.0,0.006329113924050633,0.5658914728682171,-0.6533665832165473
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,distance_to_bus_access_m,1266.9410721891363,884.8326208432429,1729.7544712114288,1282.5890260439373,0.5267807104975245
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,healthcare_count_500m,0.0,1.0,1.6455696202531647,3.116279069767442,-0.38660431878236473
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,education_count_500m,0.0,0.0,0.26582278481012656,0.46511627906976744,-0.18920019116319262
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,toilet_count_500m,0.0,0.0,0.02531645569620253,0.2558139534883721,-0.3248977400465081
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,158,parking_count_500m,0.0,0.0,0.0379746835443038,0.4689922480620155,-0.3869587736859136
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,distance_to_major_road_m,94.01148831981699,139.93235083500176,140.2659805792981,353.59165085883245,-0.214130618893886
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,road_density_250m_per_km2,22531.525398338315,18985.776601596877,21905.14849081953,18484.035907449193,0.3863824648046546
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,pedestrian_road_density_250m_per_km2,2650.1688541844114,0.0,3229.5123789649774,583.7335128446218,1.656374908650815
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,commercial_poi_count_250m,4.0,0.0,4.846153846153846,1.434108527131783,1.3980659922372995
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,market_poi_count_500m,1.0,0.0,1.8076923076923077,0.32945736434108525,1.629381187446751
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,food_poi_count_250m,1.0,0.0,1.0,0.43023255813953487,0.8423768329793406
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,bus_count_500m,1.0,0.0,1.4615384615384615,0.5658914728682171,1.0473403859811508
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,distance_to_bus_access_m,327.2091050819557,884.8326208432429,289.9458265473048,1282.5890260439373,-1.12643437150646
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,healthcare_count_500m,4.5,1.0,4.461538461538462,3.116279069767442,0.7173684387976407
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,education_count_500m,1.0,0.0,0.8846153846153846,0.46511627906976744,0.6462136911790443
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,toilet_count_500m,2.0,0.0,2.1153846153846154,0.2558139534883721,2.522620141828715
+5,1,Mapped Public Facilities with Mapped Commercial Activity,26,parking_count_500m,3.0,0.0,3.5,0.4689922480620155,2.4960449847231985
+5,2,Public Transport Access,53,distance_to_major_road_m,122.21020128977467,139.93235083500176,285.7291977956218,353.59165085883245,-0.010508101321889864
+5,2,Public Transport Access,53,road_density_250m_per_km2,16921.571261907236,18985.776601596877,17390.303148249,18484.035907449193,0.03395893588102081
+5,2,Public Transport Access,53,pedestrian_road_density_250m_per_km2,0.0,0.0,135.32399220715916,583.7335128446218,-0.24495184378270715
+5,2,Public Transport Access,53,commercial_poi_count_250m,1.0,0.0,1.490566037735849,1.434108527131783,0.2593281669934204
+5,2,Public Transport Access,53,market_poi_count_500m,0.0,0.0,0.32075471698113206,0.32945736434108525,0.11220360430399107
+5,2,Public Transport Access,53,food_poi_count_250m,0.0,0.0,0.11320754716981132,0.43023255813953487,-0.22551601109582756
+5,2,Public Transport Access,53,bus_count_500m,2.0,0.0,1.7735849056603774,0.5658914728682171,1.3715304628906466
+5,2,Public Transport Access,53,distance_to_bus_access_m,253.35651432381763,884.8326208432429,241.3038933755769,1282.5890260439373,-1.0100362138223555
+5,2,Public Transport Access,53,healthcare_count_500m,4.0,1.0,5.452830188679245,3.116279069767442,0.5306491856911988
+5,2,Public Transport Access,53,education_count_500m,0.0,0.0,0.2830188679245283,0.46511627906976744,-0.1317603698146858
+5,2,Public Transport Access,53,toilet_count_500m,0.0,0.0,0.1320754716981132,0.2558139534883721,-0.12106340762397114
+5,2,Public Transport Access,53,parking_count_500m,0.0,0.0,0.4528301886792453,0.4689922480620155,0.1021655994311408
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,distance_to_major_road_m,19.575925780176775,139.93235083500176,65.46795935799895,353.59165085883245,-0.7732303647228059
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,road_density_250m_per_km2,24250.076139828598,18985.776601596877,24185.27859208316,18484.035907449193,0.526673532570119
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,pedestrian_road_density_250m_per_km2,70.93463270812076,0.0,230.58897430691604,583.7335128446218,0.1842241661158473
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,commercial_poi_count_250m,5.0,0.0,6.388888888888889,1.434108527131783,1.7245614383989707
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,market_poi_count_500m,0.0,0.0,0.6666666666666666,0.32945736434108525,0.4597482317304704
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,food_poi_count_250m,3.0,0.0,4.111111111111111,0.43023255813953487,2.648698707101681
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,bus_count_500m,1.0,0.0,0.7222222222222222,0.5658914728682171,0.29432661496832174
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,distance_to_bus_access_m,359.3191823435193,884.8326208432429,699.3659219804184,1282.5890260439373,-0.23059723053708187
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,healthcare_count_500m,5.0,1.0,7.722222222222222,3.116279069767442,0.967173755883822
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,education_count_500m,1.0,0.0,2.2222222222222223,0.46511627906976744,1.1977024138411603
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,toilet_count_500m,0.0,0.0,0.0,0.2558139534883721,-0.37323429314894413
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,18,parking_count_500m,0.0,0.0,0.0,0.4689922480620155,-0.4367838157275853
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,distance_to_major_road_m,5626.986047040916,139.93235083500176,4233.483146779323,353.59165085883245,1.6265824362534538
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,road_density_250m_per_km2,0.0,18985.776601596877,0.0,18484.035907449193,-7.521552558979077
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,pedestrian_road_density_250m_per_km2,0.0,0.0,0.0,583.7335128446218,-0.7127696696696084
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,commercial_poi_count_250m,0.0,0.0,0.0,1.434108527131783,-0.7123772143974243
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,market_poi_count_500m,0.0,0.0,0.0,0.32945736434108525,-0.4412105693100856
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,food_poi_count_250m,0.0,0.0,0.0,0.43023255813953487,-0.4079806160383613
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,bus_count_500m,0.0,0.0,0.0,0.5658914728682171,-0.662641163309854
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,distance_to_bus_access_m,11441.662677546952,884.8326208432429,8230.159277715667,1282.5890260439373,1.2462036276038655
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,healthcare_count_500m,0.0,1.0,0.0,3.116279069767442,-1.0338771628891243
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,education_count_500m,0.0,0.0,0.0,0.46511627906976744,-0.49442320527775485
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,toilet_count_500m,0.0,0.0,0.0,0.2558139534883721,-0.37323429314894413
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,parking_count_500m,0.0,0.0,0.0,0.4689922480620155,-0.43678381572758535
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,distance_to_major_road_m,5626.986047040916,139.93235083500176,4233.483146779323,353.59165085883245,1.6265824362534538
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,road_density_250m_per_km2,0.0,18985.776601596877,0.0,18484.035907449193,-7.521552558979077
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,pedestrian_road_density_250m_per_km2,0.0,0.0,0.0,583.7335128446218,-0.7127696696696084
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,commercial_poi_count_250m,0.0,0.0,0.0,1.434108527131783,-0.7123772143974243
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,market_poi_count_500m,0.0,0.0,0.0,0.32945736434108525,-0.4412105693100856
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,food_poi_count_250m,0.0,0.0,0.0,0.43023255813953487,-0.4079806160383613
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,bus_count_500m,0.0,0.0,0.0,0.5658914728682171,-0.662641163309854
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,distance_to_bus_access_m,11441.662677546952,884.8326208432429,8230.159277715667,1282.5890260439373,1.2462036276038655
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,healthcare_count_500m,0.0,1.0,0.0,3.116279069767442,-1.0338771628891243
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,education_count_500m,0.0,0.0,0.0,0.46511627906976744,-0.49442320527775485
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,toilet_count_500m,0.0,0.0,0.0,0.2558139534883721,-0.37323429314894413
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,3,parking_count_500m,0.0,0.0,0.0,0.4689922480620155,-0.43678381572758535
+6,1,Public Transport Access,55,distance_to_major_road_m,136.71186991136983,139.93235083500176,285.2870614477174,353.59165085883245,0.009959597682998316
+6,1,Public Transport Access,55,road_density_250m_per_km2,16921.571261907236,18985.776601596877,17363.909597375958,18484.035907449193,0.030339922108051923
+6,1,Public Transport Access,55,pedestrian_road_density_250m_per_km2,0.0,0.0,139.2992575674057,583.7335128446218,-0.2277608409546304
+6,1,Public Transport Access,55,commercial_poi_count_250m,1.0,0.0,1.4545454545454546,1.434108527131783,0.2410573444692671
+6,1,Public Transport Access,55,market_poi_count_500m,0.0,0.0,0.36363636363636365,0.32945736434108525,0.15638951917917937
+6,1,Public Transport Access,55,food_poi_count_250m,0.0,0.0,0.10909090909090909,0.43023255813953487,-0.23215108763919248
+6,1,Public Transport Access,55,bus_count_500m,2.0,0.0,1.7454545454545454,0.5658914728682171,1.3508472639285372
+6,1,Public Transport Access,55,distance_to_bus_access_m,265.1664682434612,884.8326208432429,247.01104875115135,1282.5890260439373,-0.9883219242833465
+6,1,Public Transport Access,55,healthcare_count_500m,4.0,1.0,5.3090909090909095,3.116279069767442,0.5014669374310384
+6,1,Public Transport Access,55,education_count_500m,0.0,0.0,0.38181818181818183,0.46511627906976744,-0.037902009059964145
+6,1,Public Transport Access,55,toilet_count_500m,0.0,0.0,0.12727272727272726,0.2558139534883721,-0.1302332580066974
+6,1,Public Transport Access,55,parking_count_500m,0.0,0.0,0.45454545454545453,0.4689922480620155,0.10819585753436575
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,distance_to_major_road_m,72.95642833272053,139.93235083500176,128.11238835107045,353.59165085883245,-0.3021371012037369
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,road_density_250m_per_km2,22015.716428306347,18985.776601596877,21753.67947379117,18484.035907449193,0.3751654684508778
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,pedestrian_road_density_250m_per_km2,2770.0451055605863,0.0,3597.79605191859,583.7335128446218,1.7294347022093208
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,commercial_poi_count_250m,4.0,0.0,5.0,1.434108527131783,1.4232356599676586
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,market_poi_count_500m,1.0,0.0,1.5217391304347827,0.32945736434108525,1.3798989466720484
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,food_poi_count_250m,1.0,0.0,0.9130434782608695,0.43023255813953487,0.7542435682086215
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,bus_count_500m,1.0,0.0,1.434782608695652,0.5658914728682171,1.004705808122776
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,distance_to_bus_access_m,333.3367430831475,884.8326208432429,285.9046405874824,1282.5890260439373,-1.1998781739692304
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,healthcare_count_500m,5.0,1.0,4.565217391304348,3.116279069767442,0.7276249499483217
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,education_count_500m,1.0,0.0,0.7391304347826086,0.46511627906976744,0.483451782305718
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,toilet_count_500m,2.0,0.0,2.391304347826087,0.2558139534883721,2.9003402855214535
+6,2,Mapped Public Facilities with Mapped Commercial Activity,23,parking_count_500m,3.0,0.0,3.739130434782609,0.4689922480620155,2.6334464759133316
+6,3,Road and Pedestrian Access,40,distance_to_major_road_m,138.4609163545317,139.93235083500176,310.2679817113305,353.59165085883245,0.016211744203492407
+6,3,Road and Pedestrian Access,40,road_density_250m_per_km2,22863.969445630362,18985.776601596877,22784.047523727353,18484.035907449193,0.40276490843869245
+6,3,Road and Pedestrian Access,40,pedestrian_road_density_250m_per_km2,648.759070937898,0.0,1380.069504354889,583.7335128446218,1.2853677177757388
+6,3,Road and Pedestrian Access,40,commercial_poi_count_250m,0.0,0.0,0.575,1.434108527131783,-0.37990984971974906
+6,3,Road and Pedestrian Access,40,market_poi_count_500m,0.0,0.0,0.05,0.32945736434108525,-0.3711343515270921
+6,3,Road and Pedestrian Access,40,food_poi_count_250m,0.0,0.0,0.1,0.43023255813953487,-0.24680354833912316
+6,3,Road and Pedestrian Access,40,bus_count_500m,0.0,0.0,0.0,0.5658914728682171,-0.662641163309854
+6,3,Road and Pedestrian Access,40,distance_to_bus_access_m,1279.5052147797255,884.8326208432429,1461.2892826993489,1282.5890260439373,0.45391679377432864
+6,3,Road and Pedestrian Access,40,healthcare_count_500m,0.5,1.0,2.075,3.116279069767442,-0.29860827696418424
+6,3,Road and Pedestrian Access,40,education_count_500m,0.0,0.0,0.675,0.46511627906976744,0.2405890145852702
+6,3,Road and Pedestrian Access,40,toilet_count_500m,0.0,0.0,0.0,0.2558139534883721,-0.37323429314894413
+6,3,Road and Pedestrian Access,40,parking_count_500m,0.0,0.0,0.0,0.4689922480620155,-0.4367838157275853
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,distance_to_major_road_m,251.53296147270134,139.93235083500176,394.87607836377737,353.59165085883245,0.12351451215142008
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,road_density_250m_per_km2,15980.009004394535,18985.776601596877,16407.288372498657,18484.035907449193,-0.12388783306784702
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,pedestrian_road_density_250m_per_km2,0.0,0.0,0.9514755355478823,583.7335128446218,-0.7004327177345218
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,commercial_poi_count_250m,0.0,0.0,0.20689655172413793,1.434108527131783,-0.5539221166132067
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,market_poi_count_500m,0.0,0.0,0.04310344827586207,0.32945736434108525,-0.3649809644531134
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,food_poi_count_250m,0.0,0.0,0.008620689655172414,0.43023255813953487,-0.3940860412367027
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,bus_count_500m,0.0,0.0,0.0,0.5658914728682171,-0.6626411633098542
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,distance_to_bus_access_m,1266.9410721891363,884.8326208432429,1837.54845410183,1282.5890260439373,0.5597148962394236
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,healthcare_count_500m,0.0,1.0,1.4827586206896552,3.116279069767442,-0.4227687579841291
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,education_count_500m,0.0,0.0,0.07758620689655173,0.46511627906976744,-0.38289551628513424
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,toilet_count_500m,0.0,0.0,0.034482758620689655,0.2558139534883721,-0.30739657426804
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,116,parking_count_500m,0.0,0.0,0.05172413793103448,0.4689922480620155,-0.3689186722570324
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,distance_to_major_road_m,21.54778401903493,139.93235083500176,79.6418481376352,353.59165085883245,-0.64069166815923
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,road_density_250m_per_km2,24075.372696512724,18985.776601596877,23758.297914765666,18484.035907449193,0.5013118326165182
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,pedestrian_road_density_250m_per_km2,141.86926541624152,0.0,232.3488865361172,583.7335128446218,0.22493541223209745
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,commercial_poi_count_250m,5.0,0.0,6.095238095238095,1.434108527131783,1.6950436682880172
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,market_poi_count_500m,0.0,0.0,1.0952380952380953,0.32945736434108525,0.8651284912982428
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,food_poi_count_250m,3.0,0.0,3.761904761904762,0.43023255813953487,2.487179634118801
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,bus_count_500m,1.0,0.0,0.8095238095238095,0.5658914728682171,0.37881485063682707
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,distance_to_bus_access_m,359.3191823435193,884.8326208432429,688.0421184560566,1282.5890260439373,-0.23177651241339797
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,healthcare_count_500m,5.0,1.0,7.238095238095238,3.116279069767442,0.9414801469464377
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,education_count_500m,1.0,0.0,2.1904761904761907,0.46511627906976744,1.2971813536554533
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,toilet_count_500m,0.0,0.0,0.0,0.2558139534883721,-0.3732342931489442
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,21,parking_count_500m,0.0,0.0,0.19047619047619047,0.4689922480620155,-0.23541766915689605

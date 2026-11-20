@@ -35,15 +35,15 @@ from pydantic import (
     StrictBool,
 )
 
-from backend.mcda_engine import ROOT, DATA, CATEGORIES, recommend
+from backend.recommendation.mcda_engine import ROOT, DATA, CATEGORIES, recommend
 
-from backend.decision_policy import DEFAULT_POLICY_PATH, FACTOR_ORDER, RESEARCH_BASELINE_WEIGHTS, derive_mcda_weights, load_base_weight_policy
+from backend.recommendation.decision_policy import DEFAULT_POLICY_PATH, FACTOR_ORDER, RESEARCH_BASELINE_WEIGHTS, derive_mcda_weights, load_base_weight_policy
 
-from backend.recommendation_evaluation import SensitivityConfig, evaluate_weight_sensitivity
+from backend.recommendation.recommendation_evaluation import SensitivityConfig, evaluate_weight_sensitivity
 
-from backend.allocation_optimizer import AllocationOptimizationError
+from backend.allocation.allocation_optimizer import AllocationOptimizationError
 
-from backend.allocation_planning_service import AllocationPlanningValidationError, plan_vendor_allocations
+from backend.allocation.allocation_planning_service import AllocationPlanningValidationError, plan_vendor_allocations
 
 from backend.repositories.database import DATABASE_PATH, OperationalConflictError, OperationalNotFoundError, OperationalValidationError, approve_allocation_request, cancel_allocation_request, create_allocation_request, get_allocation, get_admin_overview, get_allocation_request, get_active_allocation_for_vendor, get_zone_live_status, get_live_zone_status_map, get_vendor_dashboard_activity, list_allocations, list_allocation_requests, reject_allocation_request, update_zone_live_status
 

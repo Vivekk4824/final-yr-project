@@ -1,0 +1,97 @@
+\section{Experimental Setup}
+\label{sec:experimental_setup}
+
+This section details the empirical datasets, hardware/software computational environment, and experimental protocols used to evaluate UrbanVending AI.
+
+\subsection{Dataset Profile and Spatial Coverage}
+\label{sec:setup_data}
+
+The empirical evaluation was conducted using actual municipal datasets provided by the Nashik Municipal Corporation (NMC) and curated spatial features extracted from OpenStreetMap (OSM). Table~\ref{tab:dataset_summary} presents the profile of the core data assets.
+
+\begin{table}[t]
+    \caption{Dataset Summary and Spatial Inventory}
+    \label{tab:dataset_summary}
+    \centering
+    \begin{tabular}{llrrl}
+        \toprule
+        \textbf{Dataset Asset} & \textbf{Data Type} & \textbf{Records} & \textbf{Features} & \textbf{Primary Source} \\
+        \midrule
+        \texttt{official\_zones.csv} & Tabular & 308 & 9 & NMC Municipal Gazette \\
+        \texttt{vendors.csv} & Tabular & 7,259 & 22 & NMC Vendor Survey \\
+        \texttt{assignments.csv} & Relational & 7,259 & 19 & NMC Administrative Crosswalk \\
+        \texttt{zone\_evidence.csv} & Tabular & 308 & 20 & Synthesized Historical Audit \\
+        \texttt{roads\_clean.gpkg} & Vector Lines & 13,988 & 12 & OpenStreetMap (OSM) \\
+        \texttt{commercial\_pts.gpkg} & Vector Points & 353 & 8 & OSM Commercial Features \\
+        \texttt{landuse\_clean.gpkg} & Vector Polygons & 401 & 6 & OSM Land Use Polygons \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[t]
+    \caption{Distribution of Municipal Zones and Business Categories}
+    \label{tab:distributions}
+    \centering
+    \begin{tabular}{lrr|lrr}
+        \toprule
+        \textbf{Zone Type} & \textbf{Count} & \textbf{\%} & \textbf{Business Category} & \textbf{Vendors} & \textbf{\%} \\
+        \midrule
+        FREE & 166 & 53.9\% & Vegetable / Fruit & 3,176 & 43.8\% \\
+        NO\_VENDING & 83 & 26.9\% & Food / Beverages & 1,693 & 23.3\% \\
+        RESTRICTED & 59 & 19.2\% & General Goods & 955 & 13.2\% \\
+        \midrule
+        \textbf{Total Zones} & \textbf{308} & \textbf{100\%} & Other Categories & 682 & 9.4\% \\
+        \cmidrule(r){1-3}
+        \textbf{Geometry Status} & & & Clothing / Apparel & 457 & 6.3\% \\
+        Usable Ref. & 258 & 83.8\% & Unknown / Review & 174 & 2.4\% \\
+        Unmapped & 50 & 16.2\% & Flower / Puja Items & 122 & 1.7\% \\
+        \midrule
+        \textbf{Total Area} & \multicolumn{2}{r|}{Median $3,732\text{ m}^2$} & \textbf{Total Registered} & \textbf{7,259} & \textbf{100\%} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+As documented in Table~\ref{tab:distributions}, the zone registry comprises 166 FREE vending zones (53.9\%), 83 NO\_VENDING zones (26.9\%), and 59 RESTRICTED zones (19.2\%). Out of 308 zones, 258 possess usable spatial reference geometries with a median polygon footprint of $3,731.56\,\text{m}^2$, while 50 zones lack confirmed spatial coordinates and are flagged for physical re-survey. 
+
+Among the 7,259 registered street vendors, vegetable and fruit vending constitutes the largest category (43.8\%), followed by food services (23.3\%), general household goods (13.2\%), other services (9.4\%), clothing (6.3\%), and flowers (1.7\%).
+
+\subsection{Hardware and Software Computational Environment}
+\label{sec:setup_env}
+
+Experiments and pipeline benchmarks were executed on an x86\_64 workstation running Windows 11 / Linux with the following software configuration:
+\begin{itemize}
+    \item \textbf{Core Language and Runtime:} Python 3.10.12, Node.js v18.19.0.
+    \item \textbf{Scientific and Spatial Libraries:} NumPy 1.24.3, Pandas 2.0.3, SciPy 1.11.4~\cite{virtanen2020scipy}, Scikit-learn 1.3.2~\cite{pedregosa2011scikit}, Shapely 2.0.2, PyProj 3.6.1.
+    \item \textbf{Mathematical Optimization:} HiGHS MILP Solver~\cite{huang2023highs} (integrated into \texttt{scipy.optimize.milp}).
+    \item \textbf{Explainability Framework:} SHAP 0.44.0 (TreeExplainer)~\cite{lundberg2017unified}.
+    \item \textbf{Hardware Environment:} [TODO: Insert exact CPU model, e.g., AMD Ryzen 7 / Intel Core i7], 16 GB DDR4 RAM, NVMe Solid State Drive.
+\end{itemize}
+
+\subsection{Experimental Design and Evaluation Protocols}
+\label{sec:setup_protocol}
+
+To evaluate the system thoroughly, four independent experimental protocols were designed:
+
+\subsubsection{Unsupervised Environmental Clustering Protocol}
+To assess cluster stability and spatial separation across the 258 zones, $K$-Means clustering was executed for $K=2$ and $K=4$ across five initialization seeds ($\{11, 23, 37, 53, 71\}$). Partition concordance between configurations was measured using the Adjusted Rand Index ($ARI$).
+
+\subsubsection{MCDA Weight Sensitivity Protocol}
+To determine whether recommendation rankings are excessively fragile to subjective weight variations, a sensitivity audit spanning 224 distinct weight scenarios was executed for a benchmark demand profile (food vendor in Nashik West evaluating 146 candidate zones). The test suite comprises:
+\begin{itemize}
+    \item \textbf{One-at-a-Time (OAT) Perturbations:} Varying each criterion by $\pm 10\%$ and $\pm 20\%$ while renormalizing remaining weights (24 scenarios).
+    \item \textbf{Monte Carlo Simulations:} 200 random weight vectors sampled from a uniform hypercube within a $\pm 20\%$ perturbation ball ($\delta = 0.20$) around the baseline policy, seeded deterministically at random seed 42.
+\end{itemize}
+Stability was quantified via: (i) Top-1 stability rate, (ii) Top-$K$ Jaccard similarity ($|S_K \cap S'_K| / |S_K \cup S'_K|$ for $K=3$), (iii) Top-$K$ retention rate ($|S_K \cap S'_K| / K$), and (iv) Spearman rank correlation coefficient ($\rho$).
+
+\subsubsection{Micro-Slot Geometric Packing Protocol}
+The geometric slot generator was validated on the Lekha Nagar pilot (Zone NN\_F\_013) across two user-drawn Geoman boundaries: Boundary A (Property ID 2974, area $1,377.87\,\text{m}^2$) and Boundary B (Property ID 3577, area $1,283.35\,\text{m}^2$). The verification protocol rigorously tested polygon containment, slot edge length deviations ($\le 0.002\,\text{m}$), inter-slot clearance ($\ge 0.50\,\text{m}$), and uninterrupted $1.20\,\text{m}$ pedestrian corridor exclusion in metric EPSG:32643 projection.
+
+\subsubsection{Supervised Suitability and TreeSHAP Explainability Protocol}
+To benchmark whether supervised models can approximate multi-criteria suitability judgments, a dataset of 140 zone-vendor evaluation instances was benchmarked across 5-fold GroupKFold cross-validation grouped strictly by \texttt{vendor\_profile\_id} (6 unique vendor groups). Grouped splitting prevents optimistic data leakage that would occur if the same vendor profile appeared in both training and validation folds. 
+
+Candidate models include:
+\begin{enumerate}
+    \item \textbf{Grouped Mean Baseline:} Assigns the fold-specific training mean.
+    \item \textbf{RandomForestRegressor:} 100 estimators, max depth 8, random state 42.
+    \item \textbf{XGBRegressor:} Learning rate 0.05, max depth 4, 100 estimators, random state 42.
+\end{enumerate}
+Models were evaluated using Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), Spearman rank correlation ($\rho$), Within-One accuracy ($\mathbb{P}(|\hat{y} - y| \le 1.0)$), and the coefficient of determination ($R^2$). Global and local feature attributions were computed using TreeSHAP~\cite{lundberg2017unified}.

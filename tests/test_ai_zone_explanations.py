@@ -8,7 +8,7 @@ import pytest
 import pandas as pd
 
 from backend.core.config import GeminiSettings
-from backend.decision_policy import FACTOR_ORDER
+from backend.recommendation.decision_policy import FACTOR_ORDER
 from backend.services.ai_zone_explanations import (
     ExplanationValidationError,
     build_evidence,

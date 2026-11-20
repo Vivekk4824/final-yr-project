@@ -23,7 +23,8 @@
     "reference_audit": "data/model/versions/manual-142-v2/metadata/features/zone_reference_audit.csv",
     "reference_audit_summary": "data/model/versions/manual-142-v2/metadata/features/audit_summary.json",
     "kmeans_metadata": "data/model/versions/manual-142-v2/metadata/kmeans/kmeans_run.json",
-    "mcda_configuration": "data/model/versions/manual-142-v2/metadata/mcda_configuration.json"
+    "mcda_configuration": "data/model/versions/manual-142-v2/metadata/mcda_configuration.json",
+    "reference_points": "data/gis/reference_audit/reference_points.geojson"
   },
   "legacy_paths": {
     "data/raw/nmc/official_zones_geometries.geojson": "data/gis/analytical/official_zones_geometries.geojson",
@@ -76,15 +77,16 @@
     "candidate_zones": "data/processed/candidate_zone_snapshot.csv",
     "vendor_registry": "data/processed/vendor_training_registry.csv",
     "kmeans_output": "data/model/kmeans",
-    "kmeans_artifacts": "models/kmeans",
+    "kmeans_artifacts": "data/models/kmeans",
     "recommendation_output": "data/model/recommendations",
     "database": "data/operational/vendor_management.db",
     "lekha_boundary": "data/pilot/lekha_nagar_boundaries.geojson",
     "three_zone_layout": "data/pilot/nashik_three_zones.geojson",
     "mcda_inputs": "data/processed",
-    "reference_audit": "reports/data_quality/geometry_duplicates/zone_reference_audit.csv",
-    "reference_audit_summary": "reports/data_quality/geometry_duplicates/audit_summary.json",
-    "kmeans_metadata": "reports/metrics/kmeans_run.json"
+    "reference_audit": "data/gis/reference_audit/zone_reference_audit.csv",
+    "reference_audit_summary": "data/gis/reference_audit/audit_summary.json",
+    "kmeans_metadata": "extra/reports/metrics/kmeans_run.json",
+    "reference_points": "data/gis/reference_audit/reference_points.geojson"
   },
   "active_model_version": "manual-142-v2",
   "model_versions": {
@@ -110,7 +112,8 @@
       "mcda_inputs": "data/model/versions/manual-142-v1/inputs",
       "reference_audit": "data/model/versions/manual-142-v1/metadata/features/zone_reference_audit.csv",
       "reference_audit_summary": "data/model/versions/manual-142-v1/metadata/features/audit_summary.json",
-      "kmeans_metadata": "data/model/versions/manual-142-v1/metadata/kmeans/kmeans_run.json"
+      "kmeans_metadata": "data/model/versions/manual-142-v1/metadata/kmeans/kmeans_run.json",
+      "reference_points": "data/gis/reference_audit/reference_points.geojson"
     },
     "manual-142-v2": {
       "official_zones": "data/raw/nmc/official_zones.csv",
@@ -135,7 +138,8 @@
       "reference_audit": "data/model/versions/manual-142-v2/metadata/features/zone_reference_audit.csv",
       "reference_audit_summary": "data/model/versions/manual-142-v2/metadata/features/audit_summary.json",
       "kmeans_metadata": "data/model/versions/manual-142-v2/metadata/kmeans/kmeans_run.json",
-      "mcda_configuration": "data/model/versions/manual-142-v2/metadata/mcda_configuration.json"
+      "mcda_configuration": "data/model/versions/manual-142-v2/metadata/mcda_configuration.json",
+      "reference_points": "data/gis/reference_audit/reference_points.geojson"
     }
   }
 }

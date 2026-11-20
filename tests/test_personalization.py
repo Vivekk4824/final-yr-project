@@ -7,8 +7,8 @@ from fastapi.testclient import TestClient
 
 import backend.api as api
 from backend.database import initialize_database
-from backend.mcda_engine import WEIGHTS, derive_mcda_weights
-from backend.decision_policy import neutralize_constrained_division_weight
+from backend.recommendation.mcda_engine import WEIGHTS, derive_mcda_weights
+from backend.recommendation.decision_policy import neutralize_constrained_division_weight
 
 
 class RecommendationPersonalizationTests(unittest.TestCase):
@@ -98,7 +98,7 @@ class RecommendationPersonalizationTests(unittest.TestCase):
             with self.subTest(profile=profile):
                 # This is the original v1 policy contract. Active v2 blending
                 # and non-compounding controls have separate acceptance tests.
-                with patch("backend.decision_policy.active_mcda_configuration", return_value=None):
+                with patch("backend.recommendation.decision_policy.active_mcda_configuration", return_value=None):
                     result = derive_mcda_weights(profile)
                 self.assertAlmostEqual(result["multipliers"][factor], expected_multiplier, places=12)
                 self.assertGreater(result["final_weights"][factor], WEIGHTS[factor])

@@ -1,7 +1,7 @@
 # Backend ownership and entry points
 
 Run production from the repository root so the backend, data and models are
-available. See [deployment settings](../docs/deployment.md).
+available. See [deployment settings](../extra/docs/deployment.md).
 
 ```sh
 pip install -r backend/requirements/app.txt
@@ -43,16 +43,16 @@ research commands are not production health checks.
   research workflows.
 - `ahp_calibration.py`, `expert_label_aggregation.py`,
   `suitability_model_training.py`: reproducible research pipelines used by
-  `scripts/generate_synthetic_expert_demo.py` and project evidence.
+  `extra/research_tools/generate_synthetic_expert_demo.py` and project evidence.
 - `05_recommend.py`: explicit operational recommendation CLI. The distinct
-  `research/mcda_baseline.py` and its `scripts/` bridge also remain.
+  `extra/research_tools/mcda_baseline.py` and its `scripts/` bridge also remain.
 - `app_config.py`, `auth_service.py`, `database.py`, `vendor_service.py`,
   `pilot_geometry.py`, `pilot_slots.py`, `pilot_navigation.py`: compatibility
   aliases used by tests, scripts and documented commands, not duplicate code.
 - Package `__init__.py` files preserve stable package imports.
 
 The unused `_LEGACY_SQLITE_SCHEMA` literal moved intact to
-[the schema archive](../docs/archive/pre-sqlalchemy-schema.sql). This is
+[the schema archive](../extra/docs/archive/pre-sqlalchemy-schema.sql). This is
 historical documentation, **not an executable migration**. `METADATA` and
 existing additive upgrades remain authoritative.
 

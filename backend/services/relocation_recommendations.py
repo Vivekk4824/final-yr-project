@@ -7,10 +7,10 @@ from typing import Any
 
 import pandas as pd
 
-from backend.decision_policy import derive_mcda_weights
+from backend.recommendation.decision_policy import derive_mcda_weights
 from backend.core.data_paths import CATALOG
 from backend.geo.zone_locations import resolve_zone_locations
-from backend.mcda_engine import recommend
+from backend.recommendation.mcda_engine import recommend
 from backend.repositories.database import (
     DATABASE_PATH,
     OperationalNotFoundError,

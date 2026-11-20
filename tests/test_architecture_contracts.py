@@ -12,14 +12,31 @@ import pytest
 import backend.api as api
 from backend.core.config import ConfigurationError, get_cors_origins
 from backend.repositories import database
-from backend.allocation_optimizer import AllocationDemand, optimize_precomputed
-from backend.decision_policy import calculate_ahp_weights
+from backend.allocation.allocation_optimizer import AllocationDemand, optimize_precomputed
+from backend.recommendation.decision_policy import calculate_ahp_weights
 
 ROOT = Path(__file__).resolve().parents[1]
+BASELINES = Path(__file__).resolve().parent / "fixtures/baselines"
+IMPLEMENTATION_PATHS = {
+    "backend/mcda_engine.py": "backend/recommendation/mcda_engine.py",
+    "backend/decision_policy.py": "backend/recommendation/decision_policy.py",
+    "backend/allocation_optimizer.py": "backend/allocation/allocation_optimizer.py",
+    "backend/allocation_planning_service.py": "backend/allocation/allocation_planning_service.py",
+    "backend/recommendation_evaluation.py": "backend/recommendation/recommendation_evaluation.py",
+    "backend/ahp_calibration.py": "extra/research_tools/ahp_calibration.py",
+    "backend/expert_label_aggregation.py": "extra/research_tools/expert_label_aggregation.py",
+    "backend/suitability_model_training.py": "extra/research_tools/suitability_model_training.py",
+    "scripts/01_validate_data.py": "extra/research_tools/scripts/01_validate_data.py",
+    "scripts/02_build_zone_features.py": "extra/research_tools/scripts/02_build_zone_features.py",
+    "scripts/03_build_training_data.py": "extra/research_tools/scripts/03_build_training_data.py",
+    "scripts/04_compare_kmeans.py": "extra/research_tools/scripts/04_compare_kmeans.py",
+    "scripts/04_train_kmeans.py": "extra/research_tools/scripts/04_train_kmeans.py",
+    "research/mcda_baseline.py": "extra/research_tools/mcda_baseline.py",
+}
 
 
 def test_openapi_contract_matches_pre_refactor_baseline():
-    expected = json.loads((ROOT / "docs/api-contract-baseline.json").read_text(encoding="utf-8"))
+    expected = json.loads((BASELINES / "api-contract-baseline.json").read_text(encoding="utf-8"))
     assert api.app.openapi() == expected
 
 
@@ -30,7 +47,7 @@ def test_database_and_boundary_paths_remain_stable():
 
 
 def test_original_runtime_and_research_assets_are_unchanged():
-    baseline = json.loads((ROOT / "docs/refactor-baseline.json").read_text(encoding="utf-8"))
+    baseline = json.loads((BASELINES / "refactor-baseline.json").read_text(encoding="utf-8"))
     for name, digest in baseline.get("tracked_assets_sha256", baseline["assets_sha256"]).items():
         path = resolve_dataset_path(name)
         assert path.is_file(), name
@@ -41,9 +58,9 @@ def test_original_runtime_and_research_assets_are_unchanged():
 
 
 def test_scientific_implementations_match_original_function_bodies():
-    baseline = json.loads((ROOT / "docs/algorithm-baseline.json").read_text(encoding="utf-8"))
+    baseline = json.loads((BASELINES / "algorithm-baseline.json").read_text(encoding="utf-8"))
     for filename, expected in baseline.items():
-        tree = ast.parse((ROOT / filename).read_text(encoding="utf-8"))
+        tree = ast.parse((ROOT / IMPLEMENTATION_PATHS.get(filename, filename)).read_text(encoding="utf-8"))
         actual = {n.name: hashlib.sha256(ast.dump(n, include_attributes=False).encode()).hexdigest()
                   for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))}
         assert actual == expected, filename

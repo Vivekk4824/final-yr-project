@@ -107,6 +107,6 @@ try {
 } catch(error) {report.errors.push(String(error));throw error;}
 finally {
   await writeFile(swPath,originalWorker);
-  await mkdir(path.join(root,"reports/vendormap"),{recursive:true});await writeFile(path.join(root,"reports/vendormap/pwa-results.json"),JSON.stringify(report,null,2));
+  await mkdir(path.join(root,"extra/reports/vendormap"),{recursive:true});await writeFile(path.join(root,"extra/reports/vendormap/pwa-results.json"),JSON.stringify(report,null,2));
   await browser?.close();await new Promise(resolve=>server?.httpServer ? server.httpServer.close(resolve) : resolve());backend.kill();
 }

@@ -81,6 +81,7 @@ export const getRecommendations = (vendorId, excludeZone = "", preferences = {})
     business: preferences.business || "",
     division: preferences.division || "",
     top_n: 3,
+    ...(preferences.expandSearch ? {expand_search: true} : {}),
   }));
 export const getRecommendationAiExplanation = zoneId =>
   apiRequest(`/api/recommendations/${encodeURIComponent(zoneId)}/ai-explanation`);

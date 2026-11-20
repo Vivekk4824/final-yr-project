@@ -5,8 +5,8 @@ from fastapi.testclient import TestClient
 
 from backend.application import app
 from backend.core import context
-from backend.decision_policy import derive_mcda_weights
-from backend.mcda_engine import recommend
+from backend.recommendation.decision_policy import derive_mcda_weights
+from backend.recommendation.mcda_engine import recommend
 from backend.repositories.database import connect, initialize_database, transaction, utc_now
 from backend.services.capacity_analysis import capacity_pressure_summary, zone_capacity_analysis
 from backend.services.relocation_recommendations import relocation_recommendations

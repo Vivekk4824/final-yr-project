@@ -4,6 +4,7 @@ venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.tsupgrader/
 .mypy_cache/
 .ruff_cache/
 *.egg-info/
@@ -11,6 +12,7 @@ build/
 dist/
 
 # Node / React dependencies
+.npm-cache/
 node_modules/
 **/node_modules/
 **/dist/
@@ -62,6 +64,7 @@ data/operational/*.db-shm
 # Private credentials or officer-maintained live records
 data/raw/nmc/zone_live_status.csv
 reports/expert_review/expert_labels.csv
+extra/reports/expert_review/expert_labels.csv
 
 # Tooling / browser review artifacts (source tests and curated reports remain tracked)
 .coverage
@@ -74,6 +77,8 @@ test-results/
 data/**/vendors.csv
 data/archive/**/vendor*.csv
 reports/migrations/
+extra/reports/migrations/
 
 .worktrees/
 reports/vendormap-frontend-before.zip
+extra/reports/vendormap-frontend-before.zip

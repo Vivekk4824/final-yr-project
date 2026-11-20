@@ -1,0 +1,35 @@
+\section{Discussion}
+\label{sec:discussion}
+
+The development and empirical evaluation of UrbanVending AI provide substantive insights into the intersection of spatial decision analysis, algorithmic fairness, and municipal informal economy governance. This section discusses key findings, practical policy implications, and academic limitations.
+
+\subsection{Key Findings and Methodological Insights}
+\label{sec:disc_findings}
+
+The experimental results yield three foundational insights:
+\begin{enumerate}
+    \item \textbf{Non-linear Scaling Insulates MCDA Against Stakeholder Disagreement:} A common objection to multi-criteria models in municipal governance is that stakeholders cannot agree on objective factor weights. The 224-scenario sensitivity analysis established that when input features undergo non-linear diminishing-returns saturation and exponential proximity decay, the resulting ranking exhibits extreme resilience ($\rho = 0.9977$ mean rank correlation and 100\% Top-1 stability). Consequently, minor policy debates over exact AHP weights do not compromise core zone recommendations.
+    \item \textbf{The Inadequacy of Standalone Suitability Ranking:} The case study in Section~\ref{sec:res_paradox} demonstrated that unconstrained suitability ranking produces catastrophic over-allocation in high-density retail corridors (e.g., 50 vendors assigned to a 5-capacity zone). Purely predictive machine learning or greedy ranking models optimize individual vendor placement but ignore collective physical spatial carrying capacity. Two-stage pre-emptive Goal Programming is therefore non-negotiable for real-world municipal feasibility.
+    \item \textbf{The Micro-Scale Operational Gap:} High-level town-planning zoning frequently fails during field enforcement because officers and vendors lack micro-spatial certainty. By introducing automated $2\,\text{m} \times 2\,\text{m}$ metric slot generation with sub-millimeter geometric precision ($1.87 \times 10^{-9}\,\text{m}$ error) and guaranteed $1.2\,\text{m}$ pedestrian corridors, UrbanVending AI operationalizes rights-of-way protection without relying on ad-hoc physical demarcation.
+\end{enumerate}
+
+\subsection{Policy and Urban Governance Implications}
+\label{sec:disc_policy}
+
+UrbanVending AI directly supports the implementation of statutory mandates under the \textit{Street Vendors Act, 2014}~\cite{india2014street}. Specifically:
+\begin{itemize}
+    \item \textbf{Town Vending Committee (TVC) Empowerment:} The AHP calibration panel provides TVC members—comprising municipal authorities, police representatives, and vendor union leaders—with a transparent mathematical forum to establish consensus weights while monitoring consistency ratios ($CR \le 0.10$).
+    \item \textbf{Digital Inclusivity and Anti-Extortion Safeguards:} By delivering digital allocation credentials and navigation guidance directly through the Meta WhatsApp Cloud API in Marathi and English, the platform removes informational gatekeeping, protecting vulnerable informal vendors from harassment and unauthorized middleman fees.
+    \item \textbf{Auditable Livelihood Protection:} Every allocation decision is logged with full MCDA factor breakdowns and Goal Programming optimization histories, providing an immutable audit trail to defend municipal policies during judicial review or administrative appeals.
+\end{itemize}
+
+\subsection{Limitations and Threats to Validity}
+\label{sec:disc_limitations}
+
+In adherence to research integrity, several limitations of the present study must be explicitly acknowledged:
+\begin{enumerate}
+    \item \textbf{Volunteer Geographic Information (OSM) Incompleteness:} Although OpenStreetMap provided 13,988 road links and 353 commercial POIs, crowdsourced spatial data in Indian tier-two cities exhibits geographic unevenness. An observed zero POI count in a newly developing peripheral ward does not establish the physical absence of informal commerce.
+    \item \textbf{Unmapped Municipal Geometries:} While 258 official zones possessed usable spatial boundaries, 50 zones in the official NMC registry lacked geographic coordinates and could not be evaluated. Complete citywide coverage requires physical municipal re-surveys.
+    \item \textbf{Supervised Suitability Dataset Constraints:} The supervised machine learning and TreeSHAP models benchmarked in Section~\ref{sec:res_ml_shap} evaluated 140 instances. While grouped cross-validation prevented leakage, the supervised models represent an experimental proof-of-pipeline. Institutional deployment should continue to rely on the transparent AHP-MCDA engine until large-scale, multi-year empirical business revenue outcomes are collected.
+    \item \textbf{Static vs. Temporal Vending Dynamics:} The current framework models spatial capacity statically. However, street vending often exhibits intense temporal cyclicity (e.g., morning fresh vegetable markets transitioning to evening street food hubs). Temporal time-banking of micro-slots represents an important area for subsequent development.
+\end{enumerate}

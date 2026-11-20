@@ -4,12 +4,12 @@ from backend.core import context as dependencies
 from fastapi import Request as FastAPIRequest
 from fastapi import HTTPException
 from backend.schemas.api import Request
-from backend.recommendation_evaluation import SensitivityConfig
+from backend.recommendation.recommendation_evaluation import SensitivityConfig
 from backend.schemas.api import SensitivityRequest
 from backend.core.serialization import clean
-from backend.recommendation_evaluation import evaluate_weight_sensitivity
+from backend.recommendation.recommendation_evaluation import evaluate_weight_sensitivity
 from backend.services.explanations import explain
-from backend.mcda_engine import recommend
+from backend.recommendation.mcda_engine import recommend
 import pandas as pd
 from backend.core.data_paths import CATALOG, dataset_path
 from backend.services.eligibility import zone_ineligibility_reason
@@ -20,10 +20,36 @@ from backend.services.ai_zone_explanations import generate_explanations
 from backend.core.security import request_session
 from backend.services.vendors import get_vendor_profile
 from backend.repositories.database import get_active_allocation_for_vendor
-from backend.decision_policy import FACTOR_ORDER
+from backend.recommendation.decision_policy import FACTOR_ORDER
+from backend.recommendation.business_aware_mcda import CATEGORY_GIS_FEATURE_WEIGHTS
+from backend.recommendation.location_ranking import DISTANCE_RADII_KM, configured_location_policy, saved_working_location
 from backend.services.capacity_analysis import zone_capacity_analysis
 from fastapi import APIRouter
 router = APIRouter()
+
+PERSONALIZED_FIELDS = (
+    "original_mcda_score", "personalized_score", "distance_km", "proximity_score",
+    "requested_business_category", "category_gis_method", "category_gis_fallback_used",
+)
+
+
+def _ranking_reason(row):
+    if pd.isna(row.get("score")):
+        return {}
+    category_features = CATEGORY_GIS_FEATURE_WEIGHTS.get(row.get("requested_business_category"), {})
+    mapped = {
+        feature: weight * value
+        for feature, weight in category_features.items()
+        if pd.notna(value := row.get(f"category_gis_component_{feature}")) and value > 0
+    }
+    if mapped:
+        feature = max(mapped, key=mapped.get)
+        return {"ranking_reason": {"kind": "mapped_poi", "feature": feature, "count": float(row[feature])}}
+    if pd.notna(row.get("distance_km")) and row["distance_km"] <= 3:
+        return {"ranking_reason": {"kind": "nearby"}}
+    factors = [factor for factor in FACTOR_ORDER if pd.notna(row.get(f"{factor}_contribution"))]
+    factor = max(factors, key=lambda item: row[f"{item}_contribution"]) if factors else None
+    return {"ranking_reason": {"kind": "mcda_factor", "factor": factor}} if factor else {}
 
 
 @router.get("/api/recommendations/{zone_id}/ai-explanation")
@@ -41,7 +67,7 @@ def recommendation_ai_explanation(zone_id: str, request: FastAPIRequest):
     active = get_active_allocation_for_vendor(vendor_id, dependencies.DATABASE_PATH)
     exclude_zone = str(active["zone_id"]) if active is not None else ""
     payload = Request(vendor_id=vendor_id, exclude_zone=exclude_zone, top_n=20)
-    context = resolve_recommendation_context(payload, request)
+    context = resolve_recommendation_context(payload, request, use_saved_vendor_preferences=True)
     try:
         result = recommend(
             context["business"],
@@ -105,6 +131,7 @@ def recommendations(
         resolve_recommendation_context(
             req,
             request,
+            use_saved_vendor_preferences=True,
         )
     )
 
@@ -140,15 +167,31 @@ def recommendations(
         ]
     )
 
+    exclude_zone = req.exclude_zone
+    location = None
+    radius_km = None
+    saved_radius = None
+    location_policy = None
+    if context["vendor_session"]:
+        active = get_active_allocation_for_vendor(profile["vendor_id"], dependencies.DATABASE_PATH)
+        if active is not None:
+            exclude_zone = active["zone_id"]
 
     try:
+        if context["vendor_session"]:
+            location_policy = configured_location_policy()
+            if location_policy is not None:
+                location = saved_working_location(profile)
+            saved_radius = profile.get("preferred_radius_km")
+            if location is not None and saved_radius in DISTANCE_RADII_KM and not req.expand_search:
+                radius_km = saved_radius
 
         result = recommend(
             business,
             division,
             engine_vendor_id,
             req.top_n,
-            req.exclude_zone,
+            exclude_zone,
             req.require_verified,
             use_live_status=True,
             database_path=dependencies.DATABASE_PATH,
@@ -156,6 +199,9 @@ def recommendations(
                 effective_weights
             ),
             include_all=True,
+            location=location,
+            radius_km=radius_km,
+            location_policy=location_policy,
         )
 
 
@@ -204,7 +250,7 @@ def recommendations(
 
         "personalization_applied":
             bool(
-                req.vendor_id
+                profile
             ),
 
         "priority_profile":
@@ -302,6 +348,18 @@ def recommendations(
             ),
         })
 
+    metadata["location_ranking"] = {
+        "enabled": location_policy is not None,
+        "applied": location is not None,
+        "radius_km": radius_km,
+        "expanded": bool(location is not None and req.expand_search and saved_radius in DISTANCE_RADII_KM),
+        "can_expand": radius_km is not None and len(result) < req.top_n,
+    }
+    if location is not None:
+        metadata["location_ranking"].update({
+            "proximity_weight": location_policy.proximity_weight,
+            "decay_km": location_policy.decay_km,
+        })
 
     all_candidates = result.attrs["all_candidates"]
     ranks = {zone_id:index+1 for index,zone_id in enumerate(all_candidates.loc[all_candidates.score.notna(), "zone_id"])}
@@ -312,6 +370,7 @@ def recommendations(
                      "location_source":row.get("reference_location_source"),
                      "scoreability_reason":row.get("scoreability_reason"),
                      "factors":explain(row, effective_weights)})
+        item.update(_ranking_reason(row))
         return clean(item)
 
     # One score calculation supplies both the highlighted and complete lists.
@@ -324,7 +383,7 @@ def recommendations(
     eligible_ids = set(all_candidates.zone_id)
     ineligible = []
     for zone in official.itertuples(index=False):
-        if zone.zone_id == req.exclude_zone:
+        if zone.zone_id == exclude_zone:
             reason = "CURRENT_ZONE_EXCLUDED"
         elif zone.zone_id in eligible_ids:
             continue
@@ -354,8 +413,9 @@ def recommendations(
 
             "notice":
                 (
-                    "No suitable available zones were found in the selected "
-                    f"division: {division}. No allocation is inferred."
+                    "No scorable eligible zones were found within the selected distance."
+                    if radius_km is not None
+                    else f"No suitable available zones were found in the selected division: {division}. No allocation is inferred."
                     if division
                     else
                     "No operationally available zones meet the selected "
@@ -406,6 +466,7 @@ def recommendations(
         "current_vendor_count",
         "available_capacity",
         "reference_location_source",
+        *PERSONALIZED_FIELDS,
     ]
 
 
@@ -463,6 +524,7 @@ def recommendations(
                     {"label": "Accepted historical associations", "value": item["accepted_historical_association_count"]},
                 ]
         item.update({"title":row.zone_id, "description":row.get("official_description"), "location_source":row.get("reference_location_source")})
+        item.update(_ranking_reason(row))
 
 
         records.append(

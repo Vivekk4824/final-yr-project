@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 import backend.api as api
 from backend.database import connect, initialize_database, utc_now
-from backend.mcda_engine import CATEGORIES, derive_mcda_weights, recommend
+from backend.recommendation.mcda_engine import CATEGORIES, derive_mcda_weights, recommend
 from backend.vendor_service import HISTORICAL_VENDOR_PATH
 from backend.services import vendors as vendor_service
 

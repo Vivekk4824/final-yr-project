@@ -28,6 +28,18 @@ test("unscoreable eligibility stays accessible without numerical score or rank",
   assert.equal(suitableZoneSections({...data,eligible_unscorable_zones:[{...unscored,eligible:false}]}).unscored.length,0);
 });
 
+test("a short nearby shortlist keeps its highlights while the explorer includes all eligible zones", () => {
+  const sections = suitableZoneSections({
+    recommendations: [{...b, rank: 1}],
+    remaining_recommendations: [{...c, rank: 1}, {...a, rank: 2}],
+    eligible_unscorable_zones: [unscored],
+    location_ranking: {applied: true, radius_km: 1},
+  });
+  assert.deepEqual(sections.scored.map(zone => zone.zone_id), [b.zone_id, c.zone_id, a.zone_id]);
+  assert.deepEqual(sections.scored.map(zone => zone.is_top_three), [true, false, false]);
+  assert.equal(sections.unscored.length, 1);
+});
+
 test("division, zone ID and operational capacity filters retain honest missing values", () => {
   assert.equal(suitableZoneSections(data,{division:"Satpur"}).scored[0].zone_id,c.zone_id);
   assert.equal(suitableZoneSections(data,{search:"nn_f_013"}).scored[0].zone_id,a.zone_id);

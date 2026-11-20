@@ -167,7 +167,7 @@ export default function ImplementationApp() {
     </header>
     <div className="implementation-content"><div className="implementation-view" id="main-content" tabIndex={-1}>
     {logoutError && <p role="alert" className="vendor-action-notice">{logoutError}</p>}
-    {(session.role === "VENDOR" || onboarding) && <VendorPortal onProfileUpdated={updateVendorProfile} focusRequestId={focusedRequestId} openOwnSlot={openOwnSlot} sessionProfile={session.vendor_profile} onboarding={onboarding} view={page} detailZoneId={recommendationZoneId} onNavigate={navigate} onOpenRecommendation={openRecommendation} onBackRecommendations={backToRecommendations} onRegistered={refreshSession}/>}
+    {(session.role === "VENDOR" || onboarding) && <VendorPortal key={session.vendor_id} onProfileUpdated={updateVendorProfile} focusRequestId={focusedRequestId} openOwnSlot={openOwnSlot} sessionProfile={session.vendor_profile} onboarding={onboarding} view={page} detailZoneId={recommendationZoneId} onNavigate={navigate} onOpenRecommendation={openRecommendation} onBackRecommendations={backToRecommendations} onRegistered={refreshSession}/>}
     {session.role === "ADMIN" && page !== "vendors" && <AdminDashboard adminId={session.admin_id} slotTarget={slotTarget} section={page === "admin" ? "overview" : page} onSectionChange={id => navigate(id === "overview" ? "admin" : id)}/>}
     {session.role === "ADMIN" && page === "vendors" && <VendorDirectory onViewSlot={slot => {setSlotTarget({...slot}); navigate("map");}}/>}
   </div></div>

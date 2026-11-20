@@ -1,0 +1,40 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Street vending constitutes a vital socioeconomic pillar in developing and emerging urban economies. Across the Global South, millions of micro-entrepreneurs rely on informal retail to sustain household livelihoods, while urban residents depend on street vendors for affordable, proximate access to fresh produce, prepared food, and essential commodities~\cite{bhowmik2005street, bromley2000street}. However, the rapid expansion of informal vending often collides with formal municipal infrastructure, generating severe urban governance tensions. In dense commercial nodes, unregulated vending can lead to pedestrian walkway encroachments, vehicular gridlock, visual disorder, and acute sanitation deficiencies~\cite{bromley2000street}. Conversely, heavy-handed eviction policies and punitive clearances undermine the statutory protections granted to vulnerable vendors, precipitating immediate livelihood precarity.
+
+To institutionalize a rights-based regulatory framework, statutory mandates such as the \textit{Street Vendors (Protection of Livelihood and Regulation of Street Vending) Act, 2014} in India established legal mechanisms to protect vendors from arbitrary displacement while mandating Urban Local Bodies (ULBs) to delineate designated vending, restricted vending, and non-vending zones~\cite{india2014street}. In practice, however, municipal authorities face formidable computational and operational hurdles when attempting to implement these legal mandates at scale.
+
+\subsection{The Unverified Heuristic Allocation Challenge}
+\label{sec:unverified_challenge}
+
+In most municipal jurisdictions, including the Nashik Municipal Corporation (NMC) in Maharashtra, India, street vendor zoning and permit allocations have historically relied on static paper-based registries, coarse town-planning maps, or uncoordinated discretionary officer decisions. Such traditional approaches suffer from three systemic vulnerabilities:
+
+\begin{enumerate}
+    \item \textbf{Spatial and Environmental Blindness:} Conventional zone categorization assigns arbitrary capacity ceilings without quantitative spatial analysis of local pedestrian accessibility, transit connectivity, or proximity to critical amenities such as public sanitary conveniences and water infrastructure.
+    \item \textbf{Category-Zone Incompatibility and Disagreement:} Retail requirements vary drastically across business typologies. A perishable produce vendor requires different proximity characteristics and waste facilities than an apparel or dry-goods cart. Heuristic assignments routinely locate vendors in commercial deserts or in over-saturated clusters where excessive competition induces financial insolvency.
+    \item \textbf{The Aggregate Capacity Paradox:} Even when a high-level zoning plan specifies aggregate zone capacities, municipal systems lack physical micro-allocation mechanisms. In practice, vendors assigned to a designated zone compete chaotically for curb space, frequently encroaching on mandatory pedestrian corridors and roadway clear zones. Furthermore, predictive machine learning models, if deployed naively, risk assigning vendors to high-suitability locations that are already over-saturated, thereby violating statutory physical space constraints.
+\end{enumerate}
+
+\subsection{Project Objectives and Research Contributions}
+\label{sec:objectives}
+
+To bridge the gap between statutory zoning mandates and operational urban execution, this paper presents \textbf{UrbanVending AI}, an end-to-end geospatial decision-support and micro-allocation framework engineered for municipal street vendor governance. The framework integrates multi-source geographic information systems (GIS), unsupervised spatial clustering, missing-data-aware Multi-Criteria Decision Analysis (MCDA), Analytic Hierarchy Process (AHP) calibration, pre-emptive Goal Programming, and metric micro-slot packing.
+
+The principal technical contributions of this work are as follows:
+
+\begin{itemize}
+    \item \textbf{Comprehensive Municipal GIS Ingestion Pipeline:} Ingestion, normalization, and geographic reconciliation of 7,259 official vendor records and 308 municipal zones across six administrative divisions of Nashik, cross-referenced with 13,988 road geometries and 353 commercial point-of-interest (POI) clusters from OpenStreetMap (OSM).
+    \item \textbf{Environmental Typology via Spatial Clustering:} Unsupervised $K$-Means modeling on 12 scale-transformed environmental features across 258 usable zone geometries, establishing a reproducible environmental baseline ($ARI = 1.0$ across random initialization seeds).
+    \item \textbf{Missing-Data-Aware MCDA with AHP Calibration:} A six-factor decision-support engine incorporating non-linear log-saturation, exponential proximity decay, and empirical Bayes category shrinkage with leave-location-group-out cross-validation to prevent self-reinforcing historical bias, calibrated via AHP with formal consistency ratio verification ($CR \le 0.10$).
+    \item \textbf{Robustness via Large-Scale Sensitivity Analysis:} Comprehensive evaluation across 224 weight-perturbation scenarios, proving 100\% Top-1 ranking stability and a mean Spearman rank correlation of $\rho = 0.9977$.
+    \item \textbf{Two-Stage Pre-emptive Goal Programming (MILP):} A mathematical optimization formulation solved via the HiGHS dual revised simplex engine that guarantees zero capacity over-allocation while minimizing vendor suitability loss and preference fallback.
+    \item \textbf{Metric Micro-Slot Packing Generator:} Geographic micro-allocation in projected metric coordinates (EPSG:32643 / UTM Zone 43N), validated on the Lekha Nagar (NN\_F\_013) pilot to pack 10 standardized $2\,\text{m} \times 2\,\text{m}$ slots with sub-millimeter edge tolerances, $\ge 0.5\,\text{m}$ spacing, and a $1.2\,\text{m}$ continuous pedestrian corridor.
+    \item \textbf{Explainable ML Suitability Benchmarking:} Supervised benchmarking across 5-fold grouped cross-validation, demonstrating that ensemble regression ($R^2 = 0.7592$, $\text{MAE} = 0.2469$) outperforms mean baselines by 59.8\%, accompanied by TreeSHAP feature attributions.
+    \item \textbf{Production Full-Stack Architecture with Privacy Guardrails:} An authenticated, role-based platform pairing a React/Leaflet dashboard with a FastAPI/SQLite backend, featuring HMAC-SHA256 identity hashing for vendor privacy and direct Meta WhatsApp Cloud API integration.
+\end{itemize}
+
+\subsection{Paper Organization}
+\label{sec:org}
+
+The remainder of this paper is structured as follows. Section~\ref{sec:literature_review} surveys related literature in urban informal economics, spatial MCDA, mathematical programming, and explainable AI. Section~\ref{sec:methodology} formalizes the seven-stage UrbanVending AI methodology and mathematical formulations. Section~\ref{sec:experimental_setup} outlines the empirical datasets and evaluation metrics. Section~\ref{sec:results} presents experimental findings, sensitivity analyses, pilot micro-slot validation, and ablation studies. Section~\ref{sec:implementation} details the operational software architecture and conversational integration. Section~\ref{sec:discussion} discusses policy implications, threats to validity, and limitations. Finally, Section~\ref{sec:conclusion} concludes the paper and delineates future research directions.

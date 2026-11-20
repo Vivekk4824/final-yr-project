@@ -1,0 +1,55 @@
+\section{Literature Review}
+\label{sec:literature_review}
+
+Urban street vending management lies at the confluence of urban geography, informal economics, multi-criteria spatial modeling, operations research, and interpretable machine learning. This section reviews relevant theoretical and empirical foundations, highlighting key limitations in prior approaches that motivate the proposed framework.
+
+\subsection{Street Vending Governance and Informal Urban Economics}
+\label{sec:lit_vending}
+
+In their seminal reviews of street vending across Asia and Latin America, Bhowmik~\cite{bhowmik2005street} and Bromley~\cite{bromley2000street} established that the informal retail sector is neither a transient friction nor an inherently parasitic phenomenon. Instead, it constitutes an indispensable structural element of urban consumer distribution, absorbing significant labor surpluses and supplying low-income urban strata with essential food and household commodities. However, uncoordinated vending generates spatial externalities, including footway impedance, public right-of-way contestation, and vehicular congestion. 
+
+In India, recognition of these dynamics culminated in the \textit{Street Vendors (Protection of Livelihood and Regulation of Street Vending) Act, 2014}, which legally established Town Vending Committees (TVCs) and mandated spatial surveys, natural market demarcation, and periodic socio-economic census enumeration~\cite{india2014street}. Despite this progressive legislative mandate, municipal authorities frequently encounter operational deficits: zoning decisions are often negotiated through blunt administrative decrees or static tabular records lacking fine-grained spatial evidence.
+
+\subsection{Spatial Multi-Criteria Decision Analysis and AHP in Urban Planning}
+\label{sec:lit_mcda}
+
+Multi-Criteria Decision Analysis (MCDA) integrated with Geographic Information Systems (GIS) provides a rigorous mathematical apparatus for evaluating competing spatial alternatives~\cite{malczewski1999gis}. Malczewski~\cite{malczewski2006ordered} demonstrated that spatial decision-making fundamentally requires balancing heterogeneous environmental attributes—such as proximity to transport nodes, pedestrian density, and public infrastructure—where no single alternative simultaneously dominates all criteria.
+
+To assign objective weights across criteria, the Analytic Hierarchy Process (AHP), formulated by Saaty~\cite{saaty1980analytic, saaty1990how}, has been widely adopted in municipal site-suitability studies. AHP decomposes complex multi-attribute decision problems into a reciprocal pairwise comparison matrix, calculating criterion weights via the principal eigenvector and bounding subjective inconsistencies through the Consistency Ratio ($CR$). 
+
+However, conventional spatial MCDA pipelines assume complete spatial datasets and static uniform weights across all decision agents. In municipal street vendor allocation, criteria data are frequently incomplete or subject to varying spatial survey coverage. Moreover, existing systems rarely implement non-linear diminishing-returns transforms or shrinkage mechanisms to prevent historical self-reinforcement when measuring location-category compatibility.
+
+\subsection{Mathematical Optimization and Goal Programming}
+\label{sec:lit_optimization}
+
+While spatial MCDA computes a suitability score for individual vendor-zone pairings, it does not solve the collective resource-allocation problem under strict municipal capacity constraints. When multiple vendors compete for limited authorized slots in prime commercial zones, independent greedy allocation based on MCDA scores inevitably causes catastrophic capacity over-allocation.
+
+To resolve competing institutional objectives under finite resource constraints, Charnes and Cooper~\cite{charnes1977goal} introduced Goal Programming as an extension of linear programming. Romero~\cite{romero1991handbook} further developed pre-emptive (lexicographic) Goal Programming, wherein higher-priority organizational goals (e.g., maximizing the absolute number of legally accommodated vendors) are satisfied before subordinate optimization goals (e.g., minimizing suitability loss or preference fallback) are considered. 
+
+Recent advancements in mathematical programming solvers, such as the open-source HiGHS solver~\cite{huang2023highs} integrated into SciPy~\cite{virtanen2020scipy}, enable efficient exact solutions to large-scale mixed-integer linear programming (MILP) allocation problems. However, the application of two-stage pre-emptive Goal Programming directly coupled with spatial MCDA suitability scores and physical geometric micro-slot packing remains largely unexplored in municipal street vending literature.
+
+\subsection{Spatial Clustering and Open GIS Infrastructure}
+\label{sec:lit_clustering}
+
+The extraction of environmental typologies from urban spatial data relies on unsupervised clustering algorithms, with $K$-Means clustering~\cite{macqueen1967some, lloyd1982least} remaining the foundational benchmark for continuous multi-dimensional feature partitioning. 
+
+With the maturation of collaborative geographic data platforms like OpenStreetMap (OSM)~\cite{haklay2008openstreetmap}, urban researchers can extract comprehensive physical road networks and commercial point-of-interest (POI) layers without proprietary geographic database licensing. Nevertheless, volunteer geographic information exhibits spatial reporting variability and missingness. Unsupervised clustering models must therefore be rigorously evaluated against random-seed stability and decoupled from legal allocation constraints to avoid treating unverified spatial clusters as statutory vending zones.
+
+\subsection{Supervised Machine Learning and Explainable AI (XAI)}
+\label{sec:lit_ml_xai}
+
+Ensemble machine learning algorithms, notably Random Forests~\cite{breiman2001random} and Extreme Gradient Boosting (XGBoost)~\cite{chen2016xgboost}, have demonstrated superior predictive capability on complex, non-linear tabular datasets~\cite{pedregosa2011scikit}. When applied to urban suitability estimation, however, black-box ensemble algorithms complicate institutional adoption because municipal officers and affected vendors cannot inspect the underlying decision logic.
+
+To alleviate opacity, post-hoc Explainable AI (XAI) frameworks based on cooperative game theory, specifically SHapley Additive exPlanations (SHAP)~\cite{lundberg2017unified}, compute additive feature attributions satisfying local accuracy, missingness, and consistency. In urban governance applications, SHAP enables auditability by revealing which specific environmental factors (e.g., commercial density versus transit proximity) drove a given suitability judgment.
+
+\subsection{Research Gap and Positioning of UrbanVending AI}
+\label{sec:lit_gap}
+
+A critical synthesis of prior literature reveals three overarching gaps:
+\begin{enumerate}
+    \item \textbf{Decoupling of Suitability and Capacity:} Existing spatial recommendation engines rank zones in isolation without constraining aggregate assignments against physical municipal carrying capacity.
+    \item \textbf{Absence of Physical Micro-Slot Engineering:} Macro-level zoning allocations rarely bridge the gap to micro-scale geometric layout, leaving assigned vendors without demarcated $2\,\text{m}\times 2\,\text{m}$ footprints or mandatory pedestrian clearance corridors.
+    \item \textbf{Heuristic Weighting without Rigorous Sensitivity Auditing:} Practical municipal systems often apply ad-hoc criteria weights without empirical sensitivity testing to verify ranking robustness under stakeholder weight perturbation.
+\end{enumerate}
+
+UrbanVending AI directly addresses these shortcomings through a unified, end-to-end framework integrating multi-criteria GIS modeling, AHP consistency calibration, 224-scenario sensitivity analysis, pre-emptive Goal Programming, and metric micro-slot packing.

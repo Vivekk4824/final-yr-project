@@ -1,0 +1,21 @@
+k,cluster,profile_name,selected_seed,zone_count,share_of_training_rows,smallest_cluster_for_k,largest_cluster_for_k,cluster_size_ratio_for_k
+2,0,Public Transport Access with Mapped Commercial Activity,42,83,0.32170542635658916,83,175,2.108433734939759
+2,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,42,175,0.6782945736434108,83,175,2.108433734939759
+3,0,Mapped Commercial Activity with Mapped Public Facilities,42,32,0.12403100775193798,32,169,5.28125
+3,1,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,42,169,0.6550387596899225,32,169,5.28125
+3,2,Public Transport Access,42,57,0.22093023255813954,32,169,5.28125
+4,0,Public Transport Access,43,54,0.20930232558139536,21,160,7.619047619047619
+4,1,Mapped Commercial Activity with Road and Pedestrian Access,43,21,0.08139534883720931,21,160,7.619047619047619
+4,2,Mapped Public Facilities with Mapped Commercial Activity,43,23,0.08914728682170543,21,160,7.619047619047619
+4,3,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,43,160,0.6201550387596899,21,160,7.619047619047619
+5,0,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,42,158,0.6124031007751938,3,158,52.666666666666664
+5,1,Mapped Public Facilities with Mapped Commercial Activity,42,26,0.10077519379844961,3,158,52.666666666666664
+5,2,Public Transport Access,42,53,0.2054263565891473,3,158,52.666666666666664
+5,3,Mapped Commercial Activity with Road and Pedestrian Access,42,18,0.06976744186046512,3,158,52.666666666666664
+5,4,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,42,3,0.011627906976744186,3,158,52.666666666666664
+6,0,Lower Mapped Environmental Intensity; relatively Mapped Commercial Activity,42,3,0.011627906976744186,3,116,38.666666666666664
+6,1,Public Transport Access,42,55,0.2131782945736434,3,116,38.666666666666664
+6,2,Mapped Public Facilities with Mapped Commercial Activity,42,23,0.08914728682170543,3,116,38.666666666666664
+6,3,Road and Pedestrian Access,42,40,0.15503875968992248,3,116,38.666666666666664
+6,4,Lower Mapped Environmental Intensity; relatively Road and Pedestrian Access,42,116,0.4496124031007752,3,116,38.666666666666664
+6,5,Mapped Commercial Activity with Road and Pedestrian Access,42,21,0.08139534883720931,3,116,38.666666666666664

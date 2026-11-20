@@ -1,0 +1,1727 @@
+{
+  "checks": [
+    "Login, language switching, OTP validation and OTP verification through real forms; reduced viewport remains scrollable",
+    "OTP login reaches onboarding",
+    "Home action loads three real recommendations",
+    "Ranking preferences persist through UI",
+    "Explore all opens interactive map/list",
+    "Non-top-three application submitted through UI",
+    "Profile photo uploads and persists; initials fallback; localized identity preview; PNG download uses the public application reference",
+    "Profile saves through UI",
+    "Officer approves vendor application through UI",
+    "Vendor directory loads",
+    "Vendor search returns registered test vendor",
+    "Read-only relocation alternatives load for approved vendor",
+    "Zone management loads official capacity",
+    "City map opens",
+    "Geographic slot workspace opens",
+    "No browser runtime exceptions"
+  ],
+  "layouts": [
+    {
+      "name": "login",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-en",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-en",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-en",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-en",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-en",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-en",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-mr",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-mr",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-mr",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-mr",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-mr",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-mr",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-hi",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-hi",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-hi",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-hi",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-hi",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "login-hi",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-en",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-en",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-en",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-en",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-en",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-en",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-mr",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-mr",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-mr",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-mr",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-mr",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-mr",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-hi",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-hi",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-hi",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-hi",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-hi",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-hi",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "otp-validation-error",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": null
+    },
+    {
+      "name": "vendor-home",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-home",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "recommendations",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "all-places",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "all-places",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "all-places",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "all-places",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "all-places",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "all-places",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zone-details",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "zone-details",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "zone-details",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "zone-details",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zone-details",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zone-details",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "applications",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "applications",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "applications",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "applications",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "applications",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "applications",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-en",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-en",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-en",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-en",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-en",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-en",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-en",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-en",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-en",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-en",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-en",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-en",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-mr",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-mr",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-mr",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-mr",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-mr",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-mr",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-mr",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-mr",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-mr",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-mr",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-mr",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-mr",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-hi",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-hi",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-hi",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "settings-hi",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-hi",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "settings-hi",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-hi",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-hi",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-hi",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile-hi",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-hi",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile-hi",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "fixed",
+        "top": 925,
+        "bottom": 1000,
+        "display": "grid"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 17.3125,
+        "bottom": 73.6875,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "profile",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 134.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 122.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "officer-overview",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "approval-dialog",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "approval-dialog",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "approval-dialog",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "approval-dialog",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 134.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "approval-dialog",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 122.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "approval-dialog",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 134.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 122.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vendor-directory",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 768,
+      "scroll": 768,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 134.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 1024,
+      "scroll": 1024,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 122.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "relocation-planning",
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zones",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zones",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zones",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zones",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [
+        "",
+        "",
+        ""
+      ],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 134.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zones",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [
+        "",
+        "",
+        ""
+      ],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 122.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "zones",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "city-map",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "city-map",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "city-map",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "city-map",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 134.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "city-map",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 122.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "city-map",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vending-slots",
+      "width": 320,
+      "scroll": 320,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vending-slots",
+      "width": 360,
+      "scroll": 360,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vending-slots",
+      "width": 390,
+      "scroll": 390,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 74,
+        "bottom": 128,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vending-slots",
+      "width": 768,
+      "scroll": 753,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 134.8125,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vending-slots",
+      "width": 1024,
+      "scroll": 1009,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 78.4375,
+        "bottom": 122.4375,
+        "display": "flex"
+      }
+    },
+    {
+      "name": "vending-slots",
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": [],
+      "nav": {
+        "position": "static",
+        "top": 23.5,
+        "bottom": 67.5,
+        "display": "flex"
+      }
+    }
+  ],
+  "errors": []
+}

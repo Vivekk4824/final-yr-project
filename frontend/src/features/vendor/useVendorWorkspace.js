@@ -9,13 +9,19 @@ import {mergeRecommendationContext, latestRecommendationRequest} from "./viewMod
 
 import {initialPilotState, pilotReducer, PILOT_ZONE_IDS} from "../pilot-slots/pilotState.js";
 
+const locationPreferences = profile => ({
+  preferred_latitude: profile?.preferred_latitude ?? null,
+  preferred_longitude: profile?.preferred_longitude ?? null,
+  preferred_radius_km: profile?.preferred_radius_km ?? null,
+});
+
 function draftFromProfile(profile) {
   return {
     full_name: profile?.full_name || "",
     business_name: profile?.business_name || "",
     business_category: profile?.business_category || "food",
     preferred_division: profile?.preferred_division || "",
-    preferred_locality: profile?.preferred_locality || "",
+    ...locationPreferences(profile),
     priority_profile: profile?.priority_profile || "BALANCED",
     market_preference: Boolean(profile?.market_preference),
     transport_preference: Boolean(profile?.transport_preference),
@@ -101,13 +107,14 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
     setActiveAllocation(active.allocation);
   };
   const register = event => { event.preventDefault(); run(async () => {
-    const vendor = await registerVendor({...draft, preferred_division: draft.preferred_division || null, preferred_locality: draft.preferred_locality || null});
+    const vendor = await registerVendor({...draft, preferred_division: draft.preferred_division || null});
     await hydrateVendor(vendor); await onRegistered?.(); setSuccess(t("onboarding.created"));
   }); };
   const persistProfile = () => run(async () => {
     recommendationRequest.current.invalidate();
-    const vendor = await updateVendorProfile(profile.vendor_id, {full_name: draft.full_name, business_name: draft.business_name, business_category: draft.business_category, preferred_division: draft.preferred_division || null, preferred_locality: draft.preferred_locality || null});
-    setProfile(vendor); setDraft(draftFromProfile(vendor)); selectLanguage(vendor.preferred_language); setRecommendationData(null); await refreshDashboard(true); setSuccess(t("profile.saved"));
+    const vendor = await updateVendorProfile(profile.vendor_id, {full_name: draft.full_name, business_name: draft.business_name, business_category: draft.business_category, preferred_division: draft.preferred_division || null, ...locationPreferences(draft)});
+    setProfile(vendor); setDraft(draftFromProfile(vendor)); selectLanguage(vendor.preferred_language);
+    await refreshSavedPreferences(vendor);
   });
   const saveAccountLanguage = next => run(async () => {
     const vendor = await updateVendorProfile(profile.vendor_id, {preferred_language: next});
@@ -117,28 +124,39 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
   });
   const saveRankingPreferences = event => {event.preventDefault(); run(async () => {
     recommendationRequest.current.invalidate();
-    const vendor = await updateVendorProfile(profile.vendor_id, {priority_profile: draft.priority_profile,
-      market_preference: draft.market_preference, transport_preference: draft.transport_preference, parking_preference: draft.parking_preference});
-    setProfile(vendor); setDraft(draftFromProfile(vendor)); await refreshDashboard(true);
-    await loadRecommendations(vendor, {navigate:false}); setSuccess(t("profile.saved"));
+    const vendor = await updateVendorProfile(profile.vendor_id, {business_category: draft.business_category,
+      preferred_division: draft.preferred_division || null, priority_profile: draft.priority_profile,
+      market_preference: draft.market_preference, transport_preference: draft.transport_preference, parking_preference: draft.parking_preference,
+      ...locationPreferences(draft)});
+    setProfile(vendor); setDraft(draftFromProfile(vendor));
+    await refreshSavedPreferences(vendor);
   });};
+  const refreshSavedPreferences = async vendor => {
+    setSuccess(t("profile.saved"));
+    try {
+      await Promise.all([loadRecommendations(vendor, {navigate: false}), refreshDashboard(true)]);
+    } catch (error) {
+      setRecommendationData(null);
+      throw error;
+    }
+  };
   const saveProfile = event => {
     event.preventDefault();
     if (recommendationData) setPreferenceConfirm(true);
     else persistProfile();
   };
-  const loadRecommendations = async (vendor, {navigate = true} = {}) => {
+  const loadRecommendations = async (vendor, {navigate = true, expandSearch = false} = {}) => {
     const requestId = recommendationRequest.current.begin();
     try {
       const active = await getActiveAllocation(vendor.vendor_id);
       if (!recommendationRequest.current.isCurrent(requestId)) return;
       setActiveAllocation(active.allocation);
       const [data, context] = await Promise.all([
-        getRecommendations(vendor.vendor_id, active.allocation?.zone_id || "", {
-          business: vendor.business_category,
-          division: vendor.preferred_division || "",
+        getRecommendations(vendor.vendor_id, active.allocation?.zone_id || "", {expandSearch}),
+        getVendorEligibleZones().catch(error => {
+          if (error.status !== 503) throw error;
+          return {zones: [], current_zone_id: active.allocation?.zone_id || null};
         }),
-        getVendorEligibleZones(),
       ]);
       if (!recommendationRequest.current.isCurrent(requestId)) return;
       setMapUnavailableIds(null);
@@ -150,7 +168,7 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
       if (recommendationRequest.current.isCurrent(requestId)) throw error;
     }
   };
-  const findZones = ({navigate = true} = {}) => run(() => loadRecommendations(profile, {navigate}));
+  const findZones = ({navigate = true, expandSearch = false} = {}) => run(() => loadRecommendations(profile, {navigate, expandSearch}));
   useEffect(() => {
     const recommendationView = view === "vendor-recommendations" || view === "vendor-recommendation-detail";
     if (recommendationView && profileReady && profile && !recommendationData && (view === "vendor-recommendation-detail" || !dashboard?.action_state?.has_pending_request)) findZones({navigate: false});
