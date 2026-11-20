@@ -1,0 +1,73 @@
+\documentclass[conference]{IEEEtran}
+
+% ---------------------------------------------------------------------------
+% Core Packages
+% ---------------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{tikz}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% TikZ Libraries
+\usetikzlibrary{positioning, shapes.geometric, arrows.meta, calc, fit}
+
+% IEEE Citation and Reference Formatting
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+% ---------------------------------------------------------------------------
+% Title and Authors
+% ---------------------------------------------------------------------------
+\title{UrbanVending AI: A Geospatial Decision-Support and Micro-Allocation Framework for Municipal Street Vendor Zoning Using Multi-Criteria Evaluation, AHP Calibration, and Pre-emptive Goal Programming}
+
+\author{
+    \IEEEauthorblockN{Author Name 1\IEEEauthorrefmark{1}, Author Name 2\IEEEauthorrefmark{1}, Author Name 3\IEEEauthorrefmark{1}, and Author Name 4\IEEEauthorrefmark{1}}
+    \IEEEauthorblockA{\IEEEauthorrefmark{1}Department of Information Technology\\
+    [TODO: Insert College / Department Name], Nashik, Maharashtra, India\\
+    Email: \{author1, author2, author3, author4\}@[TODO: institution domain]}
+}
+
+\maketitle
+
+% ---------------------------------------------------------------------------
+% Abstract and Index Terms
+% ---------------------------------------------------------------------------
+\begin{abstract}
+Street vending sustains informal urban livelihoods across developing economies while supplying affordable goods to millions of city residents. However, uncoordinated street vending frequently conflicts with municipal infrastructure, causing pedestrian walkway encroachments, vehicular congestion, and public right-of-way disputes. Although statutory frameworks such as India's Street Vendors Act, 2014 mandate the demarcation of vending zones, municipal authorities lack operational geospatial tools to evaluate zone suitability, enforce carrying capacity, and engineer micro-scale physical vendor pitches. This paper presents UrbanVending AI, an end-to-end geospatial decision-support and micro-allocation framework for municipal street vendor zoning. Evaluated on official datasets from the Nashik Municipal Corporation (NMC) comprising 7,259 registered vendors and 308 municipal zones across six administrative divisions, the framework combines OpenStreetMap GIS feature engineering with unsupervised $K$-Means clustering ($ARI = 1.0$). A six-factor Multi-Criteria Decision Analysis (MCDA) engine incorporates non-linear saturation scaling, exponential proximity decay, and empirical Bayes category shrinkage with leave-location-group-out validation, calibrated via the Analytic Hierarchy Process (AHP) ($CR \le 0.10$). In a 224-scenario sensitivity audit, the MCDA model demonstrated 100\% Top-1 stability and a mean Spearman rank correlation of $\rho = 0.9977$. To resolve the spatial capacity paradox where greedy suitability selection causes massive over-allocation, the framework formulates two-stage pre-emptive Goal Programming (MILP) guaranteeing zero capacity violation. Physical feasibility is established through a metric micro-slot packing generator validated on the Lekha Nagar pilot (Zone NN\_F\_013), packing 10 standardized $2\,\text{m}\times 2\,\text{m}$ slots ($1.87 \times 10^{-9}\,\text{m}$ edge error) with $1.2\,\text{m}$ pedestrian clearance. Supervised benchmarking confirms that Random Forest regression ($R^2 = 0.7592$) achieves a 59.8\% error reduction over baselines, with TreeSHAP explainability attributing primary importance to commercial footfall. The operational system features an authenticated React/FastAPI architecture with HMAC-SHA256 identity hashing and direct Meta WhatsApp Cloud API integration, providing an auditable, privacy-preserving solution for equitable urban governance.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Geographic Information Systems (GIS), Multi-Criteria Decision Analysis (MCDA), Analytic Hierarchy Process (AHP), Pre-emptive Goal Programming, Mixed-Integer Linear Programming (MILP), Urban Street Vending, Micro-Slot Allocation, Explainable AI (XAI), TreeSHAP.
+\end{IEEEkeywords}
+
+% ---------------------------------------------------------------------------
+% Main Content Sections
+% ---------------------------------------------------------------------------
+\input{sections/introduction.tex}
+\input{sections/literature_review.tex}
+\input{sections/methodology.tex}
+\input{sections/experimental_setup.tex}
+\input{sections/results.tex}
+\input{sections/system_implementation.tex}
+\input{sections/discussion.tex}
+\input{sections/conclusion.tex}
+
+% ---------------------------------------------------------------------------
+% Bibliography
+% ---------------------------------------------------------------------------
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

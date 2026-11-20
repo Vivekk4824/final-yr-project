@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel, Field, StrictBool
 
+class VendorLocationPreferences(BaseModel):
+    preferred_latitude: float | None = Field(default=None, ge=-90, le=90, allow_inf_nan=False)
+    preferred_longitude: float | None = Field(default=None, ge=-180, le=180, allow_inf_nan=False)
+    preferred_radius_km: Literal[1, 3, 5, 10] | None = None
+
 class PilotSlotUpdate(BaseModel):
     status: Literal["AVAILABLE", "RESERVED", "OCCUPIED", "BLOCKED"]
     assigned_vendor_id: str | None = Field(default=None, max_length=100)
@@ -62,6 +67,7 @@ class Request(
     )
 
     require_verified: bool = False
+    expand_search: bool = False
 
 class SensitivityRequest(
     BaseModel
@@ -448,7 +454,7 @@ class ZoneLiveStatusResponse(
     updated_at: str
 
 class VendorRegistrationBody(
-    BaseModel
+    VendorLocationPreferences
 ):
 
     full_name: (
@@ -492,7 +498,7 @@ class VendorRegistrationBody(
     preferred_language: str = "en"
 
 class VendorProfileUpdateBody(
-    BaseModel
+    VendorLocationPreferences
 ):
 
     full_name: (
@@ -550,7 +556,7 @@ class VendorProfilePhotoUpdate(BaseModel):
 
 
 class VendorProfileResponse(
-    BaseModel
+    VendorLocationPreferences
 ):
 
     vendor_id: str

@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from backend.core.config import GeminiSettings, get_gemini_settings
 from backend.core.data_paths import CATALOG
-from backend.decision_policy import FACTOR_ORDER
+from backend.recommendation.decision_policy import FACTOR_ORDER
 
 
 LANGUAGE_NAMES = {"en": "English", "mr": "Marathi", "hi": "Hindi"}

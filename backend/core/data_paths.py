@@ -26,7 +26,12 @@ def resolve_dataset_path(path):
         relative = target.as_posix()
     if relative in CATALOG["legacy_paths"]:
         return ROOT / CATALOG["legacy_paths"][relative]
-    for old, new in (("data/model_outputs/", "data/model/"),):
+    for old, new in (
+        ("data/model_outputs/", "data/model/"),
+        ("models/kmeans/", "data/models/kmeans/"),
+        ("reports/data_quality/geometry_duplicates/", "data/gis/reference_audit/"),
+        ("reports/", "extra/reports/"),
+    ):
         if relative.startswith(old):
             return ROOT / (new + relative[len(old):])
     return ROOT / relative

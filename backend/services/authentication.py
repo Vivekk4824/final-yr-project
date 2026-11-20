@@ -389,6 +389,7 @@ def create_otp_challenge(
     request_ip: str = "unknown",
 ) -> dict[str, str]:
     normalized = normalize_indian_mobile(mobile)
+    delivery = provider or get_otp_provider()
     hashed_phone = phone_hmac(normalized)
     hashed_ip = _ip_hmac(request_ip or "unknown")
     selected_provider = provider or get_otp_provider()

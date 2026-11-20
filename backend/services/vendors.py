@@ -22,8 +22,9 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from backend.repositories.database import DATABASE_PATH, PREFERRED_LANGUAGES, PRIORITY_PROFILES, OperationalNotFoundError, OperationalValidationError, connect, create_operational_vendor, get_operational_vendor, save_operational_vendor_profile
-from backend.mcda_engine import CATEGORIES, DATA
+from backend.repositories.database import DATABASE_PATH, PREFERRED_LANGUAGES, PRIORITY_PROFILES, VENDOR_LOCATION_COLUMNS, OperationalNotFoundError, OperationalValidationError, connect, create_operational_vendor, get_operational_vendor, save_operational_vendor_profile
+from backend.recommendation.location_ranking import DISTANCE_RADII_KM
+from backend.recommendation.mcda_engine import CATEGORIES, DATA
 
 
 # ---------------------------------------------------------------------------
@@ -66,6 +67,7 @@ EDITABLE_PROFILE_FIELDS = {
     "business_category",
     "preferred_division",
     "preferred_locality",
+    *VENDOR_LOCATION_COLUMNS,
     "priority_profile",
     "parking_preference",
     "transport_preference",
@@ -412,6 +414,7 @@ def _normalize_operational(
     """Convert an operational SQLite row into the public profile contract."""
 
     return {
+        **{field: row.get(field) for field in VENDOR_LOCATION_COLUMNS},
 
         "vendor_id":
             row[
@@ -588,6 +591,8 @@ def _historical_profile(
         "preferred_locality":
             None,
 
+        **dict.fromkeys(VENDOR_LOCATION_COLUMNS),
+
         "priority_profile":
             "BALANCED",
 
@@ -628,6 +633,21 @@ def validate_vendor_profile(
     partial: bool = False,
 ) -> None:
     """Validate mutable operational profile fields."""
+
+    latitude = values.get("preferred_latitude")
+    longitude = values.get("preferred_longitude")
+    if ("preferred_latitude" in values) != ("preferred_longitude" in values) or (
+        (latitude is None) != (longitude is None)
+    ):
+        raise OperationalValidationError("Supply both preferred location coordinates or clear both")
+    if latitude is not None and (
+        type(latitude) not in (float, int) or not -90 <= latitude <= 90
+        or type(longitude) not in (float, int) or not -180 <= longitude <= 180
+    ):
+        raise OperationalValidationError("Preferred location coordinates are out of range")
+    radius = values.get("preferred_radius_km")
+    if radius is not None and (type(radius) is not int or radius not in DISTANCE_RADII_KM):
+        raise OperationalValidationError("Preferred distance must be 1, 3, 5, 10 km or Anywhere")
 
     for field, maximum in (
         (
@@ -1009,6 +1029,7 @@ def update_vendor_profile(
             merged,
 
             database_path,
+            updated_fields=set(updates),
         )
     )
 

@@ -3,8 +3,8 @@ from __future__ import annotations
 from backend.core.data_paths import dataset_path, CATALOG
 from backend.core import context as dependencies
 from backend.schemas.api import AdminZoneStatusBody
-from backend.mcda_engine import CATEGORIES
-from backend.mcda_engine import DATA
+from backend.recommendation.mcda_engine import CATEGORIES
+from backend.recommendation.mcda_engine import DATA
 from fastapi import Request as FastAPIRequest
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
@@ -12,7 +12,7 @@ from backend.repositories.database import OperationalConflictError
 from backend.repositories.database import OperationalNotFoundError
 from backend.repositories.database import OperationalValidationError
 from fastapi import Query
-from backend.mcda_engine import ROOT
+from backend.recommendation.mcda_engine import ROOT
 from backend.schemas.response_fields import ZONE_LIVE_STATUS_RESPONSE_FIELDS
 from backend.schemas.api import ZoneLiveStatusResponse
 from backend.core.serialization import clean
@@ -22,8 +22,8 @@ from fastapi import status as http_status
 import json
 import csv
 import math
-from backend.decision_policy import load_base_weight_policy, active_mcda_configuration
-from backend.geo.zone_locations import resolve_zone_locations
+from backend.recommendation.decision_policy import load_base_weight_policy, active_mcda_configuration
+from backend.services.zone_references import resolve_zone_locations
 from backend.core.security import operational_error
 import pandas as pd
 from backend.core.security import request_session
@@ -200,13 +200,7 @@ def options():
 def geometry():
     """Return analytical reference points only."""
 
-    path = (
-        ROOT
-        / "reports"
-        / "data_quality"
-        / "geometry_duplicates"
-        / "reference_points.geojson"
-    )
+    path = dataset_path("reference_points")
 
 
     if not path.exists():

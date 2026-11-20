@@ -9,8 +9,8 @@ from unittest.mock import patch
 
 import backend.api as api
 from backend.database import connect, initialize_database
-from backend.decision_policy import derive_mcda_weights
-from backend.mcda_engine import DATA, recommend
+from backend.recommendation.decision_policy import derive_mcda_weights
+from backend.recommendation.mcda_engine import DATA, recommend
 
 
 class StrictDivisionRecommendationTests(unittest.TestCase):

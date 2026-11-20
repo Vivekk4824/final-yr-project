@@ -1,0 +1,49 @@
+model,division,business_category,priority_profiles_evaluated,unique_first_rank_zones_across_profiles,unique_top3_zones_across_profiles,mean_pairwise_top3_overlap_share
+BASELINE,Nashik East,clothing,4,2,4,0.8333333333333334
+BASELINE,Nashik East,food,4,2,3,1.0
+BASELINE,Nashik East,general_goods,4,2,3,1.0
+BASELINE,Nashik East,vegetable_fruit,4,2,4,0.8333333333333334
+BASELINE,Nashik Road,clothing,4,1,3,1.0
+BASELINE,Nashik Road,food,4,1,3,1.0
+BASELINE,Nashik Road,general_goods,4,1,4,0.8333333333333334
+BASELINE,Nashik Road,vegetable_fruit,4,1,3,1.0
+BASELINE,Nashik West,clothing,4,1,4,0.8333333333333334
+BASELINE,Nashik West,food,4,1,4,0.8333333333333334
+BASELINE,Nashik West,general_goods,4,1,5,0.611111111111111
+BASELINE,Nashik West,vegetable_fruit,4,1,4,0.7777777777777777
+BASELINE,New Nashik,clothing,4,2,5,0.6666666666666666
+BASELINE,New Nashik,food,4,1,5,0.6666666666666666
+BASELINE,New Nashik,general_goods,4,1,4,0.8333333333333334
+BASELINE,New Nashik,vegetable_fruit,4,2,5,0.6666666666666666
+BASELINE,Panchavati,clothing,4,1,3,1.0
+BASELINE,Panchavati,food,4,1,3,1.0
+BASELINE,Panchavati,general_goods,4,1,3,1.0
+BASELINE,Panchavati,vegetable_fruit,4,1,3,1.0
+BASELINE,Satpur,clothing,4,3,4,0.8333333333333334
+BASELINE,Satpur,food,4,2,4,0.8333333333333334
+BASELINE,Satpur,general_goods,4,1,4,0.8333333333333334
+BASELINE,Satpur,vegetable_fruit,4,2,4,0.8333333333333334
+BUSINESS_AWARE_EXPERIMENT,Nashik East,clothing,4,1,5,0.6666666666666666
+BUSINESS_AWARE_EXPERIMENT,Nashik East,food,4,2,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Nashik East,general_goods,4,2,4,0.8333333333333334
+BUSINESS_AWARE_EXPERIMENT,Nashik East,vegetable_fruit,4,2,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Nashik Road,clothing,4,1,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Nashik Road,food,4,1,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Nashik Road,general_goods,4,1,4,0.8333333333333334
+BUSINESS_AWARE_EXPERIMENT,Nashik Road,vegetable_fruit,4,1,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Nashik West,clothing,4,1,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Nashik West,food,4,1,4,0.8333333333333334
+BUSINESS_AWARE_EXPERIMENT,Nashik West,general_goods,4,1,4,0.7777777777777777
+BUSINESS_AWARE_EXPERIMENT,Nashik West,vegetable_fruit,4,1,4,0.7777777777777777
+BUSINESS_AWARE_EXPERIMENT,New Nashik,clothing,4,2,5,0.7222222222222222
+BUSINESS_AWARE_EXPERIMENT,New Nashik,food,4,1,5,0.6666666666666666
+BUSINESS_AWARE_EXPERIMENT,New Nashik,general_goods,4,2,5,0.6666666666666666
+BUSINESS_AWARE_EXPERIMENT,New Nashik,vegetable_fruit,4,2,6,0.6666666666666666
+BUSINESS_AWARE_EXPERIMENT,Panchavati,clothing,4,1,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Panchavati,food,4,2,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Panchavati,general_goods,4,1,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Panchavati,vegetable_fruit,4,1,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Satpur,clothing,4,2,4,0.8333333333333334
+BUSINESS_AWARE_EXPERIMENT,Satpur,food,4,2,3,1.0
+BUSINESS_AWARE_EXPERIMENT,Satpur,general_goods,4,1,4,0.8333333333333334
+BUSINESS_AWARE_EXPERIMENT,Satpur,vegetable_fruit,4,2,4,0.7777777777777777

@@ -7,14 +7,14 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from backend.business_aware_mcda import (
+from backend.recommendation.business_aware_mcda import (
     CATEGORY_GIS_FEATURE_WEIGHTS,
     category_gis_scores,
 )
 from backend.database import connect, initialize_database
-from backend.decision_policy import FACTOR_ORDER, derive_mcda_weights
-from backend.mcda_engine import DATA, recommend, score_candidates
-from backend.recommendation_explanations import explain
+from backend.recommendation.decision_policy import FACTOR_ORDER, derive_mcda_weights
+from backend.recommendation.mcda_engine import DATA, recommend, score_candidates
+from backend.recommendation.recommendation_explanations import explain
 
 
 class BusinessAwareGISUnitTests(unittest.TestCase):

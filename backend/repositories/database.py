@@ -9,6 +9,7 @@ from backend.core.data_paths import dataset_path
 
 import csv
 import json
+import os
 import re
 import uuid
 from collections import Counter
@@ -24,10 +25,10 @@ from sqlalchemy import (
     inspect, text,
 )
 from sqlalchemy.engine import Connection, Engine, RowMapping
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
-from backend.core.config import get_database_backend, get_database_url
+from backend.core.config import ConfigurationError, get_database_backend, get_database_url
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -50,6 +51,11 @@ VENDOR_TYPES = ("NEW", "EXISTING_IMPORTED")
 PRIORITY_PROFILES = ("BALANCED", "COMMERCIAL", "ACCESSIBILITY", "FACILITIES")
 PREFERRED_LANGUAGES = ("en", "mr", "hi")
 VENDOR_STATUSES = ("ACTIVE", "INACTIVE")
+VENDOR_LOCATION_COLUMNS = {
+    "preferred_latitude": "DOUBLE PRECISION",
+    "preferred_longitude": "DOUBLE PRECISION",
+    "preferred_radius_km": "INTEGER",
+}
 
 
 # Retained only as a readable record of the pre-SQLAlchemy SQLite schema. It is
@@ -324,6 +330,8 @@ def _build_metadata() -> MetaData:
         Column("full_name", Text), Column("business_name", Text),
         Column("business_category", Text, nullable=False),
         Column("preferred_division", Text), Column("preferred_locality", Text),
+        Column("preferred_latitude", Float), Column("preferred_longitude", Float),
+        Column("preferred_radius_km", Integer),
         Column("priority_profile", Text, nullable=False, server_default="BALANCED"),
         Column("parking_preference", Integer, nullable=False, server_default="0"),
         Column("transport_preference", Integer, nullable=False, server_default="0"),
@@ -556,6 +564,8 @@ def _database_url(database: str | Path | None = None) -> str:
         path.parent.mkdir(parents=True, exist_ok=True)
         return f"sqlite:///{path.as_posix()}"
     url = str(target)
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url.removeprefix("postgres://")
     return "postgresql+psycopg://" + url.removeprefix("postgresql://") if url.startswith("postgresql://") else url
 
 
@@ -671,6 +681,18 @@ class DatabaseConnection:
     def close(self) -> None:
         self.raw.close()
 
+    def __enter__(self) -> DatabaseConnection:
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        try:
+            if exc_type is None:
+                self.commit()
+            else:
+                self.rollback()
+        finally:
+            self.close()
+
 
 def get_connection(database_path: str | Path = DATABASE_PATH) -> DatabaseConnection:
     return DatabaseConnection(get_engine(database_path).connect())
@@ -706,6 +728,31 @@ def transaction(
 def initialize_schema(database_path: str | Path = DATABASE_PATH) -> None:
     """Create every missing operational table and index without deleting data."""
     METADATA.create_all(get_engine(database_path), checkfirst=True)
+
+
+def migrate_vendor_location_preferences(database_path: str | Path = DATABASE_PATH) -> None:
+    """Add nullable preference columns to an existing operational schema."""
+    with transaction(database_path, immediate=True) as connection:
+        columns = {column["name"] for column in inspect(connection.raw).get_columns("operational_vendors")}
+        for name, definition in VENDOR_LOCATION_COLUMNS.items():
+            if name not in columns:
+                if_missing = " IF NOT EXISTS" if connection.backend == "postgresql" else ""
+                connection.execute(f"ALTER TABLE operational_vendors ADD COLUMN{if_missing} {name} {definition}")
+
+
+def validate_existing_production_database(database_path: str | Path) -> None:
+    """Inspect the configured DB before bootstrap can create tables or seed it."""
+    if os.environ.get("APP_ENV", "").strip().lower() != "production":
+        return
+    try:
+        with get_engine(database_path).connect() as connection:
+            required = {"operational_vendors", "zone_live_status", "allocations", "allocation_requests"}
+            if not required <= set(inspect(connection).get_table_names()):
+                raise ConfigurationError("Production database lacks the existing operational schema; verify DATABASE_URL and restore or provision it explicitly")
+            if not connection.execute(text("SELECT COUNT(*) FROM zone_live_status")).scalar_one():
+                raise ConfigurationError("Production database has no operational zone records; verify the existing database before startup")
+    except SQLAlchemyError:
+        raise ConfigurationError("Configured production database is unavailable; verify DATABASE_URL, connectivity and permissions") from None
 
 
 def inspect_schema(database_path: str | Path = DATABASE_PATH) -> dict[str, dict[str, Any]]:
@@ -817,6 +864,7 @@ def initialize_database(
     now = utc_now()
     backfilled_application_ids = 0
     initialize_schema(database_path)
+    migrate_vendor_location_preferences(database_path)
     schema = inspect_schema(database_path)
     with transaction(database_path, immediate=True) as connection:
         pilot_columns = set(schema.get("pilot_slots", {}).get("columns", []))
@@ -1894,10 +1942,11 @@ def create_operational_vendor(
         connection.execute(
             """INSERT INTO operational_vendors (
                    vendor_id, application_vendor_id, vendor_type, full_name, business_name, business_category, preferred_division,
-                   preferred_locality, priority_profile, parking_preference,
+                   preferred_locality, preferred_latitude, preferred_longitude, preferred_radius_km,
+                   priority_profile, parking_preference,
                    transport_preference, market_preference, preferred_language,
                    status, created_at, updated_at
-               ) VALUES (?, ?, 'NEW', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?, ?)""",
+               ) VALUES (?, ?, 'NEW', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?, ?)""",
             (
                 vendor_id,
                 application_vendor_id,
@@ -1906,6 +1955,7 @@ def create_operational_vendor(
                 profile["business_category"],
                 profile.get("preferred_division"),
                 profile.get("preferred_locality"),
+                *(profile.get(field) for field in VENDOR_LOCATION_COLUMNS),
                 profile.get("priority_profile", "BALANCED"),
                 int(profile.get("parking_preference", False)),
                 int(profile.get("transport_preference", False)),
@@ -1935,9 +1985,22 @@ def save_operational_vendor_profile(
     vendor_type: str,
     profile: dict[str, Any],
     database_path: str | Path = DATABASE_PATH,
+    *,
+    updated_fields: set[str] | None = None,
 ) -> RowMapping:
     """Update an operational row or create an overlay for a historical vendor."""
     now = utc_now()
+    editable = (
+        "full_name", "business_name", "business_category", "preferred_division",
+        "preferred_locality", *VENDOR_LOCATION_COLUMNS, "priority_profile",
+        "parking_preference", "transport_preference", "market_preference",
+        "preferred_language", "status",
+    )
+    assignments = ", ".join(
+        f"{field} = excluded.{field}"
+        for field in (*editable, "updated_at")
+        if updated_fields is None or field in updated_fields or field == "updated_at"
+    )
     with transaction(database_path, immediate=True) as connection:
         existing = connection.execute(
             "SELECT created_at, application_vendor_id FROM operational_vendors WHERE vendor_id = ?", (vendor_id,)
@@ -1945,25 +2008,14 @@ def save_operational_vendor_profile(
         created_at = existing["created_at"] if existing is not None else now
         application_vendor_id = existing["application_vendor_id"] if existing is not None else None
         connection.execute(
-            """INSERT INTO operational_vendors (
+            f"""INSERT INTO operational_vendors (
                    vendor_id, application_vendor_id, vendor_type, full_name, business_name, business_category, preferred_division,
-                   preferred_locality, priority_profile, parking_preference,
+                   preferred_locality, preferred_latitude, preferred_longitude, preferred_radius_km,
+                   priority_profile, parking_preference,
                    transport_preference, market_preference, preferred_language,
                    status, created_at, updated_at
-               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-               ON CONFLICT(vendor_id) DO UPDATE SET
-                   full_name = excluded.full_name,
-                   business_name = excluded.business_name,
-                   business_category = excluded.business_category,
-                   preferred_division = excluded.preferred_division,
-                   preferred_locality = excluded.preferred_locality,
-                   priority_profile = excluded.priority_profile,
-                   parking_preference = excluded.parking_preference,
-                   transport_preference = excluded.transport_preference,
-                   market_preference = excluded.market_preference,
-                   preferred_language = excluded.preferred_language,
-                   status = excluded.status,
-                   updated_at = excluded.updated_at""",
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(vendor_id) DO UPDATE SET {assignments}""",
             (
                 vendor_id,
                 application_vendor_id,
@@ -1973,6 +2025,7 @@ def save_operational_vendor_profile(
                 profile["business_category"],
                 profile.get("preferred_division"),
                 profile.get("preferred_locality"),
+                *(profile.get(field) for field in VENDOR_LOCATION_COLUMNS),
                 profile.get("priority_profile", "BALANCED"),
                 int(profile.get("parking_preference", False)),
                 int(profile.get("transport_preference", False)),

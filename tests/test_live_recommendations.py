@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 import backend.api as api
 from backend.database import connect, initialize_database, utc_now
-from backend.mcda_engine import DATA, WEIGHTS, recommend
+from backend.recommendation.mcda_engine import DATA, WEIGHTS, recommend
 
 
 class LiveRecommendationTests(unittest.TestCase):

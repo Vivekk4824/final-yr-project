@@ -1,0 +1,1 @@
+"""VendorMap scripts package."""

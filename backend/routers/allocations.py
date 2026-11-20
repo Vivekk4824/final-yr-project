@@ -2,9 +2,9 @@
 from __future__ import annotations
 from backend.core import context as dependencies
 from backend.schemas.api import AllocationListResponse
-from backend.allocation_optimizer import AllocationOptimizationError
+from backend.allocation.allocation_optimizer import AllocationOptimizationError
 from backend.schemas.api import AllocationPlanningBody
-from backend.allocation_planning_service import AllocationPlanningValidationError
+from backend.allocation.allocation_planning_service import AllocationPlanningValidationError
 from backend.schemas.api import AllocationRequestCreate
 from backend.schemas.api import AllocationRequestListResponse
 from backend.schemas.api import AllocationRequestResponse
@@ -35,7 +35,7 @@ from backend.repositories.database import list_allocation_requests
 from backend.repositories.database import list_allocations
 from backend.repositories.database import count_allocations
 from backend.core.security import operational_error
-from backend.allocation_planning_service import plan_vendor_allocations
+from backend.allocation.allocation_planning_service import plan_vendor_allocations
 from backend.repositories.database import reject_allocation_request
 from backend.core.security import request_session
 from backend.core.security import require_request_owner

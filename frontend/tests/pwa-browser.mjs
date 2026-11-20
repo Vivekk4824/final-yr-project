@@ -83,11 +83,30 @@ try {
   report.checks.push("A waiting update preserves unsaved form state until explicit Reload; activation and reload preserve the authenticated session");
   await api("/api/auth/logout",{});await go("/vendor/profile");await wait("!!document.querySelector('.auth-card')");assert.equal(await ev("document.body.innerText.includes('PWA Private Test Vendor')"),false);
   report.checks.push("Logout cannot restore a cached vendor profile");
+  // Submit the actual officer form against the same first-party proxy used by
+  // the production bundle. No credentials or writes target deployed services.
+  await ev("document.querySelectorAll('.auth-choice button')[1].click();true");
+  await wait("!!document.querySelector('input[autocomplete=username]')");
+  await ev("(()=>{const set=(selector,value)=>{const i=document.querySelector(selector);Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,value);i.dispatchEvent(new Event('input',{bubbles:true}));};set('input[autocomplete=username]','review-admin');set('input[type=password]','review-only-password');return true;})()");
+  await ev("document.querySelector('.auth-card form').requestSubmit();true");
+  await wait("!!document.querySelector('.service-action')");
+  assert.equal((await api('/api/auth/me')).body.role,'ADMIN');
+  assert.equal((await api('/api/admin/overview')).status,200);
+  assert.equal((await api('/api/allocation-requests?status=PENDING')).status,200);
+  assert.equal((await api('/api/admin/vendors')).status,200);
+  assert.equal((await api('/api/admin/zones')).status,200);
+  await go('/admin/requests');await wait("!!document.querySelector('.admin-pending-requests')");
+  assert.equal((await api('/api/auth/me')).body.role,'ADMIN');
+  await ev("document.querySelector('.vm-utilities button[aria-label]').click();true");
+  await wait("!!document.querySelector('.auth-card')");
+  await go('/admin');await wait("!!document.querySelector('.auth-card')");
+  assert.equal((await api('/api/admin/overview')).status,401);
+  report.checks.push("Officer form login confirms the cookie; admin overview, pending applications, vendor directory and zones authorize; deep-link refresh persists and logout revokes the session");
   assert.deepEqual(browser.errors,[]);report.checks.push("No browser runtime exceptions");
   console.log(JSON.stringify(report,null,2));
 } catch(error) {report.errors.push(String(error));throw error;}
 finally {
   await writeFile(swPath,originalWorker);
-  await mkdir(path.join(root,"reports/vendormap"),{recursive:true});await writeFile(path.join(root,"reports/vendormap/pwa-results.json"),JSON.stringify(report,null,2));
+  await mkdir(path.join(root,"extra/reports/vendormap"),{recursive:true});await writeFile(path.join(root,"extra/reports/vendormap/pwa-results.json"),JSON.stringify(report,null,2));
   await browser?.close();await new Promise(resolve=>server?.httpServer ? server.httpServer.close(resolve) : resolve());backend.kill();
 }

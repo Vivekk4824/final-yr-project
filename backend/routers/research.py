@@ -2,15 +2,15 @@
 from __future__ import annotations
 from backend.core.data_paths import dataset_path
 from backend.core import context as dependencies
-from backend.mcda_engine import DATA
-from backend.decision_policy import DEFAULT_POLICY_PATH
-from backend.decision_policy import FACTOR_ORDER
-from backend.decision_policy import RESEARCH_BASELINE_WEIGHTS
-from backend.mcda_engine import ROOT
+from backend.recommendation.mcda_engine import DATA
+from backend.recommendation.decision_policy import DEFAULT_POLICY_PATH
+from backend.recommendation.decision_policy import FACTOR_ORDER
+from backend.recommendation.decision_policy import RESEARCH_BASELINE_WEIGHTS
+from backend.recommendation.mcda_engine import ROOT
 from backend.core.serialization import _csv_row_count
 from backend.core.serialization import _read_json
 from backend.core.serialization import clean
-from backend.decision_policy import load_base_weight_policy
+from backend.recommendation.decision_policy import load_base_weight_policy
 import numpy as np
 import pandas as pd
 from fastapi import APIRouter
@@ -61,29 +61,28 @@ def research_status():
 
     expert_dir = (
         ROOT
-        / "reports"
+        / "extra" / "reports"
         / "expert_review"
     )
 
 
     ahp_dir = (
         ROOT
-        / "reports"
+        / "extra" / "reports"
         / "ahp_calibration"
     )
 
 
     model_report_dir = (
         ROOT
-        / "reports"
+        / "extra" / "reports"
         / "suitability_model"
     )
 
 
     model_artifact_dir = (
         ROOT
-        / "artifacts"
-        / "models"
+        / "extra/reports/suitability_model/artifacts"
     )
 
 
@@ -388,7 +387,7 @@ def implementation_summary():
 
     train = _read_json(
         ROOT
-        / "reports"
+        / "extra" / "reports"
         / "data_quality"
         / "training_data_metrics.json"
     )
@@ -432,7 +431,7 @@ def implementation_summary():
 
     expert_quality = _read_json(
         ROOT
-        / "reports"
+        / "extra" / "reports"
         / "expert_review"
         / "expert_label_quality.json"
     )
@@ -440,7 +439,7 @@ def implementation_summary():
 
     model_comparison = _read_json(
         ROOT
-        / "reports"
+        / "extra" / "reports"
         / "suitability_model"
         / "model_comparison.json"
     )
@@ -448,15 +447,14 @@ def implementation_summary():
 
     selected_model_path = (
         ROOT
-        / "artifacts"
-        / "models"
+        / "extra/reports/suitability_model/artifacts"
         / "selected_suitability_model.joblib"
     )
 
 
     shap_summary_path = (
         ROOT
-        / "reports"
+        / "extra" / "reports"
         / "suitability_model"
         / "shap_summary.json"
     )
@@ -914,7 +912,7 @@ def review_summary():
 
     folder = (
         ROOT
-        / "reports"
+        / "extra" / "reports"
         / "expert_review"
     )
 

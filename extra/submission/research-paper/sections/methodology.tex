@@ -1,0 +1,252 @@
+\section{Proposed Methodology}
+\label{sec:methodology}
+
+The UrbanVending AI framework is structured into a seven-stage computational pipeline that seamlessly bridges high-level municipal policy, spatial GIS intelligence, mathematical optimization, and physical micro-slot engineering. Fig.~\ref{fig:architecture} depicts the multi-tier system architecture, and Fig.~\ref{fig:workflow} illustrates the end-to-end allocation workflow.
+
+\begin{figure*}[t]
+    \centering
+    \input{figures/architecture.tex}
+    \caption{Multi-tier system architecture of UrbanVending AI, spanning spatial data ingestion, environmental typology, AHP-calibrated MCDA, pre-emptive Goal Programming, and operational delivery.}
+    \label{fig:architecture}
+\end{figure*}
+
+\begin{figure}[t]
+    \centering
+    \input{figures/workflow.tex}
+    \caption{End-to-end allocation and micro-slot generation workflow, illustrating the operational gates and mathematical optimization stages.}
+    \label{fig:workflow}
+\end{figure}
+
+\subsection{Stage 1: Multi-Source Municipal and Spatial Data Ingestion}
+\label{sec:meth_stage1}
+
+The pipeline ingests two primary data streams: (i) the official street vendor and zoning records from the Nashik Municipal Corporation (NMC), and (ii) urban road networks and point-of-interest (POI) spatial layers from OpenStreetMap (OSM).
+
+Let $\mathcal{V} = \{v_1, v_2, \dots, v_N\}$ denote the set of $N = 7,259$ registered vendors, where each vendor $v$ is characterized by a tuple:
+\begin{equation}
+    v = \left( \text{ID}_v, c_v, d_v, \mathbf{x}_v, \text{Status}_v \right)
+    \label{eq:vendor_tuple}
+\end{equation}
+where $c_v \in \mathcal{C}$ is the standardized business category, $d_v \in \mathcal{D}$ is the preferred administrative division, $\mathbf{x}_v$ represents historical location coordinates (if recorded), and $\text{Status}_v$ denotes registration status. The business category set $\mathcal{C}$ comprises:
+\begin{equation}
+    \mathcal{C} = \left\{ \text{vegetable\_fruit}, \text{food}, \text{clothing}, \text{flower}, \text{general\_goods}, \text{other} \right\}
+    \label{eq:categories}
+\end{equation}
+
+Similarly, let $\mathcal{Z} = \{z_1, z_2, \dots, z_M\}$ denote the set of $M = 308$ official municipal vending zones across the six NMC administrative divisions $\mathcal{D} = \{\text{Nashik East}, \text{Nashik West}, \text{Nashik Road}, \text{Panchavati}, \text{CIDCO}, \text{Satpur}\}$. Each zone $z$ is characterized by:
+\begin{equation}
+    z = \left( \text{ID}_z, \text{Type}_z, C_z, \mathcal{P}_z \right)
+    \label{eq:zone_tuple}
+\end{equation}
+where $\text{Type}_z \in \{\text{FREE}, \text{RESTRICTED}, \text{NO\_VENDING}\}$, $C_z \in \mathbb{N}_{\ge 0}$ is the authorized municipal capacity, and $\mathcal{P}_z$ represents the zone reference geometry. Among the 308 official zones, 258 possess verified usable reference geometries, while 50 lack usable geographic boundaries and are flagged for physical re-survey.
+
+\subsection{Stage 2: Spatial Feature Engineering and Non-linear Transforms}
+\label{sec:meth_stage2}
+
+Raw spatial indicators, such as raw POI counts or distances in meters, exhibit heavy-tailed distributions and cannot be directly aggregated into linear multi-criteria models. UrbanVending AI applies two deterministic non-linear transformations:
+
+\subsubsection{Logarithmic Saturation Transform}
+For count and density metrics where additional units yield diminishing utility beyond an empirical saturation threshold $\beta > 0$, the feature value $x \in \mathbb{R}_{\ge 0}$ is transformed via:
+\begin{equation}
+    S(x, \beta) = \min\left(1.0, \frac{\ln(1 + \max(x, 0))}{\ln(1 + \beta)}\right)
+    \label{eq:saturation}
+\end{equation}
+Table~\ref{tab:mcda_scales} lists the empirical saturation scaling parameters $\beta$ calibrated for commercial and public infrastructure criteria.
+
+\subsubsection{Exponential Proximity Decay Transform}
+For distance metrics where proximity represents positive utility and utility decays with physical displacement, the distance $d \ge 0$ (in meters) is transformed via:
+\begin{equation}
+    P(d, \lambda) = \exp\left( -\frac{\max(d, 0)}{\lambda} \right)
+    \label{eq:proximity}
+\end{equation}
+where $\lambda > 0$ is the characteristic decay distance parameter.
+
+\begin{table}[t]
+    \caption{Scaling Parameters for Environmental Feature Transformations}
+    \label{tab:mcda_scales}
+    \centering
+    \begin{tabular}{llr}
+        \toprule
+        \textbf{Criteria Factor} & \textbf{Feature Variable} & \textbf{Scale Parameter} \\
+        \midrule
+        \multirow{3}{*}{Commercial} & Commercial POI Count (250m) & $\beta = 12.0$ \\
+                                   & Market POI Count (500m) & $\beta = 4.0$ \\
+                                   & Food POI Count (250m) & $\beta = 8.0$ \\
+        \midrule
+        \multirow{3}{*}{Accessibility} & Distance to Major Road & $\lambda = 400.0\text{ m}$ \\
+                                      & Distance to Bus Transit Access & $\lambda = 1000.0\text{ m}$ \\
+                                      & Pedestrian Road Density (250m) & $\beta = 5000.0\text{ m/km}^2$ \\
+        \midrule
+        \multirow{4}{*}{Facilities}    & Healthcare Facility Count (500m) & $\beta = 15.0$ \\
+                                      & Education Facility Count (500m) & $\beta = 6.0$ \\
+                                      & Public Toilet Count (500m) & $\beta = 3.0$ \\
+                                      & Public Parking Count (500m) & $\beta = 4.0$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Stage 3: Unsupervised Environmental Typology (K-Means)}
+\label{sec:meth_stage3}
+
+To characterize the underlying spatial environment across the 258 usable zone geometries, the 12 normalized commercial, accessibility, and facility features are clustered using $K$-Means:
+\begin{equation}
+    \min_{\mathbf{\mu}} \sum_{k=1}^K \sum_{z \in \mathcal{C}_k} \|\mathbf{x}_z - \mathbf{\mu}_k\|_2^2
+    \label{eq:kmeans}
+\end{equation}
+Cluster stability is benchmarked across five deterministic random seeds ($\{11, 23, 37, 53, 71\}$). Solutions for $K=2$ and $K=4$ are evaluated using the Adjusted Rand Index ($ARI$) and silhouette scores to partition zones into coherent environmental typologies without confusing unsupervised clusters with statutory zoning rules.
+
+\subsection{Stage 4: Missing-Data-Aware Weighted MCDA}
+\label{sec:meth_stage4}
+
+The multi-criteria suitability engine evaluates six distinct criteria factors: Commercial Density ($f_{\text{com}}$), Accessibility ($f_{\text{acc}}$), Public Facilities ($f_{\text{fac}}$), Business Category Compatibility ($f_{\text{bus}}$), Preference Matching ($f_{\text{pref}}$), and Historical Association Density ($f_{\text{hist}}$).
+
+\subsubsection{Empirical Bayes Category Compatibility with Leave-Group-Out Validation}
+To determine how well zone $z$ accommodates business category $c$, the system avoids raw category proportions, which overfit small sample sizes. Let $n_z$ be the total historical vendors associated with zone $z$, $n_{z,c}$ be the count in category $c$, and $p_c = N_c / N_{\text{total}}$ be the citywide prior share. To eliminate self-reinforcing bias for an existing vendor $v$ possessing recorded location group $g_v$, the entire location group is removed from the estimation:
+\begin{equation}
+    n_{z}^{(-g_v)} = \sum_{v' \notin g_v, z(v') = z} 1, \quad n_{z,c}^{(-g_v)} = \sum_{v' \notin g_v, z(v') = z, c(v') = c} 1
+    \label{eq:leave_group_out}
+\end{equation}
+
+The smoothed posterior category share $\hat{\theta}_{z,c}$ is computed via Laplace shrinkage with strength $M = 20.0$:
+\begin{equation}
+    \hat{\theta}_{z,c} = \frac{n_{z,c}^{(-g_v)} + M \cdot p_c}{n_z^{(-g_v)} + M}
+    \label{eq:shrinkage}
+\end{equation}
+The historical category lift is defined as:
+\begin{equation}
+    \text{Lift}_{z,c} = \frac{\hat{\theta}_{z,c}}{p_c}
+    \label{eq:lift}
+\end{equation}
+The business compatibility factor score $f_{\text{bus}}(z, c)$ scales the lift logarithmically while weighting by sample reliability:
+\begin{equation}
+    R(n_z) = \frac{n_z^{(-g_v)}}{n_z^{(-g_v)} + M}
+    \label{eq:reliability}
+\end{equation}
+\begin{equation}
+    f_{\text{bus}}(z, c) = 0.5 + \left( \min\left(1.0, \frac{\ln(1 + \max(\text{Lift}_{z,c}, 0))}{\ln(3)}\right) - 0.5 \right) \cdot R(n_z)
+    \label{eq:f_bus}
+\end{equation}
+This formulation ensures that zones with negligible historical evidence revert to a neutral score of 0.5 rather than receiving an unmerited extreme penalty or bonus.
+
+\subsubsection{Preference and Historical Density Scoring}
+The preference factor $f_{\text{pref}}(v, z)$ scores 1.0 if zone $z$ belongs to vendor $v$'s preferred administrative division $d_v$, and 0.0 otherwise (or 0.5 if no preference is stated). Historical density is scored via saturation:
+\begin{equation}
+    f_{\text{hist}}(z) = S(n_z, 50.0)
+    \label{eq:f_hist}
+\end{equation}
+
+\subsubsection{Missing-Data Renormalization}
+Let $\mathcal{F} = \{\text{bus}, \text{com}, \text{acc}, \text{fac}, \text{pref}, \text{hist}\}$ index the six factors, and let $w_i > 0$ denote their calibrated weights with $\sum_{i \in \mathcal{F}} w_i = 1$. If a zone lacks data for factor $i$, the engine omits factor $i$ and renormalizes across available factors:
+\begin{equation}
+    \text{Score}(v, z) = 100 \times \frac{\sum_{i \in \mathcal{F}} w_i \cdot f_i(v, z) \cdot \mathbb{I}(f_i(v, z) \ne \text{NaN})}{\sum_{i \in \mathcal{F}} w_i \cdot \mathbb{I}(f_i(v, z) \ne \text{NaN})}
+    \label{eq:mcda_aggregation}
+\end{equation}
+where $\mathbb{I}(\cdot)$ is the indicator function. The evidence coverage ratio is simultaneously tracked:
+\begin{equation}
+    \text{Coverage}(v, z) = \sum_{i \in \mathcal{F}} w_i \cdot \mathbb{I}(f_i(v, z) \ne \text{NaN}) \in [0, 1]
+    \label{eq:coverage}
+\end{equation}
+
+\subsection{Stage 5: Analytic Hierarchy Process (AHP) Weight Calibration}
+\label{sec:meth_stage5}
+
+To establish credible baseline weights, an expert pairwise comparison matrix $\mathbf{A} \in \mathbb{R}^{6 \times 6}$ is constructed according to Saaty's 1–9 fundamental scale, where $a_{jk} = 1 / a_{kj}$ and $a_{jj} = 1$:
+\begin{equation}
+    \mathbf{A} \mathbf{w} = \lambda_{\max} \mathbf{w}
+    \label{eq:ahp_eigen}
+\end{equation}
+The principal eigenvalue $\lambda_{\max}$ is calculated, and the Consistency Index ($CI$) and Consistency Ratio ($CR$) are computed via:
+\begin{equation}
+    CI = \frac{\lambda_{\max} - n}{n - 1}, \quad CR = \frac{CI}{RI(n)}
+    \label{eq:cr}
+\end{equation}
+where $n = 6$ and $RI(6) = 1.24$. Pairwise comparison policies are accepted only if $CR \le 0.10$. The baseline policy establishes:
+\begin{equation}
+    \mathbf{w}_{\text{base}} = [w_{\text{bus}}=0.25, w_{\text{com}}=0.20, w_{\text{acc}}=0.20, w_{\text{fac}}=0.15, w_{\text{pref}}=0.10, w_{\text{hist}}=0.10]
+    \label{eq:base_weights}
+\end{equation}
+
+\subsection{Stage 6: Two-Stage Pre-emptive Goal Programming Optimizer}
+\label{sec:meth_stage6}
+
+To allocate batches of vendors under strict municipal zone capacity limits without causing over-allocation, UrbanVending AI formulates a two-stage Mixed-Integer Linear Program (MILP) solved via the HiGHS dual simplex solver.
+
+Let $x_{v,z} \in \{0, 1\}$ be the binary decision variable indicating whether vendor $v$ is assigned to zone $z$, and let $u_v \in \{0, 1\}$ indicate whether vendor $v$ remains unassigned.
+
+\subsubsection{Stage 1: Cardinality Maximization}
+The primary institutional goal of the municipality is to legally accommodate the maximum possible number of vendors (or equivalently, minimize unassigned vendors):
+\begin{equation}
+    \min_{\mathbf{x}, \mathbf{u}} \sum_{v \in \mathcal{V}} u_v
+    \label{eq:milp_stage1}
+\end{equation}
+subject to:
+\begin{align}
+    \sum_{z \in \mathcal{Z}_{\text{elig}}} x_{v,z} + u_v &= 1, \quad \forall v \in \mathcal{V} \label{eq:con_vendor} \\
+    \sum_{v \in \mathcal{V}} x_{v,z} &\le C_z, \quad \forall z \in \mathcal{Z} \label{eq:con_capacity} \\
+    x_{v,z}, u_v &\in \{0, 1\}, \quad \forall v \in \mathcal{V}, z \in \mathcal{Z} \label{eq:con_binary}
+\end{align}
+where $\mathcal{Z}_{\text{elig}}$ denotes the set of legally OPEN zones possessing verified available capacity $C_z > 0$. Let $U^*$ denote the optimal objective value of Stage 1 (minimum unassigned vendors).
+
+\subsubsection{Stage 2: Lexicographic Quality Optimization}
+Holding the minimum unassigned count fixed at $U^*$, Stage 2 minimizes the composite penalty comprising suitability loss, preferred-division fallback, and low evidence coverage:
+\begin{equation}
+    \min_{\mathbf{x}, \mathbf{u}} \sum_{v \in \mathcal{V}} \sum_{z \in \mathcal{Z}_{\text{elig}}} x_{v,z} \cdot \Psi(v, z)
+    \label{eq:milp_stage2}
+\end{equation}
+subject to (\ref{eq:con_vendor})--(\ref{eq:con_binary}) and the lexicographic constraint:
+\begin{equation}
+    \sum_{v \in \mathcal{V}} u_v = U^*
+    \label{eq:con_lexicographic}
+\end{equation}
+where the edge penalty $\Psi(v, z)$ is defined as:
+\begin{equation}
+    \Psi(v, z) = (100 - \text{Score}(v, z)) + \alpha_{\text{fb}} \cdot \mathbb{I}(\text{Fallback}_{v,z}) + \alpha_{\text{cov}} \cdot (1 - \text{Coverage}(v, z))
+    \label{eq:penalty}
+\end{equation}
+with default penalty coefficients $\alpha_{\text{fb}} = 0.10$ and $\alpha_{\text{cov}} = 0.05$.
+
+\subsection{Stage 7: Metric Micro-Slot Packing Generator}
+\label{sec:meth_stage7}
+
+Once a zone is allocated, vendors require physically marked slots. Standard geographic representations in geographic coordinates (EPSG:4326) introduce severe latitude-dependent metric distortion. UrbanVending AI projects boundary polygons into metric projected coordinates (EPSG:32643 / UTM Zone 43N).
+
+For each boundary polygon $\Omega \subset \mathbb{R}^2$, the generator determines the dominant orientation $\theta^*$ from the minimum rotated bounding rectangle:
+\begin{equation}
+    \theta^* = \arg\max_{\theta} \text{Length}(\text{Edge}(\text{MinRotatedRect}(\Omega)))
+    \label{eq:orientation}
+\end{equation}
+Along this primary axis, the algorithm packs candidate square footprints of fixed dimension $w_{\text{slot}} \times h_{\text{slot}} = 2.0\,\text{m} \times 2.0\,\text{m}$. For each slot $k$, the generator enforces three geometric invariants:
+\begin{align}
+    \text{Footprint}_k &\subset \Omega \label{eq:geom_contain} \\
+    \text{dist}(\text{Footprint}_k, \text{Footprint}_j) &\ge 0.50\text{ m}, \quad \forall j \ne k \label{eq:geom_spacing} \\
+    \text{Corridor}(\Omega, w_{\text{corr}} = 1.2\text{ m}) &\cap \text{Footprint}_k = \emptyset, \quad \forall k \label{eq:geom_corridor}
+\end{align}
+Sub-millimeter numeric tolerances ($\le 0.002\,\text{m}$) are verified to guarantee that no physical obstruction or pedestrian right-of-way is violated.
+
+\begin{algorithm}[t]
+\caption{End-to-End UrbanVending AI Allocation Pipeline}
+\label{alg:pipeline}
+\begin{algorithmic}[1]
+\Require Vendor demands $\mathcal{V}$, Zone registry $\mathcal{Z}$, Spatial features $\mathbf{X}_{\text{GIS}}$
+\Ensure Optimal allocation plan $\mathbf{X}^*$ and physical slot coordinates $\mathcal{S}$
+\State Filter candidate zones: $\mathcal{Z}_{\text{elig}} \gets \{z \in \mathcal{Z} \mid \text{Type}_z = \text{FREE} \land C_z > 0\}$
+\For{each vendor $v \in \mathcal{V}$}
+    \State Extract category $c_v$ and preferred division $d_v$
+    \For{each zone $z \in \mathcal{Z}_{\text{elig}}$}
+        \State Compute $\text{Lift}_{z,c_v}$ via leave-group-out shrinkage (Eq.~\ref{eq:leave_group_out}--\ref{eq:shrinkage})
+        \State Compute non-linear feature scores $f_{\text{com}}, f_{\text{acc}}, f_{\text{fac}}$ (Eq.~\ref{eq:saturation}--\ref{eq:proximity})
+        \State Calculate $\text{Score}(v,z)$ and $\text{Coverage}(v,z)$ (Eq.~\ref{eq:mcda_aggregation}--\ref{eq:coverage})
+    \EndFor
+\EndFor
+\State \textbf{// Stage 1: Solve Cardinality MILP}
+\State $U^* \gets \min \sum_{v} u_v$ subject to capacity and assignment constraints (Eq.~\ref{eq:milp_stage1}--\ref{eq:con_binary})
+\State \textbf{// Stage 2: Solve Lexicographic Quality MILP}
+\State $\mathbf{X}^* \gets \arg\min \sum_{v,z} x_{v,z} \Psi(v,z)$ subject to $\sum u_v = U^*$ (Eq.~\ref{eq:milp_stage2}--\ref{eq:penalty})
+\For{each assigned zone $z$ with boundary $\Omega_z$}
+    \State Project $\Omega_z$ to EPSG:32643 (UTM 43N)
+    \State Pack $2\text{m} \times 2\text{m}$ slots satisfying $\ge 0.5\text{m}$ spacing and $1.2\text{m}$ corridor (Eq.~\ref{eq:geom_contain}--\ref{eq:geom_corridor})
+    \State Reproject slot polygons $\mathcal{S}_z$ to EPSG:4326 for UI rendering
+\EndFor
+\State \Return $\mathbf{X}^*$ and $\mathcal{S}$
+\end{algorithmic}
+\end{algorithm}

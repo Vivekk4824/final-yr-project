@@ -1,0 +1,1 @@
+"""VendorMap allocation package."""

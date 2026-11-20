@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  CANONICAL_TERMINOLOGY, categoryLabel, formatDate, formatNumber,
+  CANONICAL_TERMINOLOGY, categoryLabel, dictionaries, formatDate, formatNumber,
   hasDeliberateLanguage, persistLanguage, readStoredLanguage,
   setDocumentLanguage, statusLabel, translate,
 } from "./index.js";
@@ -25,6 +25,18 @@ test("renders English, Marathi, and Hindi interface strings", () => {
 test("interpolates dynamic values without translating identifiers", () => {
   assert.match(translate("mr", "recommend.confirmTitle", {zoneId: "NE_F_010"}), /NE_F_010/);
   assert.match(translate("hi", "recommend.eligible", {count: 17}), /17/);
+});
+
+test("location preferences and expansion have strings in each supported language", () => {
+  for (const language of ["en", "mr", "hi"]) {
+    for (const key of ["profile.workingLocation", "profile.useMapCenter", "profile.preferredDistance",
+      "profile.anywhere", "profile.distanceOption", "recommend.expandSearch", "recommend.restoreDistance",
+      "recommend.approxDistance", "recommend.originalSuitability"]) {
+      assert.ok(Object.hasOwn(dictionaries[language], key), `${language} ${key}`);
+      if (language !== "en") assert.notEqual(translate(language, key), translate("en", key), key);
+    }
+    assert.match(translate(language, "profile.distanceOption", {distance: 5}), /5/);
+  }
 });
 
 test("falls back to English for an untranslated localized key", () => {

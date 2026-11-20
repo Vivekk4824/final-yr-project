@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from 'vite';
 const polish=process.argv.includes("--polish");
 const frontend=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const root=path.dirname(frontend), output=path.join(root,'reports/vendormap');
+const root=path.dirname(frontend), output=path.join(root,'extra/reports/vendormap');
 await mkdir(output,{recursive:true});
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 const backend=spawn(path.join(root,'.venv/Scripts/python.exe'),['-X','utf8',path.join(frontend,'tests/vendormap-server.py')],{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe']});

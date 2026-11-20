@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy.exc import IntegrityError
+from backend.core.data_paths import dataset_path
 
 try:
     from ..auth_service import (
@@ -30,8 +31,8 @@ try:
         transaction,
         utc_now,
     )
-    from ..mcda_engine import CATEGORIES, derive_mcda_weights, recommend
-    from ..recommendation_explanations import explain
+    from ..recommendation.mcda_engine import CATEGORIES, derive_mcda_weights, recommend
+    from ..recommendation.recommendation_explanations import explain
     from ..vendor_service import get_vendor_profile, register_vendor, update_vendor_profile, valid_divisions
 except ImportError:
     from auth_service import bind_verified_phone_hash, find_vendor_by_phone_hash, normalize_indian_mobile, phone_hmac
@@ -40,8 +41,8 @@ except ImportError:
         OperationalValidationError, cancel_allocation_request, connect,
         create_allocation_request, get_vendor_dashboard_activity, transaction, utc_now,
     )
-    from mcda_engine import CATEGORIES, derive_mcda_weights, recommend
-    from recommendation_explanations import explain
+    from backend.recommendation.mcda_engine import CATEGORIES, derive_mcda_weights, recommend
+    from backend.recommendation.recommendation_explanations import explain
     from vendor_service import get_vendor_profile, register_vendor, update_vendor_profile, valid_divisions
 
 from .message_templates import (
@@ -51,8 +52,7 @@ from .message_templates import (
 
 
 LOGGER = logging.getLogger(__name__)
-ROOT = Path(__file__).resolve().parents[2]
-GEOMETRY_PATH = ROOT / "reports" / "data_quality" / "geometry_duplicates" / "reference_points.geojson"
+GEOMETRY_PATH = dataset_path("reference_points")
 CONVERSATION_TTL = timedelta(hours=24)
 LANGUAGE_CHOICES = {"1": "en", "2": "mr", "3": "hi", "english": "en", "मराठी": "mr", "हिन्दी": "hi", "हिंदी": "hi"}
 WHATSAPP_CATEGORY_ORDER = (

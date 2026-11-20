@@ -25,7 +25,7 @@ From the repository root, create a virtual environment and install the Python de
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r backend/requirements.txt
 ```
 
 Then, after configuring the environment, initialize the local database:
@@ -64,7 +64,7 @@ The frontend listens on all network interfaces and forwards `/api` requests to F
 
 Leave `VITE_API_BASE` empty or unset in frontend environment files. An explicit `http://localhost:8000` or `http://127.0.0.1:8000` points to the visiting device and breaks LAN access. If FastAPI runs on a different port, set `API_PROXY_TARGET` in `frontend/.env.local` and restart Vite. `npm run preview` also supports the proxy after a production build.
 
-If the Network URL itself cannot be reached, allow Node.js through Windows Firewall on your private network and confirm both devices are on the same network without client isolation. For production hosting, configure the host's `/api` reverse proxy or set `VITE_API_BASE` and explicit backend CORS origins for the deployed API.
+If the Network URL itself cannot be reached, allow Node.js through Windows Firewall on your private network and confirm both devices are on the same network without client isolation. For Vercel/Render hosting, leave `VITE_API_BASE` empty and use the `/api` reverse proxy in `frontend/vercel.json`; see [deployment](extra/docs/deployment.md) for hosting settings and persistence requirements.
 
 ## Install VendorMap as a PWA
 
@@ -79,7 +79,7 @@ Keep FastAPI running. Preview forwards `/api` to the local backend. Desktop inst
 
 Supported browsers receive a dismissible Install action after their native installability event. On iPhone/iPad, the app provides Share → Add to Home Screen guidance; it is hidden when already running standalone. No background push service or new notification permissions were added: existing in-app notifications remain unchanged.
 
-The worker caches only an explicit build-generated allowlist of fingerprinted JS, CSS, logo assets and a fingerprinted generic offline page. API requests use `cache: no-store` in both the client and worker. Authenticated HTML, profiles, photos, allocations, tokens, map tiles and navigation URLs are never stored in Cache Storage. Losing connectivity removes the in-memory workspace; reconnecting revalidates the session and reloads current data. Offline writes are not queued or replayed.
+The worker caches only an explicit build-generated allowlist of fingerprinted JS, CSS, logo assets and a fingerprinted generic offline page. API requests bypass the worker and use `cache: no-store` in the client; the server also marks API responses private and non-cacheable. Authenticated HTML, profiles, photos, allocations, tokens, map tiles and navigation URLs are never stored in Cache Storage. Losing connectivity removes the in-memory workspace; reconnecting revalidates the session and reloads current data. Offline writes are not queued or replayed.
 
 Updates wait for a Reload action or for older app windows to close. Old immutable chunks remain available to older open windows; once a sole current-build window confirms readiness, obsolete VendorMap caches are removed. Session cookies and language preferences are preserved. No forced reload interrupts an open form.
 
@@ -150,6 +150,8 @@ Authentication does not modify K-Means, MCDA weights, personalization multiplier
 
 ## Code organization and maintenance
 
-See [architecture](docs/architecture.md) for the final folder tree, module relationships, compatibility entry points and protected assets; [migration checklist](docs/migration-checklist.md) for phases and reversibility; and [deployment](docs/deployment.md) for dependency groups, configuration and PowerShell commands. [Removal evidence](docs/deletion-manifest.json) and [frontend moves](docs/frontend-moves.json) document source cleanup.
+See [architecture](extra/docs/architecture.md) for the folder tree, module relationships, compatibility entry points and protected assets. The [migration checklist](extra/docs/migration-checklist.md) covers reversibility, and [deployment](extra/docs/deployment.md) covers dependencies, configuration and startup commands. [Removal evidence](extra/docs/deletion-manifest.json) and [frontend moves](extra/docs/frontend-moves.json) document earlier source cleanup.
 
-The operational engine remains `backend.mcda_engine`; the different historical baseline is `research.mcda_baseline`, with `scripts/mcda_engine.py` retained as a compatibility entry. No database migration or model regeneration is required by this refactor.
+Submission materials include the [final recommendation validation](extra/reports/vendormap/final-recommendation-input-validation.md), the [scenario CSV](extra/reports/vendormap/final-recommendation-input-validation.csv), and the [research paper](extra/submission/research-paper/README.md). The [submission cleanup inventory](extra/docs/submission-cleanup.md) describes the report archive and the paths retained for runtime and research.
+
+The operational engine remains `backend.mcda_engine`; the different historical baseline is `extra.research_tools.mcda_baseline`, with `extra/research_tools/scripts/mcda_engine.py` retained as a compatibility entry. No database migration or model regeneration is required by this refactor.

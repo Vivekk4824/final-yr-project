@@ -4,6 +4,7 @@ import {AlertCircle, ArrowLeft, Building2, Check, CheckCircle2, ChevronDown, Clo
 import {categoryLabel, factorLabel, factorSummary, statusLabel} from "../../i18n/index.js";
 import {useI18n} from "../../i18n/react.jsx";
 import {displayCapacity, indexAiFactorExplanations, score} from "./viewModel.js";
+import {RankingContext} from "./RankingContext.jsx";
 import RecommendationDetailMap from "./RecommendationDetailMap.jsx";
 import {getRecommendationAiExplanation} from "../../services/api.js";
 import "./RecommendationDetailPage.css";
@@ -62,7 +63,7 @@ function FactorCard({factor, language, t, expanded, onToggle, aiExplanation, aiS
   </article>;
 }
 
-export default function RecommendationDetailPage({zone, recommendations, mapContext, profile, activeAllocation, dashboard, busy, onBack, onSelect, onOpenRequests}) {
+export default function RecommendationDetailPage({zone, recommendations, mapContext, profile, locationApplied, activeAllocation, dashboard, busy, onBack, onSelect, onOpenRequests}) {
   const {language, t} = useI18n();
   const [expandedFactor, setExpandedFactor] = useState("");
   const [aiResult, setAiResult] = useState(null);
@@ -74,7 +75,7 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
   const rankedFactors = useMemo(() => factors.filter(item => normalizedScore(item.score) != null).sort((left, right) => normalizedScore(right.score) - normalizedScore(left.score)), [factors]);
   const strengths = rankedFactors.slice(0, 3);
   const weakest = rankedFactors.at(-1);
-  const finalValue = Number.isFinite(Number(zone.score)) ? Number(zone.score) : null;
+  const finalValue = zone.score != null && Number.isFinite(Number(zone.score)) ? Number(zone.score) : null;
   const finalStrength = finalValue == null ? null : strengthKey(finalValue);
   const summary = strengths.length ? t("recommend.quickSummary", {
     first: shortFactorLabel(t, strengths[0]),
@@ -95,8 +96,8 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
   return <section className="recommendation-detail-page">
     <button className="vendor-back recommendation-detail-back" onClick={onBack}><ArrowLeft size={16}/> {t("recommend.backRecommendations")}</button>
     <header className="recommendation-detail-header">
-      <div><span className="recommendation-detail-rank">{zone.rank ? t("recommend.recommendedZone", {rank: zone.rank}) : t("recommend.viewRecommendation")}</span><h1>{zone.zone_id}</h1><p>{zoneDescription(zone,t("fallback.zoneDescription"))}</p><small>{zoneName(zone,t("display.zoneMissing"))}</small><div className="recommendation-detail-location"><MapPin size={14}/><span>{zone.zone_division || t("common.notSpecified")}</span></div></div>
-      {zone.score != null && <div className="recommendation-detail-score"><span>{t("recommend.suitability")}</span><strong>{score(zone.score,t("common.notRecorded"))}</strong><small>/100</small><em>{t("recommend.recommendedForBusiness")}: {categoryLabel(language, profile?.business_category)}</em></div>}
+      <div><span className="recommendation-detail-rank">{zone.rank ? t("recommend.recommendedZone", {rank: zone.rank}) : t("recommend.viewRecommendation")}</span><h1>{zone.zone_id}</h1><p>{zoneDescription(zone,t("fallback.zoneDescription"))}</p><small>{zoneName(zone,t("display.zoneMissing"))}</small><div className="recommendation-detail-location"><MapPin size={14}/><span>{zone.zone_division || t("common.notSpecified")}</span></div><RankingContext zone={zone} locationApplied={locationApplied}/></div>
+      {zone.score != null && <div className="recommendation-detail-score"><span>{t("recommend.originalSuitability")}</span><strong>{score(zone.original_mcda_score ?? zone.score,t("common.notRecorded"))}</strong><small>/100</small><em>{t("recommend.recommendedForBusiness")}: {categoryLabel(language, profile?.business_category)}</em></div>}
     </header>
 
     <div className="recommendation-summary-cards recommendation-operational-summary">
