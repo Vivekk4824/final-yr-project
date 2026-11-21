@@ -29,11 +29,9 @@ def authorized_pilot_layout(request: FastAPIRequest, zone_id: str | None = None)
                 WHERE a.vendor_id = ? AND a.status = 'ACTIVE'""",
                 (session["vendor_id"],)).fetchone()
         if zone_id is None:
-            if not allocation or allocation["zone_id"] not in pilot_slots.PILOT_ZONES:
+            if not allocation:
                 raise HTTPException(403, "A current allocation to a slot-enabled zone is required when no zone is selected")
             zone_id = allocation["zone_id"]
-        if zone_id not in pilot_slots.PILOT_ZONES:
-            raise HTTPException(404, "Slot mapping is not enabled for this zone")
     zone_id = zone_id or pilot_slots.PILOT_ZONE_ID
     layout = pilot_operation(lambda: pilot_slots.get_layout(dependencies.DATABASE_PATH, zone_id))
     if session["role"] == "VENDOR":

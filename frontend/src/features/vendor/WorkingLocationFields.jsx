@@ -46,6 +46,10 @@ export function WorkingLocationFields({draft, setDraft, disabled}) {
   return <fieldset className="vendor-working-location vendor-wide-field">
     <legend>{t("profile.workingLocation")}</legend>
     <p className="field-note">{t("profile.workingLocationHelp")}</p>
+    <div className="vendor-location-explainer">
+      <strong>{t("profile.locationWhyTitle")}</strong>
+      <p>{t("profile.locationWhyHelp")}</p>
+    </div>
     <div className="vendor-location-actions">
       <button className="vendor-secondary" type="button" disabled={disabled} aria-expanded={open}
         onClick={() => setOpen(value => !value)}>{t(open ? "profile.hideLocationMap" : "profile.openLocationMap")}</button>

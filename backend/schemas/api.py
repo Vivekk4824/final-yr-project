@@ -7,6 +7,9 @@ class VendorLocationPreferences(BaseModel):
     preferred_latitude: float | None = Field(default=None, ge=-90, le=90, allow_inf_nan=False)
     preferred_longitude: float | None = Field(default=None, ge=-180, le=180, allow_inf_nan=False)
     preferred_radius_km: Literal[1, 3, 5, 10] | None = None
+    preferred_operating_period: Literal["MORNING", "DAYTIME", "EVENING", "FLEXIBLE"] | None = None
+    required_space_sqm: float | None = Field(default=None, gt=0, le=500, allow_inf_nan=False)
+    max_monthly_budget: float | None = Field(default=None, gt=0, le=1_000_000, allow_inf_nan=False)
 
 class PilotSlotUpdate(BaseModel):
     status: Literal["AVAILABLE", "RESERVED", "OCCUPIED", "BLOCKED"]

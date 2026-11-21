@@ -22,7 +22,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from backend.repositories.database import DATABASE_PATH, PREFERRED_LANGUAGES, PRIORITY_PROFILES, VENDOR_LOCATION_COLUMNS, OperationalNotFoundError, OperationalValidationError, connect, create_operational_vendor, get_operational_vendor, save_operational_vendor_profile
+from backend.repositories.database import DATABASE_PATH, OPERATING_PERIODS, PREFERRED_LANGUAGES, PRIORITY_PROFILES, VENDOR_LOCATION_COLUMNS, VENDOR_REQUIREMENT_COLUMNS, OperationalNotFoundError, OperationalValidationError, connect, create_operational_vendor, get_operational_vendor, save_operational_vendor_profile
 from backend.recommendation.location_ranking import DISTANCE_RADII_KM
 from backend.recommendation.mcda_engine import CATEGORIES, DATA
 
@@ -68,6 +68,7 @@ EDITABLE_PROFILE_FIELDS = {
     "preferred_division",
     "preferred_locality",
     *VENDOR_LOCATION_COLUMNS,
+    *VENDOR_REQUIREMENT_COLUMNS,
     "priority_profile",
     "parking_preference",
     "transport_preference",
@@ -456,6 +457,8 @@ def _normalize_operational(
                 "preferred_locality"
             ],
 
+        **{field: row.get(field) for field in VENDOR_REQUIREMENT_COLUMNS},
+
         "priority_profile":
             row[
                 "priority_profile"
@@ -593,6 +596,8 @@ def _historical_profile(
 
         **dict.fromkeys(VENDOR_LOCATION_COLUMNS),
 
+        **dict.fromkeys(VENDOR_REQUIREMENT_COLUMNS),
+
         "priority_profile":
             "BALANCED",
 
@@ -648,6 +653,28 @@ def validate_vendor_profile(
     radius = values.get("preferred_radius_km")
     if radius is not None and (type(radius) is not int or radius not in DISTANCE_RADII_KM):
         raise OperationalValidationError("Preferred distance must be 1, 3, 5, 10 km or Anywhere")
+
+    if (
+        "preferred_operating_period" in values
+        and values["preferred_operating_period"] is not None
+        and values["preferred_operating_period"] not in OPERATING_PERIODS
+    ):
+        raise OperationalValidationError(
+            "preferred_operating_period must be one of: " + ", ".join(OPERATING_PERIODS)
+        )
+
+    for field, maximum in (
+        ("required_space_sqm", 500.0),
+        ("max_monthly_budget", 1_000_000.0),
+    ):
+        if field not in values or values[field] is None:
+            continue
+        value = values[field]
+        if type(value) not in (float, int) or not 0 < float(value) <= maximum:
+            raise OperationalValidationError(
+                f"{field} must be greater than 0 and at most {maximum:g}"
+            )
+        values[field] = float(value)
 
     for field, maximum in (
         (

@@ -20,7 +20,7 @@ export function suitableZoneSections(data, {search = "", division = "", availabi
         const bHighlight = shortlist.get(b.zone_id) ?? Infinity;
         return (aHighlight - bHighlight) || (a.rank - b.rank);
       }
-      return Number(b.score) - Number(a.score) || (a.zone_id < b.zone_id ? -1 : a.zone_id > b.zone_id ? 1 : 0);
+      return Number(b.personalized_score ?? b.score) - Number(a.personalized_score ?? a.score) || (a.zone_id < b.zone_id ? -1 : a.zone_id > b.zone_id ? 1 : 0);
     });
   const ranked = scored.map((zone, index) => ({
     ...zone, rank: index + 1, is_top_three: usesServerRanking ? shortlist.has(zone.zone_id) : index < 3,

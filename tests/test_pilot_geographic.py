@@ -97,14 +97,14 @@ class GeographicApiTests(unittest.TestCase):
         layout["expected_versions"] = {s["slot_id"]: s["updated_at"] for s in layout["slots"]}
         return layout
 
-    def test_save_reload_review_and_operational_isolation(self):
+    def test_save_reload_without_separate_review_step(self):
         before = self.snapshot()
         layout = self.geographic()
         self.assertEqual(self.snapshot(), before)
         self.assertTrue(layout["georeferenced"])
         self.assertEqual(self.initialize()["slots"], layout["slots"])
         proposal = self.edit(layout)
-        self.assertEqual(self.client.patch("/api/pilot/layout", json={"layout": proposal}).status_code, 422)
+        self.assertEqual(self.client.patch("/api/pilot/layout", json={"layout": proposal}).status_code, 200)
         self.assertEqual(self.client.post("/api/pilot/validate", json={"layout": {}}).status_code, 422)
 
     def test_assigned_or_occupied_geometry_locked_and_stale_save(self):

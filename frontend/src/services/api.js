@@ -52,7 +52,7 @@ const pilotPath = (path, zoneId) => `${path}${zoneId ? `?zone_id=${encodeURIComp
 export const getPilotLayout = zoneId => apiRequest(pilotPath("/api/pilot/layout",zoneId));
 export const previewPilotGeometry = (config, obstructions, zoneId) => apiRequest(pilotPath("/api/pilot/preview",zoneId), jsonOptions("POST", {config, obstructions}));
 export const validatePilotGeometry = (layout, poses = {}, zoneId) => apiRequest(pilotPath("/api/pilot/validate",zoneId), jsonOptions("POST", {layout, poses}));
-export const savePilotGeometry = (layout,zoneId) => apiRequest(pilotPath("/api/pilot/layout",zoneId), jsonOptions("PATCH", {layout, review_confirmed: true}));
+export const savePilotGeometry = (layout,zoneId) => apiRequest(pilotPath("/api/pilot/layout",zoneId), jsonOptions("PATCH", {layout}));
 export const getPilotDestination = zoneId => apiRequest(pilotPath("/api/pilot/navigation",zoneId));
 export const getPilotRoute = p => apiRequest("/api/pilot/route", jsonOptions("POST", {longitude: p.longitude, latitude: p.latitude}));
 export const initializePilotLayout = zoneId => apiRequest(pilotPath("/api/pilot/initialize",zoneId), {method: "POST"});
@@ -94,8 +94,21 @@ export const cancelAllocationRequest = requestId =>
 export const getZoneGeometry = signal => apiRequest("/api/zones/geometry", {signal});
 export const requestVendorOtp = mobile =>
   apiRequest("/api/auth/vendor/request-otp", jsonOptions("POST", {mobile}));
+// A successful credential/OTP response is not enough on its own: verify that
+// the browser retained the HTTP-only session cookie before entering the app.
+const establishSession = async (path, body) => {
+  await apiRequest(path, jsonOptions("POST", body));
+  try {
+    return await apiRequest("/api/auth/me");
+  } catch (error) {
+    if (error.status === 401) {
+      error.message = "The browser could not retain your session. Enable cookies and try again.";
+    }
+    throw error;
+  }
+};
 export const verifyVendorOtp = (challengeId, mobile, otp) =>
-  apiRequest("/api/auth/vendor/verify-mobile-otp", jsonOptions("POST", {challenge_id: challengeId, mobile, otp}));
+  establishSession("/api/auth/vendor/verify-mobile-otp", {challenge_id: challengeId, mobile, otp});
 export const loginAdmin = (username, password) =>
   establishSession("/api/auth/admin/login", {username, password});
 let currentUserRequest;

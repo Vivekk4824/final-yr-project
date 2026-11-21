@@ -4,7 +4,7 @@ import {categoryLabel, statusLabel} from "../../i18n/index.js";
 import {useI18n} from "../../i18n/react.jsx";
 import {publicSlotCategory} from "./slotPresentation.js";
 
-export default function SlotInspector({selected, slots, selectedId, onSelect, admin, assigned, allocations, ownBusinessCategory, onViewVendor, children, zoneId = "NN_F_013", operationalEnabled = true}) {
+export default function SlotInspector({selected, slots, selectedId, onSelect, admin, assigned, allocations, ownBusinessCategory, onViewVendor, children, zoneId = "NN_F_013"}) {
   const [expanded,setExpanded] = useState(false);
   const {language,t} = useI18n();
   const allocation = admin && selected?.assigned_vendor_id ? allocations.find(a => a.vendor_id === selected.assigned_vendor_id && a.zone_id === zoneId && a.status === "ACTIVE") : null;

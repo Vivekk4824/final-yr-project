@@ -10,6 +10,7 @@ from sqlalchemy import create_engine, make_url, text
 from backend.application import app
 from backend.core import context
 from backend.recommendation.location_ranking import LocationRankingPolicy, apply_location_ranking
+from backend.recommendation.vendor_requirement_ranking import DEMO_PATH, SOURCE, apply_vendor_requirement_ranking
 from backend.repositories import database as db
 from backend.services import authentication, vendors
 
@@ -83,6 +84,28 @@ def test_location_formula_ties_and_missing_distance(monkeypatch):
     assert ranked.iloc[3:].personalized_score.isna().all()
 
 
+def test_synthetic_demo_budget_and_space_change_ranking(monkeypatch):
+    monkeypatch.setenv("SYNTHETIC_ZONE_REQUIREMENTS", "true")
+    profiles = pd.read_csv(DEMO_PATH).sort_values("monthly_fee")
+    affordable = profiles.iloc[0]
+    expensive = profiles.iloc[-1]
+    scored = pd.DataFrame({
+        "zone_id": [expensive.zone_id, affordable.zone_id],
+        "score": [50.0, 50.0],
+        "original_mcda_score": [50.0, 50.0],
+    })
+    ranked = apply_vendor_requirement_ranking(scored, {
+        "preferred_operating_period": "FLEXIBLE",
+        "required_space_sqm": float(affordable.available_stall_space_sqm),
+        "max_monthly_budget": float(affordable.monthly_fee),
+    })
+    assert ranked.iloc[0].zone_id == affordable.zone_id
+    assert bool(ranked.iloc[0].requirement_exact_match)
+    assert not bool(ranked.iloc[1].requirement_exact_match)
+    assert ranked.iloc[0].personalized_score > ranked.iloc[1].personalized_score
+    assert ranked.requirement_data_source.eq(SOURCE).all()
+
+
 def test_authenticated_ranking_radius_and_expansion_use_current_saved_profile(operational_database, monkeypatch):
     database = operational_database
     db.initialize_database(database)
@@ -92,6 +115,7 @@ def test_authenticated_ranking_radius_and_expansion_use_current_saved_profile(op
     monkeypatch.delenv("LOCATION_PROXIMITY_WEIGHT", raising=False)
     monkeypatch.setenv("LOCATION_PROXIMITY_DECAY_KM", "3")
     monkeypatch.setenv("BUSINESS_AWARE_MCDA_EXPERIMENT", "true")
+    monkeypatch.setenv("SYNTHETIC_ZONE_REQUIREMENTS", "true")
 
     def session(preferences):
         vendor = vendors.register_vendor(preferences, database)
@@ -106,9 +130,15 @@ def test_authenticated_ranking_radius_and_expansion_use_current_saved_profile(op
         route = f"/api/vendors/{vendor_id}"
         patch = first.patch(route, json={"preferred_latitude": 19.9960883, "preferred_longitude": 73.8003276,
                                         "preferred_radius_km": 1, "priority_profile": "COMMERCIAL",
-                                        "market_preference": True})
+                                        "market_preference": True,
+                                        "preferred_operating_period": "MORNING",
+                                        "required_space_sqm": 6.5,
+                                        "max_monthly_budget": 3000})
         assert patch.status_code == 200, patch.text
         assert first.get(route).json()["preferred_radius_km"] == 1
+        assert first.get(route).json()["preferred_operating_period"] == "MORNING"
+        assert first.get(route).json()["required_space_sqm"] == 6.5
+        assert first.get(route).json()["max_monthly_budget"] == 3000
         assert first.patch(route, json={"preferred_latitude": 91}).status_code == 422
         assert first.patch(route, json={"preferred_radius_km": 2}).status_code == 422
         assert second.patch(route, json={"preferred_radius_km": None}).status_code == 403
@@ -125,12 +155,21 @@ def test_authenticated_ranking_radius_and_expansion_use_current_saved_profile(op
         assert nearby["selected_division"] == "Nashik East"
         assert nearby["priority_profile"] == "COMMERCIAL"
         assert nearby["preference_flags"]["market"]
+        assert {item["input"] for item in nearby["requirement_coverage"]} == {
+            "preferred_operating_period", "required_space_sqm", "max_monthly_budget",
+        }
+        assert all(item["status"] == "SYNTHETIC_DEMO_EVALUATED" for item in nearby["requirement_coverage"])
         assert nearby["recommendations"]
         assert all(row["zone_division"] == "Nashik East" and row["distance_km"] <= 1 for row in nearby["recommendations"])
         for row in nearby["recommendations"]:
             assert row["requested_business_category"] == "food"
-            assert row["personalized_score"] == pytest.approx(.85 * row["score"] + .15 * row["proximity_score"])
+            requirement_blend = .55 * row["score"] + .45 * row["requirements_score"]
+            assert row["personalized_score"] == pytest.approx(.85 * requirement_blend + .15 * row["proximity_score"])
             assert row["ranking_reason"]
+            assert {reason["kind"] for reason in row["why_recommended"]} >= {
+                "business_category", "preferred_division", "working_location_distance",
+                "operating_period_match", "space_match", "budget_match",
+            }
 
         other = recommend(second, vendor_id=other_id)
         assert other["selected_division"] == "Satpur" and not other["location_ranking"]["applied"]
@@ -158,6 +197,7 @@ def test_authenticated_ranking_radius_and_expansion_use_current_saved_profile(op
 
         monkeypatch.setenv("LOCATION_RANKING_EXPERIMENT", "false")
         monkeypatch.setenv("BUSINESS_AWARE_MCDA_EXPERIMENT", "false")
+        monkeypatch.setenv("SYNTHETIC_ZONE_REQUIREMENTS", "false")
         baseline = recommend(first, vendor_id=vendor_id)
         assert baseline["count"] == 3 and not baseline["location_ranking"]["applied"]
         assert all(row["score"] == row["original_mcda_score"] == row["personalized_score"] for row in baseline["recommendations"])

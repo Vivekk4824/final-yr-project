@@ -76,7 +76,7 @@ function ZoneMap({recommendations, zones, selectedId, onFocus, viewportKey, focu
           <strong>{group.shared ? t("explorer.sharedCount",{count:group.zones.length}) : group.zones[0].zone_id}</strong>
           <div className="shared-zone-list">{group.zones.map(zone => <button key={zone.zone_id} onClick={() => onFocus(zone.zone_id)}>
             <b>{zone.rank ? "#" + zone.rank : ""}</b><span>{zone.zone_id}<small>{zone.zone_division}</small></span>
-            <em>{zone.score == null ? statusLabel(language,zone.live_status) : score(zone.score)}</em>
+            <em>{zone.score == null ? statusLabel(language,zone.live_status) : score(zone.personalized_score ?? zone.score)}</em>
           </button>)}</div>
           <p>{zoneDescription(selectedZone,t("common.notRecorded"))}</p>
           <p>{statusLabel(language,selectedZone.live_status)} · {t("explorer.available",{count:displayCapacity(selectedZone.available_capacity,t)})}</p>
@@ -106,7 +106,7 @@ function ZoneCard({zone,selected,onFocus,onDetails,onRequest,busy,hasLocation}) 
       <div className="explorer-zone-heading"><div className="explorer-zone-title">
         {zone.rank != null && <span className={"explorer-rank" + (zone.is_top_three ? " top-three" : "")}>#{zone.rank}</span>}
         <h3>{zone.zone_id}</h3>{zone.is_top_three && <small className="explorer-top-label">{t("recommend.topLegend")}</small>}
-      </div><strong className="explorer-score">{zone.score == null ? t("explorer.notScored") : score(zone.score)}{zone.score != null && <small>/100</small>}</strong></div>
+      </div><strong className="explorer-score">{zone.score == null ? t("explorer.notScored") : score(zone.personalized_score ?? zone.score)}{zone.score != null && <small>/100</small>}</strong></div>
       <p className="explorer-zone-description">{zoneDescription(zone,t("common.notRecorded"))}</p>
       <div className="explorer-zone-meta"><span>{zone.zone_division}</span><span>{statusLabel(language,zone.live_status)}</span><span>{t("explorer.available",{count:displayCapacity(zone.available_capacity,t)})}</span></div>
       {!hasLocation && <span className="explorer-location-note"><MapPin size={13}/>{t("recommend.mapUnavailable")}</span>}

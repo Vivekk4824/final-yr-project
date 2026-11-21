@@ -7,7 +7,7 @@ import {useDialogFocus} from "../../shared/utils/dialogFocus.js";
 import {useI18n} from "../../i18n/react.jsx";
 import {mergeRecommendationContext, latestRecommendationRequest} from "./viewModel.js";
 
-import {initialPilotState, pilotReducer, PILOT_ZONE_IDS} from "../pilot-slots/pilotState.js";
+import {initialPilotState, pilotReducer} from "../pilot-slots/pilotState.js";
 
 const locationPreferences = profile => ({
   preferred_latitude: profile?.preferred_latitude ?? null,
@@ -21,7 +21,11 @@ function draftFromProfile(profile) {
     business_name: profile?.business_name || "",
     business_category: profile?.business_category || "food",
     preferred_division: profile?.preferred_division || "",
+    preferred_locality: profile?.preferred_locality || "",
     ...locationPreferences(profile),
+    preferred_operating_period: profile?.preferred_operating_period || "FLEXIBLE",
+    required_space_sqm: profile?.required_space_sqm ?? "",
+    max_monthly_budget: profile?.max_monthly_budget ?? "",
     priority_profile: profile?.priority_profile || "BALANCED",
     market_preference: Boolean(profile?.market_preference),
     transport_preference: Boolean(profile?.transport_preference),
@@ -48,7 +52,8 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
   const [confirmZone, setConfirmZone] = useState(null);
   const [cancelTarget, setCancelTarget] = useState(null);
   const [preferenceConfirm, setPreferenceConfirm] = useState(false);
-  useDialogFocus(Boolean(confirmZone || cancelTarget || preferenceConfirm), ".vendor-confirm");
+  const [registerConfirm, setRegisterConfirm] = useState(false);
+  useDialogFocus(Boolean(confirmZone || cancelTarget || preferenceConfirm || registerConfirm), ".vendor-confirm");
   const [dashboard, setDashboard] = useState(null);
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -87,7 +92,7 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
     try {
       const data = await getVendorDashboard();
       setDashboard(data); setActiveAllocation(data.active_allocation);
-      if (PILOT_ZONE_IDS.includes(data.active_allocation?.zone_id)) {
+      if (data.active_allocation?.zone_id) {
         try {setPilotSummary(await getPilotLayout(data.active_allocation.zone_id));} catch {setPilotSummary(null);}
       } else setPilotSummary(null);
       return data;
@@ -106,13 +111,22 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
     const active = await getActiveAllocation(vendor.vendor_id);
     setActiveAllocation(active.allocation);
   };
-  const register = event => { event.preventDefault(); run(async () => {
-    const vendor = await registerVendor({...draft, preferred_division: draft.preferred_division || null});
+  const register = event => { event.preventDefault(); setRegisterConfirm(true); };
+  const confirmRegistration = () => { setRegisterConfirm(false); run(async () => {
+    const vendor = await registerVendor({...draft, preferred_division: draft.preferred_division || null,
+      preferred_locality: draft.preferred_locality || null,
+      required_space_sqm: draft.required_space_sqm === "" ? null : Number(draft.required_space_sqm),
+      max_monthly_budget: draft.max_monthly_budget === "" ? null : Number(draft.max_monthly_budget)});
     await hydrateVendor(vendor); await onRegistered?.(); setSuccess(t("onboarding.created"));
   }); };
   const persistProfile = () => run(async () => {
     recommendationRequest.current.invalidate();
-    const vendor = await updateVendorProfile(profile.vendor_id, {full_name: draft.full_name, business_name: draft.business_name, business_category: draft.business_category, preferred_division: draft.preferred_division || null, ...locationPreferences(draft)});
+    const vendor = await updateVendorProfile(profile.vendor_id, {full_name: draft.full_name, business_name: draft.business_name, business_category: draft.business_category, preferred_division: draft.preferred_division || null,
+      preferred_locality: draft.preferred_locality || null,
+      preferred_operating_period: draft.preferred_operating_period || null,
+      required_space_sqm: draft.required_space_sqm === "" ? null : Number(draft.required_space_sqm),
+      max_monthly_budget: draft.max_monthly_budget === "" ? null : Number(draft.max_monthly_budget),
+      ...locationPreferences(draft)});
     setProfile(vendor); setDraft(draftFromProfile(vendor)); selectLanguage(vendor.preferred_language);
     await refreshSavedPreferences(vendor);
   });
@@ -122,15 +136,20 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
     selectLanguage(vendor.preferred_language); await refreshDashboard(true); setSuccess(t("profile.saved"));
     return vendor;
   });
-  const saveRankingPreferences = event => {event.preventDefault(); run(async () => {
+  const persistRankingPreferences = () => run(async () => {
     recommendationRequest.current.invalidate();
     const vendor = await updateVendorProfile(profile.vendor_id, {business_category: draft.business_category,
       preferred_division: draft.preferred_division || null, priority_profile: draft.priority_profile,
+      preferred_locality: draft.preferred_locality || null,
+      preferred_operating_period: draft.preferred_operating_period || null,
+      required_space_sqm: draft.required_space_sqm === "" ? null : Number(draft.required_space_sqm),
+      max_monthly_budget: draft.max_monthly_budget === "" ? null : Number(draft.max_monthly_budget),
       market_preference: draft.market_preference, transport_preference: draft.transport_preference, parking_preference: draft.parking_preference,
       ...locationPreferences(draft)});
     setProfile(vendor); setDraft(draftFromProfile(vendor));
     await refreshSavedPreferences(vendor);
-  });};
+  });
+  const saveRankingPreferences = event => {event.preventDefault(); setPreferenceConfirm("ranking");};
   const refreshSavedPreferences = async vendor => {
     setSuccess(t("profile.saved"));
     try {
@@ -142,8 +161,12 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
   };
   const saveProfile = event => {
     event.preventDefault();
-    if (recommendationData) setPreferenceConfirm(true);
-    else persistProfile();
+    setPreferenceConfirm("profile");
+  };
+  const confirmPreferenceSave = () => {
+    const action = preferenceConfirm;
+    setPreferenceConfirm(false);
+    return action === "ranking" ? persistRankingPreferences() : persistProfile();
   };
   const loadRecommendations = async (vendor, {navigate = true, expandSearch = false} = {}) => {
     const requestId = recommendationRequest.current.begin();
@@ -190,14 +213,15 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
     await refreshDashboard(true); setSuccess(t("requests.cancelledNotice"));
   });
   useEffect(() => {
-    if (!confirmZone && !cancelTarget && !preferenceConfirm) return undefined;
+    if (!confirmZone && !cancelTarget && !preferenceConfirm && !registerConfirm) return undefined;
     const close = event => {
       if (event.key !== "Escape") return;
       setConfirmZone(null); setCancelTarget(null); setPreferenceConfirm(false);
+      setRegisterConfirm(false);
     };
     document.addEventListener("keydown", close);
     return () => document.removeEventListener("keydown", close);
-  }, [confirmZone, cancelTarget, preferenceConfirm]);
+  }, [confirmZone, cancelTarget, preferenceConfirm, registerConfirm]);
   const changeLanguage = next => {
     selectLanguage(next);
     setDraft(current => ({...current, preferred_language: next}));
@@ -220,5 +244,5 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
   const hour = new Date().getHours();
   const greetingPeriod = t(hour < 12 ? "vendor.morning" : hour < 17 ? "vendor.afternoon" : "vendor.evening");
 
-  return {language, t, options, profile, profileReady, draft, setDraft, activeAllocation, pilot, dispatchPilot, pilotSummary, recommendationData, mapContext, selectedId, setSelectedId, confirmZone, setConfirmZone, cancelTarget, setCancelTarget, preferenceConfirm, setPreferenceConfirm, dashboard, dashboardLoading, busy, error, setError, success, setSuccess, mapUnavailableIds, stage, setStage, handleGeometryStatus, refreshDashboard, register, persistProfile, saveProfile, saveRankingPreferences, saveAccountLanguage, findZones, submitZone, cancelRequest, changeLanguage, recommendations, displayName, greetingPeriod};
+  return {language, t, options, profile, profileReady, draft, setDraft, activeAllocation, pilot, dispatchPilot, pilotSummary, recommendationData, mapContext, selectedId, setSelectedId, confirmZone, setConfirmZone, cancelTarget, setCancelTarget, preferenceConfirm, setPreferenceConfirm, registerConfirm, setRegisterConfirm, dashboard, dashboardLoading, busy, error, setError, success, setSuccess, mapUnavailableIds, stage, setStage, handleGeometryStatus, refreshDashboard, register, confirmRegistration, saveProfile, saveRankingPreferences, confirmPreferenceSave, saveAccountLanguage, findZones, submitZone, cancelRequest, changeLanguage, recommendations, displayName, greetingPeriod};
 }

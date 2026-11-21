@@ -1,7 +1,7 @@
 import VendorActivity from "../features/vendor/VendorActivity.jsx";
 import {useDialogFocus} from "../shared/utils/dialogFocus.js";
 import React, {useCallback, useEffect, useState} from "react";
-import {Bell, Building2, CircleHelp, FileText, LayoutDashboard, LogOut, MapPin, ShieldCheck, UserRound, X} from "lucide-react";
+import {ArrowLeft, Bell, Building2, CircleHelp, FileText, LayoutDashboard, LogOut, MapPin, ShieldCheck, UserRound, X} from "lucide-react";
 const VendorDirectory = React.lazy(() => import("../features/admin/VendorWorkspace.jsx"));
 const AdminDashboard = React.lazy(() => import("../features/admin/AdminDashboard.jsx"));
 const AuthLanding = React.lazy(() => import("../features/auth/AuthLanding.jsx"));
@@ -43,6 +43,8 @@ export default function ImplementationApp() {
   const {t, applyProfileLanguage} = useI18n();
   const [session, setSession] = useState(null);
   const [logoutError, setLogoutError] = useState("");
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [checking, setChecking] = useState(true);
   const [sessionError, setSessionError] = useState("");
   const [sessionAttempt, setSessionAttempt] = useState(0);
@@ -53,11 +55,18 @@ export default function ImplementationApp() {
   const [openOwnSlot, setOpenOwnSlot] = useState(0);
   useEffect(() => {window.scrollTo({top: 0, behavior: "auto"});}, [page, recommendationZoneId]);
   useDialogFocus(notificationsOpen, ".vendor-notification-drawer");
+  useDialogFocus(logoutConfirm, ".vendor-confirm");
   useEffect(() => {
     if (!notificationsOpen) return;
     const close = event => {if (event.key === "Escape") setNotificationsOpen(false);};
     document.addEventListener("keydown", close); return () => document.removeEventListener("keydown", close);
   }, [notificationsOpen]);
+  useEffect(() => {
+    if (!logoutConfirm) return;
+    const close = event => {if (event.key === "Escape" && !loggingOut) setLogoutConfirm(false);};
+    document.addEventListener("keydown", close);
+    return () => document.removeEventListener("keydown", close);
+  }, [logoutConfirm, loggingOut]);
   const [slotTarget, setSlotTarget] = useState(null);
 
 
@@ -122,8 +131,9 @@ export default function ImplementationApp() {
 
   const updateVendorProfile = useCallback(profile => setSession(current => current?.role === "VENDOR" && current.vendor_id === profile.vendor_id ? {...current, vendor_profile: profile} : current), []);
   const signOut = async () => {
-    setLogoutError("");
-    try {await logout();} catch (err) {setLogoutError(err.message); return;}
+    setLogoutError(""); setLoggingOut(true);
+    try {await logout();} catch (err) {setLogoutError(err.message); setLoggingOut(false); return;}
+    setLogoutConfirm(false); setLoggingOut(false);
     setSession(null); setPage("vendor-dashboard"); setRecommendationZoneId(""); window.history.replaceState({}, "", "/login");
   };
   const refreshSession = async () => applySession(await getCurrentUser());
@@ -143,12 +153,18 @@ export default function ImplementationApp() {
     setRecommendationZoneId(""); setPage("vendor-recommendations");
     window.history.replaceState({}, "", VENDOR_PATHS["vendor-recommendations"]);
   };
+  const goBack = () => {
+    setNotificationsOpen(false);
+    if (window.history.length > 1) window.history.back();
+    else navigate(session?.role === "ADMIN" ? "admin" : "vendor-dashboard");
+  };
+  const logoutDialog = logoutConfirm && <div className="vendor-confirm-backdrop" onClick={() => !loggingOut && setLogoutConfirm(false)}><div className="vendor-confirm" role="dialog" aria-modal="true" aria-labelledby="logout-confirm-title" onClick={event => event.stopPropagation()}><div className="confirm-icon danger"><LogOut size={24}/></div><span className="vendor-eyebrow">{t("nav.logout")}</span><h2 id="logout-confirm-title">{t("confirm.logoutTitle")}</h2><p>{t("confirm.logoutHelp")}</p>{logoutError && <p role="alert" className="vendor-action-notice">{logoutError}</p>}<div className="confirm-actions"><button className="vendor-secondary" type="button" onClick={() => setLogoutConfirm(false)} disabled={loggingOut}>{t("confirm.staySignedIn")}</button><button className="vendor-danger" type="button" onClick={signOut} disabled={loggingOut}>{t(loggingOut ? "confirm.loggingOut" : "confirm.logout")}</button></div></div></div>;
   if (checking) return <div className="auth-loading"><Building2 size={28}/><span>{t("common.loading")}</span></div>;
   if (sessionError) return <main className="auth-loading"><p role="alert">{sessionError}</p><button onClick={() => setSessionAttempt(value => value + 1)}>{t("pwa.retry")}</button></main>;
   if (!session) return <AuthLanding onAuthenticated={applySession}/>;
 
   const onboarding = session.role === "NEW_VENDOR_ONBOARDING";
-  if (onboarding) return <VendorPortal onboarding onRegistered={refreshSession}/>;
+  if (onboarding) return <div className="onboarding-shell vendormap"><VendorPortal onboarding onBack={goBack} onLogout={() => {setLogoutError(""); setLogoutConfirm(true);}} onRegistered={refreshSession}/>{logoutDialog}</div>;
 
   const nav = session.role === "ADMIN" ? ADMIN_NAV : VENDOR_NAV;
   const navTitle = item => session.role === "ADMIN" ? item.title : t(item.titleKey);
@@ -162,16 +178,17 @@ export default function ImplementationApp() {
       })}</nav>
       <div className="vm-utilities">
         {session.role === "VENDOR" && <><button aria-label={t("help.title")} title={t("help.title")} onClick={() => navigate("vendor-help")}><CircleHelp size={20}/></button><button aria-label={t("activity.title")} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen(value => !value)}><Bell size={20}/></button></>}
-        <button aria-label={t("nav.logout")} title={t("nav.logout")} onClick={signOut}><LogOut size={19}/></button>
+        <button aria-label={t("nav.logout")} title={t("nav.logout")} onClick={() => {setLogoutError(""); setLogoutConfirm(true);}}><LogOut size={19}/></button>
       </div>
     </header>
-    <div className="implementation-content"><div className="implementation-view" id="main-content" tabIndex={-1}>
+    <div className="implementation-content"><div className="vm-page-toolbar"><button className="vm-page-back" type="button" onClick={goBack}><ArrowLeft size={17}/><span>{t("nav.back")}</span></button></div><div className="implementation-view" id="main-content" tabIndex={-1}>
     {logoutError && <p role="alert" className="vendor-action-notice">{logoutError}</p>}
     {(session.role === "VENDOR" || onboarding) && <VendorPortal key={session.vendor_id} onProfileUpdated={updateVendorProfile} focusRequestId={focusedRequestId} openOwnSlot={openOwnSlot} sessionProfile={session.vendor_profile} onboarding={onboarding} view={page} detailZoneId={recommendationZoneId} onNavigate={navigate} onOpenRecommendation={openRecommendation} onBackRecommendations={backToRecommendations} onRegistered={refreshSession}/>}
     {session.role === "ADMIN" && page !== "vendors" && <AdminDashboard adminId={session.admin_id} slotTarget={slotTarget} section={page === "admin" ? "overview" : page} onSectionChange={id => navigate(id === "overview" ? "admin" : id)}/>}
     {session.role === "ADMIN" && page === "vendors" && <VendorDirectory onViewSlot={slot => {setSlotTarget({...slot}); navigate("map");}}/>}
   </div></div>
   {session.role === "VENDOR" && notificationsOpen && <div className="vendor-notification-backdrop" onClick={() => setNotificationsOpen(false)}><aside id="vendor-notifications-dialog" className="vendor-notification-drawer" role="dialog" aria-modal="true" aria-labelledby="vendor-notification-title" onClick={event => event.stopPropagation()}><button className="vendor-notification-close" aria-label={t("nav.close")} onClick={() => setNotificationsOpen(false)}><X size={18}/></button><VendorActivity compact onApplication={id => {navigate("vendor-requests"); setFocusedRequestId(id); window.history.replaceState({}, "", `/vendor/requests?request=${encodeURIComponent(id)}`);}} onSlot={() => {navigate("vendor-dashboard"); setOpenOwnSlot(value => value + 1);}}/></aside></div>}
+  {logoutDialog}
   </div>;
 }
 

@@ -37,7 +37,7 @@ class InteractiveSlotAssignmentTests(unittest.TestCase):
         layout = pilot_slots.initialize_demo(self.path, "NE_F_001")
         self.assertEqual(layout["zone_id"], "NE_F_001")
         self.assertEqual(layout["slots"], [])
-        self.assertFalse(layout["operational_enabled"])
+        self.assertTrue(layout["operational_enabled"])
         self.assertIn("longitude", layout["reference_point"])
         self.assertIn("latitude", layout["reference_point"])
         slot = pilot_slots.create_drawn_slot(
@@ -56,6 +56,18 @@ class InteractiveSlotAssignmentTests(unittest.TestCase):
                 self.geometry(), actor="test-admin", review_confirmed=True,
                 width_m=2, depth_m=2, database_path=self.path, zone_id="NV_001",
             )
+
+    def test_vendor_can_request_slot_without_separate_layout_review(self):
+        pilot_slots.initialize_demo(self.path, "NE_F_001")
+        slot = pilot_slots.create_drawn_slot(
+            self.geometry(), actor="test-admin", review_confirmed=True,
+            width_m=2, depth_m=2, database_path=self.path, zone_id="NE_F_001",
+        )
+        request = db.create_allocation_request(
+            "V2024_00001", "NE_F_001", "NEW_ALLOCATION", slot_id=slot["slot_id"],
+            database_path=self.path,
+        )
+        self.assertEqual(request["slot_id"], slot["slot_id"])
 
     def test_metric_rectangle_overlap_and_safe_delete(self):
         slot = self.create_slot()

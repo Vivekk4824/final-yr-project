@@ -132,7 +132,8 @@ def get_layout(database_path=DATABASE_PATH, zone_id=PILOT_ZONE_ID):
         if not layout.get("georeferenced"):
             layout["boundaries"] = gis.load_boundaries()
         layout.setdefault("revision", "LEGACY")
-        layout.setdefault("operational_enabled", zone_id == PILOT_ZONE_ID)
+        # Layouts are usable immediately; geometry validation remains enforced.
+        layout["operational_enabled"] = True
         categories = {r["vendor_id"]: r["business_category"] for r in db.execute(
             "SELECT a.vendor_id,r.business_category FROM allocations a JOIN allocation_requests r ON r.request_id=a.request_id WHERE a.zone_id=? AND a.status='ACTIVE' AND r.status='APPROVED' AND r.vendor_id=a.vendor_id AND r.zone_id=a.zone_id", (zone_id,))}
         for slot in layout["slots"]:
@@ -160,8 +161,6 @@ def get_layout(database_path=DATABASE_PATH, zone_id=PILOT_ZONE_ID):
 
 def update_slot(slot_id, status, vendor_id, *, actor, expected_updated_at, database_path=DATABASE_PATH, zone_id=PILOT_ZONE_ID):
     validate_zone(zone_id)
-    if zone_id != PILOT_ZONE_ID and (vendor_id or status in ("RESERVED", "OCCUPIED")) and not get_layout(database_path, zone_id).get("operational_enabled"):
-        raise OperationalValidationError("Administrator review and activation are required before assignment or occupancy")
     if status not in STATUSES:
         raise OperationalValidationError("Unknown slot status")
     if vendor_id is not None and (not vendor_id.strip() or status not in ("RESERVED", "OCCUPIED")):
@@ -290,8 +289,6 @@ def save_geographic(proposal, *, actor, review_confirmed, database_path=DATABASE
     validate_zone(zone_id)
     if proposal.get("zone_id", PILOT_ZONE_ID) != zone_id:
         raise OperationalValidationError("Layout belongs to a different pilot zone")
-    if not review_confirmed:
-        raise OperationalValidationError("Review the provisional preview and explicitly confirm before saving")
     boundaries = gis.boundaries_for_zone(zone_id)
     if proposal.get("source_sha256") != boundaries["source_sha256"]:
         raise OperationalConflictError("Boundary source changed. Generate a fresh preview")
@@ -359,8 +356,6 @@ def save_geographic(proposal, *, actor, review_confirmed, database_path=DATABASE
         if zone_id != PILOT_ZONE_ID:
             metadata.update({key: current_metadata.get(key) for key in ("source_provenance", "source_slot_properties", "pedestrian_clearance_assumptions", "zone_display_name", "dimension_spacing_by_boundary")})
             metadata["operational_enabled"] = True
-            metadata["reviewed_by"] = actor
-            metadata["reviewed_at"] = timestamp
         db.execute("UPDATE pilot_slot_layouts SET metadata_json = ? WHERE zone_id = ?", (json.dumps(metadata), zone_id))
     return get_layout(database_path, zone_id)
 
@@ -418,10 +413,10 @@ def initialize_drawn_zone(database_path, zone_id=INTERACTIVE_DRAW_ZONE_ID):
         "georeferenced": True,
         "geometry_verification_status": "PROVISIONAL_NOT_SURVEYED",
         "validation_state": "ILLUSTRATIVE_UNVERIFIED",
-        "operational_enabled": zone_id == INTERACTIVE_DRAW_ZONE_ID,
+        "operational_enabled": True,
         "boundaries": {"type": "FeatureCollection", "features": []},
         "source_provenance": "ADMIN_DRAWN_PROVISIONAL_PLANNING_LAYOUT",
-        "warning": "No independently verified vending boundary is available. Every slot requires explicit administrator confirmation and remains provisional.",
+        "warning": "No independently verified vending boundary is available. Slot positions remain provisional.",
         "revision": uuid.uuid4().hex,
     }
     reference = next((f for f in evidence.get("analytical_references", []) if f.get("properties", {}).get("zone_id") == zone_id), None)
@@ -462,8 +457,6 @@ def create_drawn_slot(geometry, *, actor, review_confirmed, width_m=None, depth_
                       database_path=DATABASE_PATH, zone_id=INTERACTIVE_DRAW_ZONE_ID):
     validate_zone(zone_id)
     _ensure_vending_zone(zone_id)
-    if not review_confirmed:
-        raise OperationalValidationError("Confirm that this is a provisional planning slot, not a verified legal boundary")
     polygon, actual_width, actual_depth = _validated_drawn_rectangle(geometry, width_m, depth_m)
     projected = gis.metric(mapping(polygon))
     timestamp = datetime.now(timezone.utc).isoformat(timespec="microseconds")
@@ -547,8 +540,6 @@ def move_drawn_slot(slot_id, *, longitude, latitude, angle, width_m, depth_m, ac
                     zone_id=INTERACTIVE_DRAW_ZONE_ID):
     validate_zone(zone_id)
     _ensure_vending_zone(zone_id)
-    if not review_confirmed:
-        raise OperationalValidationError("Confirm the provisional planning position before moving the slot")
     geometry = gis.pose_geometry(longitude, latitude, angle, width_m=width_m, depth_m=depth_m)
     polygon, actual_width, actual_depth = _validated_drawn_rectangle(geometry, width_m, depth_m)
     projected = gis.metric(mapping(polygon))

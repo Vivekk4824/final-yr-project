@@ -227,6 +227,13 @@ class PilotApiTests(unittest.TestCase):
         self.session = {"role": "NEW_VENDOR_ONBOARDING"}
         self.assertEqual(self.client.get("/api/pilot/layout").status_code, 403)
 
+    def test_vendor_can_open_any_official_zone_layout_without_review(self):
+        pilot.initialize_demo(self.path, "NE_F_001")
+        self.session = {"role": "VENDOR", "vendor_id": "V_PILOT_1"}
+        response = self.client.get("/api/pilot/layout?zone_id=NE_F_001")
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["zone_id"], "NE_F_001")
+
     def test_vendor_empty_state_privacy_highlight_and_revoked_allocation(self):
         self.initialize()
         self.approve()

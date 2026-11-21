@@ -6,9 +6,8 @@ import {useI18n} from "../../i18n/react.jsx";
 import {displayCapacity, indexAiFactorExplanations, score} from "./viewModel.js";
 import {RankingContext} from "./RankingContext.jsx";
 import RecommendationDetailMap from "./RecommendationDetailMap.jsx";
-import {getRecommendationAiExplanation} from "../../services/api.js";
+import {getPilotLayout, getRecommendationAiExplanation} from "../../services/api.js";
 import "./RecommendationDetailPage.css";
-import {PILOT_ZONE_IDS} from "../pilot-slots/pilotState.js";
 const PilotSlotMap = React.lazy(() => import("../pilot-slots/PilotSlotMap.jsx"));
 
 const evidenceKeys = {
@@ -48,6 +47,22 @@ function strengthKey(value) {
 
 const shortFactorLabel = (t, factor) => t(`factorShort.${factor.key}`);
 
+function matchReason(reason, language, t) {
+  if (reason.kind === "business_category") return t("recommend.matchBusiness", {category: categoryLabel(language, reason.value)});
+  if (reason.kind === "preferred_division") return t("recommend.matchDivision", {division: reason.value});
+  if (reason.kind === "working_location_distance") return t("recommend.matchDistance", {distance: Number(reason.value).toFixed(1)});
+  if (reason.kind === "vendor_priorities") return t("recommend.matchPriorities");
+  if (reason.kind === "live_availability") return t("recommend.matchAvailability", {count: reason.value});
+  if (reason.kind === "requirements_fit") return t(
+    reason.exact_match ? "recommend.requirementsExactFit" : "recommend.requirementsFallback",
+    {matched: reason.matched, total: reason.total},
+  );
+  if (reason.kind === "operating_period_match") return t("recommend.matchOperating", {allowed: reason.allowed});
+  if (reason.kind === "space_match") return t("recommend.matchSpace", {available: reason.available, requested: reason.requested ?? "—"});
+  if (reason.kind === "budget_match") return t("recommend.matchBudget", {fee: reason.monthly_fee, budget: reason.requested ?? "—"});
+  return null;
+}
+
 function FactorCard({factor, language, t, expanded, onToggle, aiExplanation, aiSource}) {
   const value = normalizedScore(factor.score);
   const level = value == null ? "unknown" : strengthKey(value);
@@ -55,6 +70,7 @@ function FactorCard({factor, language, t, expanded, onToggle, aiExplanation, aiS
   return <article className={`recommendation-factor-card strength-${level}`}>
     <div className="factor-card-heading"><h3>{shortFactorLabel(t, factor)}</h3><div className="factor-card-score"><strong>{value == null ? t("common.notRecorded") : Math.round(value)}</strong><span>/100</span></div></div>
     <span className="factor-strength-label">{value == null ? t("common.unknown") : t(`recommend.strength.${level}`)}</span>
+    {factor.candidate_rank != null && <small className="field-note">{t("recommend.factorCandidateRank", {rank: factor.candidate_rank, count: factor.candidate_count})}</small>}
     <div className="recommendation-factor-bar" role="progressbar" aria-label={shortFactorLabel(t, factor)} aria-valuemin="0" aria-valuemax="100" aria-valuenow={value == null ? undefined : Math.round(value)}><span style={{width: `${value || 0}%`}}/></div>
     <p>{factorSummary(language, factor.key, factor.summary)}</p>
     {aiExplanation && <div className={`factor-ai-explanation ${aiSource === "gemini" ? "generated" : "fallback"}`}><span><Sparkles size={13}/>{t(aiSource === "gemini" ? "recommend.aiGeneratedLabel" : "recommend.aiFallbackLabel")}</span><p>{aiExplanation}</p></div>}
@@ -70,12 +86,29 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [slotMapOpen,setSlotMapOpen] = useState(false);
-  useEffect(() => { setAiResult(null); setAiError(""); setAiLoading(false); setSlotMapOpen(false); }, [zone?.zone_id]);
+  const [slotAvailability, setSlotAvailability] = useState(null);
+  useEffect(() => {
+    let active = true;
+    setAiResult(null); setAiError(""); setAiLoading(false); setSlotMapOpen(false); setSlotAvailability(null);
+    if (zone?.zone_id) getPilotLayout(zone.zone_id)
+      .then(layout => {
+        if (!active) return;
+        const geographicAvailable = (layout.slots || []).filter(slot =>
+          slot.status === "AVAILABLE" && slot.geometry_crs === "EPSG:4326" && !slot.assigned_vendor_id
+        ).length;
+        const authoritative = Number(layout.summary?.requestable_slots || 0);
+        setSlotAvailability({has_layout: true, operational_enabled: true,
+          requestable_slots: Math.min(geographicAvailable, authoritative)});
+      })
+      .catch(() => {if (active) setSlotAvailability(null);});
+    return () => {active = false;};
+  }, [zone?.zone_id]);
   const factors = zone?.factors || [];
   const rankedFactors = useMemo(() => factors.filter(item => normalizedScore(item.score) != null).sort((left, right) => normalizedScore(right.score) - normalizedScore(left.score)), [factors]);
   const strengths = rankedFactors.slice(0, 3);
   const weakest = rankedFactors.at(-1);
-  const finalValue = zone.score != null && Number.isFinite(Number(zone.score)) ? Number(zone.score) : null;
+  const displayedScore = zone.personalized_score ?? zone.score;
+  const finalValue = displayedScore != null && Number.isFinite(Number(displayedScore)) ? Number(displayedScore) : null;
   const finalStrength = finalValue == null ? null : strengthKey(finalValue);
   const summary = strengths.length ? t("recommend.quickSummary", {
     first: shortFactorLabel(t, strengths[0]),
@@ -83,6 +116,7 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
     third: strengths[2] ? shortFactorLabel(t, strengths[2]) : shortFactorLabel(t, strengths.at(-1)),
     weakest: weakest ? shortFactorLabel(t, weakest) : t("common.unknown"),
   }) : t("recommend.detailSummaryUnavailable");
+  const vendorMatchReasons = (zone?.why_recommended || []).map(reason => matchReason(reason, language, t)).filter(Boolean);
   const pending = dashboard?.action_state?.has_pending_request;
   const actionLoading = !dashboard;
   const aiByFactor = useMemo(() => indexAiFactorExplanations(aiResult), [aiResult]);
@@ -97,7 +131,7 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
     <button className="vendor-back recommendation-detail-back" onClick={onBack}><ArrowLeft size={16}/> {t("recommend.backRecommendations")}</button>
     <header className="recommendation-detail-header">
       <div><span className="recommendation-detail-rank">{zone.rank ? t("recommend.recommendedZone", {rank: zone.rank}) : t("recommend.viewRecommendation")}</span><h1>{zone.zone_id}</h1><p>{zoneDescription(zone,t("fallback.zoneDescription"))}</p><small>{zoneName(zone,t("display.zoneMissing"))}</small><div className="recommendation-detail-location"><MapPin size={14}/><span>{zone.zone_division || t("common.notSpecified")}</span></div><RankingContext zone={zone} locationApplied={locationApplied}/></div>
-      {zone.score != null && <div className="recommendation-detail-score"><span>{t("recommend.originalSuitability")}</span><strong>{score(zone.original_mcda_score ?? zone.score,t("common.notRecorded"))}</strong><small>/100</small><em>{t("recommend.recommendedForBusiness")}: {categoryLabel(language, profile?.business_category)}</em></div>}
+      {displayedScore != null && <div className="recommendation-detail-score"><span>{t("recommend.personalizedMatch")}</span><strong>{score(displayedScore,t("common.notRecorded"))}</strong><small>/100</small><em>{t("recommend.baseMcdaShort", {score: score(zone.score,t("common.notRecorded"))})} · {t("recommend.recommendedForBusiness")}: {categoryLabel(language, profile?.business_category)}</em></div>}
     </header>
 
     <div className="recommendation-summary-cards recommendation-operational-summary">
@@ -109,6 +143,8 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
     <section className="recommendation-quick-summary">
       <div className="quick-summary-copy"><span className="vendor-eyebrow">{t("recommend.whyThisZone")}</span><h2>{finalStrength ? t("recommend.overallQuality", {quality: t(`recommend.strength.${finalStrength}`)}) : t("recommend.whyThisZone")}</h2><p>{summary}</p></div>
       <div className="quick-summary-reasons"><div><h3>{t("recommend.mainStrengths")}</h3>{strengths.map(factor => <span key={factor.key}><Check size={15}/><b>{shortFactorLabel(t, factor)}</b><small>{t(`recommend.strength.${strengthKey(normalizedScore(factor.score))}`)}</small></span>)}</div>{weakest && <div className="quick-summary-consideration"><h3>{t("recommend.mainConsideration")}</h3><span><AlertCircle size={16}/><b>{t("recommend.considerationText", {factor: shortFactorLabel(t, weakest)})}</b></span></div>}</div>
+      {vendorMatchReasons.length > 0 && <div className="quick-summary-reasons"><div><h3>{t("recommend.vendorMatchTitle")}</h3>{vendorMatchReasons.map((reason,index) => <span key={`${reason}-${index}`}><Check size={15}/><b>{reason}</b></span>)}</div></div>}
+      {zone?.requirement_data_source === "SYNTHETIC_DEMO_NOT_MUNICIPAL_DATA" && <p className="field-note">{t("recommend.syntheticDataNotice")}</p>}
     </section>
 
     <details className="recommendation-factors-section vm-advanced"><summary>{t("recommend.whyRanking")}</summary>
@@ -122,7 +158,7 @@ export default function RecommendationDetailPage({zone, recommendations, mapCont
       <div className="recommendation-zone-facts"><h2>{t("recommend.operationalContext")}</h2><dl><div><dt>{t("common.division")}</dt><dd>{zone.zone_division || t("common.notSpecified")}</dd></div><div><dt>{t("common.liveStatus")}</dt><dd>{statusLabel(language, zone.live_status)}</dd></div><div><dt>{t("common.officialCapacity")}</dt><dd>{displayCapacity(zone.official_capacity, t)}</dd></div><div><dt>{t("common.currentVendors")}</dt><dd>{zone.current_total_vendors ?? zone.current_vendor_count ?? t("common.notSpecified")}</dd></div><div><dt>{t("evidence.currentSameCategoryVendors")}</dt><dd>{zone.current_same_category_vendors ?? 0}</dd></div><div><dt>{t("evidence.historicalSameCategoryRecords")}</dt><dd>{zone.historical_same_category_records ?? t("common.notSpecified")}</dd></div><div><dt>{t("evidence.historicalTextAssociationRecords")}</dt><dd>{zone.historical_text_association_records ?? zone.historical_vendor_zone_associations ?? t("common.notSpecified")}</dd></div><div><dt>{t("evidence.acceptedHistoricalAssociations")}</dt><dd>{zone.accepted_historical_association_count ?? t("common.notSpecified")}</dd></div><div><dt>{t("common.available")}</dt><dd>{displayCapacity(zone.available_capacity, t)}</dd></div></dl><p className="field-note">{t("common.currentVendorsHelp")}</p><p className="field-note">{t("evidence.historicalNotOccupancy")}</p>{zone.environment_cluster != null && <div className="recommendation-environment"><h3>{t("recommend.environmentalProfile")}</h3><p>{t("recommend.environmentalProfileText", {cluster: zone.environment_cluster})}</p></div>}<p className="recommendation-map-disclaimer">{t("recommend.analyticalBoundaryNotice")}</p></div>
     </section>
 
-    {PILOT_ZONE_IDS.includes(zone.zone_id) && <section className="recommendation-slot-entry"><div><span className="vendor-eyebrow">Interactive slot layout</span><h2>Choose an available vending slot</h2><p>Slot positions are provisional planning geometry unless independently verified. Selecting a slot creates a request; it does not create an allocation.</p></div><button className="vendor-secondary" onClick={() => setSlotMapOpen(value=>!value)}>{slotMapOpen ? "Hide slot layout" : "View available slots"}</button></section>}
+    {slotAvailability?.operational_enabled && <section className="recommendation-slot-entry"><div><span className="vendor-eyebrow">{t("slotLayout.kicker")}</span><h2>{t(slotAvailability.requestable_slots > 0 ? "slotLayout.availableTitle" : "slotLayout.noneTitle")}</h2><p>{slotAvailability.requestable_slots > 0 ? t(slotAvailability.requestable_slots === 1 ? "slotLayout.availableOne" : "slotLayout.availableMany", {count: slotAvailability.requestable_slots}) : t("slotLayout.noneHelp")}</p></div>{slotAvailability.requestable_slots > 0 && <button className="vendor-secondary" onClick={() => setSlotMapOpen(value=>!value)}>{slotMapOpen ? t("slotLayout.hide") : t(slotAvailability.requestable_slots === 1 ? "slotLayout.viewOne" : "slotLayout.viewMany", {count: slotAvailability.requestable_slots})}</button>}</section>}
     {slotMapOpen && <React.Suspense fallback={<p role="status">Loading slot layout…</p>}><PilotSlotMap zoneId={zone.zone_id} visible onBack={() => setSlotMapOpen(false)} ownBusinessCategory={profile?.business_category} onRequestSlot={slot => onSelect({...zone,slot_id:slot.slot_id})}/></React.Suspense>}
 
     <details className="recommendation-calculation">

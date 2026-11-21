@@ -56,6 +56,12 @@ VENDOR_LOCATION_COLUMNS = {
     "preferred_longitude": "DOUBLE PRECISION",
     "preferred_radius_km": "INTEGER",
 }
+VENDOR_REQUIREMENT_COLUMNS = {
+    "preferred_operating_period": "TEXT",
+    "required_space_sqm": "DOUBLE PRECISION",
+    "max_monthly_budget": "DOUBLE PRECISION",
+}
+OPERATING_PERIODS = ("MORNING", "DAYTIME", "EVENING", "FLEXIBLE")
 
 
 # Retained only as a readable record of the pre-SQLAlchemy SQLite schema. It is
@@ -332,6 +338,9 @@ def _build_metadata() -> MetaData:
         Column("preferred_division", Text), Column("preferred_locality", Text),
         Column("preferred_latitude", Float), Column("preferred_longitude", Float),
         Column("preferred_radius_km", Integer),
+        Column("preferred_operating_period", Text),
+        Column("required_space_sqm", Float),
+        Column("max_monthly_budget", Float),
         Column("priority_profile", Text, nullable=False, server_default="BALANCED"),
         Column("parking_preference", Integer, nullable=False, server_default="0"),
         Column("transport_preference", Integer, nullable=False, server_default="0"),
@@ -731,10 +740,10 @@ def initialize_schema(database_path: str | Path = DATABASE_PATH) -> None:
 
 
 def migrate_vendor_location_preferences(database_path: str | Path = DATABASE_PATH) -> None:
-    """Add nullable preference columns to an existing operational schema."""
+    """Add nullable personalization columns to an existing operational schema."""
     with transaction(database_path, immediate=True) as connection:
         columns = {column["name"] for column in inspect(connection.raw).get_columns("operational_vendors")}
-        for name, definition in VENDOR_LOCATION_COLUMNS.items():
+        for name, definition in {**VENDOR_LOCATION_COLUMNS, **VENDOR_REQUIREMENT_COLUMNS}.items():
             if name not in columns:
                 if_missing = " IF NOT EXISTS" if connection.backend == "postgresql" else ""
                 connection.execute(f"ALTER TABLE operational_vendors ADD COLUMN{if_missing} {name} {definition}")
@@ -1327,7 +1336,7 @@ def create_allocation_request(
             if requested_slot is None or requested_slot["is_deleted"]:
                 raise OperationalNotFoundError(f"Unknown slot {slot_id} for zone {zone_id}")
             if requested_slot["geometry_crs"] != "EPSG:4326":
-                raise OperationalConflictError("Only a reviewed geographic slot can be requested")
+                raise OperationalConflictError("Only a geographic slot can be requested")
             if requested_slot["status"] != "AVAILABLE" or requested_slot["assigned_vendor_id"] or requested_slot["pending_request_id"]:
                 raise OperationalConflictError(f"Slot {slot_id} is not available")
 
@@ -1943,10 +1952,11 @@ def create_operational_vendor(
             """INSERT INTO operational_vendors (
                    vendor_id, application_vendor_id, vendor_type, full_name, business_name, business_category, preferred_division,
                    preferred_locality, preferred_latitude, preferred_longitude, preferred_radius_km,
+                   preferred_operating_period, required_space_sqm, max_monthly_budget,
                    priority_profile, parking_preference,
                    transport_preference, market_preference, preferred_language,
                    status, created_at, updated_at
-               ) VALUES (?, ?, 'NEW', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?, ?)""",
+               ) VALUES (?, ?, 'NEW', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?, ?)""",
             (
                 vendor_id,
                 application_vendor_id,
@@ -1956,6 +1966,7 @@ def create_operational_vendor(
                 profile.get("preferred_division"),
                 profile.get("preferred_locality"),
                 *(profile.get(field) for field in VENDOR_LOCATION_COLUMNS),
+                *(profile.get(field) for field in VENDOR_REQUIREMENT_COLUMNS),
                 profile.get("priority_profile", "BALANCED"),
                 int(profile.get("parking_preference", False)),
                 int(profile.get("transport_preference", False)),
@@ -1972,7 +1983,7 @@ def create_operational_vendor(
             key: row[key]
             for key in (
                 "vendor_type", "full_name", "business_name", "business_category", "preferred_division",
-                "preferred_locality", "priority_profile", "parking_preference",
+                "preferred_locality", *VENDOR_REQUIREMENT_COLUMNS, "priority_profile", "parking_preference",
                 "transport_preference", "market_preference", "preferred_language", "status",
             )
         }
@@ -1992,7 +2003,7 @@ def save_operational_vendor_profile(
     now = utc_now()
     editable = (
         "full_name", "business_name", "business_category", "preferred_division",
-        "preferred_locality", *VENDOR_LOCATION_COLUMNS, "priority_profile",
+        "preferred_locality", *VENDOR_LOCATION_COLUMNS, *VENDOR_REQUIREMENT_COLUMNS, "priority_profile",
         "parking_preference", "transport_preference", "market_preference",
         "preferred_language", "status",
     )
@@ -2011,10 +2022,11 @@ def save_operational_vendor_profile(
             f"""INSERT INTO operational_vendors (
                    vendor_id, application_vendor_id, vendor_type, full_name, business_name, business_category, preferred_division,
                    preferred_locality, preferred_latitude, preferred_longitude, preferred_radius_km,
+                   preferred_operating_period, required_space_sqm, max_monthly_budget,
                    priority_profile, parking_preference,
                    transport_preference, market_preference, preferred_language,
                    status, created_at, updated_at
-               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT(vendor_id) DO UPDATE SET {assignments}""",
             (
                 vendor_id,
@@ -2026,6 +2038,7 @@ def save_operational_vendor_profile(
                 profile.get("preferred_division"),
                 profile.get("preferred_locality"),
                 *(profile.get(field) for field in VENDOR_LOCATION_COLUMNS),
+                *(profile.get(field) for field in VENDOR_REQUIREMENT_COLUMNS),
                 profile.get("priority_profile", "BALANCED"),
                 int(profile.get("parking_preference", False)),
                 int(profile.get("transport_preference", False)),
@@ -2043,7 +2056,7 @@ def save_operational_vendor_profile(
             key: row[key]
             for key in (
                 "vendor_type", "full_name", "business_name", "business_category", "preferred_division",
-                "preferred_locality", "priority_profile", "parking_preference",
+                "preferred_locality", *VENDOR_REQUIREMENT_COLUMNS, "priority_profile", "parking_preference",
                 "transport_preference", "market_preference", "preferred_language", "status",
             )
         }

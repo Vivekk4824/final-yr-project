@@ -81,3 +81,51 @@ Object.assign(hi, {
   "explorer.notScored":"अंक उपलब्ध नहीं", "explorer.available":"उपलब्ध: {count}", "explorer.details":"विवरण देखें", "explorer.request":"आवंटन का आवेदन करें", "explorer.noMatches":"इन फ़िल्टर से कोई क्षेत्र नहीं मिला।",
   "explorer.sharedCount":"{count} क्षेत्रों का संदर्भ समान है", "explorer.availableMarker":"उपयुक्त क्षेत्र", "explorer.missingLocations":"उपयोगी संदर्भ रहित क्षेत्र सूची में उपलब्ध हैं।"
 });
+
+Object.assign(en, {
+  "slotLayout.kicker":"Interactive slot layout",
+  "slotLayout.availableTitle":"Choose an available vending slot",
+  "slotLayout.noneTitle":"No selectable slots right now",
+  "slotLayout.availableOne":"1 slot is currently available. Selecting it creates a request; it does not create an allocation.",
+  "slotLayout.availableMany":"{count} slots are currently available. Selecting one creates a request; it does not create an allocation.",
+  "slotLayout.noneHelp":"You can still request this zone without choosing a slot. An officer can assign a suitable slot later when one becomes available.",
+  "slotLayout.hide":"Hide slot layout",
+  "slotLayout.viewOne":"View 1 available slot",
+  "slotLayout.viewMany":"View {count} available slots"
+});
+Object.assign(en, {
+  "nav.back":"Back",
+  "confirm.logoutTitle":"Log out now?",
+  "confirm.logoutHelp":"You will return to the sign-in page. Any unsaved changes on this page will be lost.",
+  "confirm.staySignedIn":"Stay signed in",
+  "confirm.logout":"Log out",
+  "confirm.loggingOut":"Logging out…",
+  "confirm.createProfileTitle":"Create this application profile?",
+  "confirm.createProfileHelp":"This will create your Application Vendor ID using the details entered here.",
+  "confirm.keepEditing":"Keep editing",
+  "confirm.createProfile":"Create profile"
+});
+Object.assign(mr, {
+  "nav.back":"मागे",
+  "confirm.logoutTitle":"आता लॉग आउट करायचे?",
+  "confirm.logoutHelp":"तुम्ही साइन-इन पृष्ठावर परत जाल. या पृष्ठावरील जतन न केलेले बदल गमावले जातील.",
+  "confirm.staySignedIn":"साइन इन राहा",
+  "confirm.logout":"लॉग आउट",
+  "confirm.loggingOut":"लॉग आउट होत आहे…",
+  "confirm.createProfileTitle":"हे अर्ज प्रोफाइल तयार करायचे?",
+  "confirm.createProfileHelp":"येथे दिलेल्या तपशीलांनुसार तुमचा Application Vendor ID तयार केला जाईल.",
+  "confirm.keepEditing":"संपादन सुरू ठेवा",
+  "confirm.createProfile":"प्रोफाइल तयार करा"
+});
+Object.assign(hi, {
+  "nav.back":"वापस",
+  "confirm.logoutTitle":"अभी लॉग आउट करें?",
+  "confirm.logoutHelp":"आप साइन-इन पेज पर लौटेंगे। इस पेज पर सहेजे नहीं गए बदलाव खो जाएंगे।",
+  "confirm.staySignedIn":"साइन इन रहें",
+  "confirm.logout":"लॉग आउट",
+  "confirm.loggingOut":"लॉग आउट हो रहा है…",
+  "confirm.createProfileTitle":"यह आवेदन प्रोफ़ाइल बनाएं?",
+  "confirm.createProfileHelp":"यहां दिए गए विवरण से आपका Application Vendor ID बनाया जाएगा।",
+  "confirm.keepEditing":"संपादन जारी रखें",
+  "confirm.createProfile":"प्रोफ़ाइल बनाएं"
+});

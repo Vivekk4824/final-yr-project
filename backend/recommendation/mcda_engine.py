@@ -48,6 +48,7 @@ from backend.recommendation.business_aware_mcda import (
     experiment_enabled as business_aware_experiment_enabled,
 )
 from backend.recommendation.location_ranking import LocationRankingPolicy, apply_location_ranking
+from backend.recommendation.vendor_requirement_ranking import apply_vendor_requirement_ranking
 
 
 DATA = dataset_path("mcda_inputs")
@@ -2018,6 +2019,7 @@ def recommend(
     location: tuple[float, float] | None = None,
     radius_km: int | None = None,
     location_policy: LocationRankingPolicy | None = None,
+    vendor_requirements: Mapping[str, object] | None = None,
 ):
     """Return ranked Top-N recommendations.
 
@@ -2082,6 +2084,7 @@ def recommend(
     if "original_mcda_score" not in scored:
         scored["original_mcda_score"] = scored["score"]
     scored["personalized_score"] = scored["score"]
+    scored = apply_vendor_requirement_ranking(scored, vendor_requirements)
     shortlist = scored
     if location is not None and location_policy is not None:
         scored = apply_location_ranking(scored, location, location_policy)

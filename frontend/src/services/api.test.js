@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {apiRequest, deletePilotSlot, getAllocations, getCapacityPressure, getRecommendationAiExplanation, getRecommendations, getPilotRoute, getVendorRelocationRecommendations, requestVendorOtp, savePilotGeometry, verifyVendorOtp} from "./api.js";
+import {apiRequest, deletePilotSlot, getAllocations, getCapacityPressure, getCurrentUser, getRecommendationAiExplanation, getRecommendations, getPilotRoute, getVendorRelocationRecommendations, loginAdmin, requestVendorOtp, savePilotGeometry, verifyVendorOtp} from "./api.js";
 import {indexAiFactorExplanations} from "../features/vendor/viewModel.js";
 
 test("shared client includes the session cookie and preserves the endpoint", async t => {
@@ -21,17 +21,18 @@ test("private requests cannot opt into the browser HTTP cache", async t => {
   await apiRequest("/api/auth/me", {cache:"force-cache"});
 });
 
-test("vendor OTP calls use routes covered by the Vite API proxy", async t => {
+test("vendor OTP calls use proxied routes and verify the retained session", async t => {
   const seen = [];
   t.mock.method(globalThis, "fetch", async (url, options) => {
-    seen.push([url, JSON.parse(options.body)]);
-    return new Response(JSON.stringify(url.endsWith("request-otp") ? {challenge_id: "challenge-1"} : {role: "vendor"}));
+    seen.push([url, options.body ? JSON.parse(options.body) : null]);
+    return new Response(JSON.stringify(url.endsWith("request-otp") ? {challenge_id: "challenge-1"} : {role: "VENDOR"}));
   });
   await requestVendorOtp("9876543210");
   await verifyVendorOtp("challenge-1", "9876543210", "1234");
   assert.deepEqual(seen, [
     ["http://127.0.0.1:8000/api/auth/vendor/request-otp", {mobile: "9876543210"}],
     ["http://127.0.0.1:8000/api/auth/vendor/verify-mobile-otp", {challenge_id: "challenge-1", mobile: "9876543210", otp: "1234"}],
+    ["http://127.0.0.1:8000/api/auth/me", null],
   ]);
 });
 
@@ -91,11 +92,11 @@ test("all six AI explanations remain keyed to their existing factor cards", () =
   keys.forEach(factor => assert.equal(indexed.get(factor), `${factor} prose`));
 });
 
-test("routing preserves WGS84 longitude/latitude and reviewed geometry payloads", async t => {
+test("routing preserves WGS84 longitude/latitude and geometry payloads", async t => {
   t.mock.method(globalThis, "fetch", async (url, options) => {
     const body = JSON.parse(options.body);
     if (url.endsWith("/route")) assert.deepEqual(body, {longitude: 73.77, latitude: 19.97});
-    else assert.deepEqual(body, {layout: {slots: []}, review_confirmed: true});
+    else assert.deepEqual(body, {layout: {slots: []}});
     return new Response(JSON.stringify({available: false}));
   });
   await getPilotRoute({longitude: 73.77, latitude: 19.97});
@@ -138,8 +139,8 @@ test("both logins verify the cookie with the shared role-aware me endpoint", asy
     return new Response(JSON.stringify({authenticated:true, role:"ADMIN"}));
   });
   assert.equal((await loginAdmin("test-officer", "test-password")).role,"ADMIN");
-  await verifyVendorOtp("test-challenge", "123456");
-  assert.deepEqual(requests.map(({url}) => new URL(url).pathname), ["/api/auth/admin/login","/api/auth/me","/api/auth/vendor/verify-otp","/api/auth/me"]);
+  await verifyVendorOtp("test-challenge", "9876543210", "1234");
+  assert.deepEqual(requests.map(({url}) => new URL(url).pathname), ["/api/auth/admin/login","/api/auth/me","/api/auth/vendor/verify-mobile-otp","/api/auth/me"]);
   for (const {options} of requests) {assert.equal(options.credentials,"include");assert.equal(options.cache,"no-store");}
 });
 

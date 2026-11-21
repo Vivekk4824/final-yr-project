@@ -225,7 +225,7 @@ def imported_layout(zone_id):
     source_hash = hashlib.sha256(raw).hexdigest()
     return {"zone_id": zone_id, "zone_display_name": features[0]["properties"]["zone_display_name"],
             "georeferenced": True, "coordinate_system": "EPSG:4326", "metric_crs": "EPSG:32643",
-            "geometry_verification_status": "PROVISIONAL_NOT_SURVEYED", "operational_enabled": False,
+            "geometry_verification_status": "PROVISIONAL_NOT_SURVEYED", "operational_enabled": True,
             "source_sha256": source_hash, "source_provenance": collection["provenance"],
             "boundaries": {"type": "FeatureCollection", "features": boundaries, "source_sha256": source_hash},
             "slots": slots, "dimension_spacing_by_boundary": settings,

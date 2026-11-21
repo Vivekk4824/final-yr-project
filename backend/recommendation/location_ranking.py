@@ -106,11 +106,21 @@ def apply_location_ranking(
     )
     ranked["distance_km"] = 6371.0088 * 2 * np.arcsin(np.sqrt(haversine.clip(0, 1)))
     ranked["proximity_score"] = (100 * np.exp(-ranked.distance_km / policy.decay_km)).where(ranked.score.notna())
+    base_score = (
+        pd.to_numeric(ranked["personalized_score"], errors="coerce")
+        if "personalized_score" in ranked
+        else ranked.score
+    )
     ranked["personalized_score"] = (
-        (1 - policy.proximity_weight) * ranked.score + policy.proximity_weight * ranked.proximity_score
-    ) if policy.proximity_weight else ranked.score
+        (1 - policy.proximity_weight) * base_score + policy.proximity_weight * ranked.proximity_score
+    ) if policy.proximity_weight else base_score
+    sort_columns = ["personalized_score", "original_mcda_score", "zone_id"]
+    ascending = [False, False, True]
+    if "requirement_exact_match" in ranked:
+        sort_columns.insert(0, "requirement_exact_match")
+        ascending.insert(0, False)
     return ranked.sort_values(
-        ["personalized_score", "original_mcda_score", "zone_id"],
-        ascending=[False, False, True],
+        sort_columns,
+        ascending=ascending,
         na_position="last",
     ).reset_index(drop=True)

@@ -23,6 +23,7 @@ from backend.repositories.database import get_active_allocation_for_vendor
 from backend.recommendation.decision_policy import FACTOR_ORDER
 from backend.recommendation.business_aware_mcda import CATEGORY_GIS_FEATURE_WEIGHTS
 from backend.recommendation.location_ranking import DISTANCE_RADII_KM, configured_location_policy, saved_working_location
+from backend.recommendation.vendor_requirement_ranking import enabled as requirement_ranking_enabled, SOURCE as REQUIREMENT_SOURCE
 from backend.services.capacity_analysis import zone_capacity_analysis
 from fastapi import APIRouter
 router = APIRouter()
@@ -30,6 +31,10 @@ router = APIRouter()
 PERSONALIZED_FIELDS = (
     "original_mcda_score", "personalized_score", "distance_km", "proximity_score",
     "requested_business_category", "category_gis_method", "category_gis_fallback_used",
+    "allowed_operating_periods", "available_stall_space_sqm", "monthly_fee",
+    "operating_period_match_score", "space_match_score", "budget_match_score",
+    "requirements_score", "requirement_data_source", "synthetic_requirements_weight",
+    "requirement_exact_match", "requirement_match_count", "requirement_constraint_count",
 )
 
 
@@ -50,6 +55,100 @@ def _ranking_reason(row):
     factors = [factor for factor in FACTOR_ORDER if pd.notna(row.get(f"{factor}_contribution"))]
     factor = max(factors, key=lambda item: row[f"{item}_contribution"]) if factors else None
     return {"ranking_reason": {"kind": "mcda_factor", "factor": factor}} if factor else {}
+
+
+def _why_recommended(row, profile, business, division):
+    """Return deterministic, source-grounded reasons for this vendor-zone pair."""
+    reasons = []
+    if business:
+        reasons.append({
+            "kind": "business_category",
+            "value": business,
+            "detail": (
+                "CATEGORY_AWARE_GIS"
+                if bool(row.get("business_aware_mcda_experiment_enabled", False))
+                else "HISTORICAL_BUSINESS_COMPATIBILITY"
+            ),
+        })
+    if division and row.get("zone_division") == division:
+        reasons.append({"kind": "preferred_division", "value": division})
+    if pd.notna(row.get("distance_km")):
+        reasons.append({
+            "kind": "working_location_distance",
+            "value": round(float(row["distance_km"]), 2),
+            "unit": "km",
+        })
+    if profile:
+        selected = [
+            name for field, name in (
+                ("market_preference", "commercial"),
+                ("transport_preference", "access"),
+                ("parking_preference", "facilities"),
+            )
+            if bool(profile.get(field))
+        ]
+        priority = str(profile.get("priority_profile") or "BALANCED")
+        if priority != "BALANCED" or selected:
+            reasons.append({
+                "kind": "vendor_priorities",
+                "value": priority,
+                "selected": selected,
+            })
+        if row.get("requirement_data_source") == REQUIREMENT_SOURCE:
+            reasons.append({
+                "kind": "requirements_fit",
+                "exact_match": bool(row.get("requirement_exact_match", False)),
+                "matched": int(row.get("requirement_match_count", 0)),
+                "total": int(row.get("requirement_constraint_count", 0)),
+            })
+            reasons.extend([
+                {
+                    "kind": "operating_period_match",
+                    "requested": profile.get("preferred_operating_period"),
+                    "allowed": row.get("allowed_operating_periods"),
+                    "score": row.get("operating_period_match_score"),
+                    "synthetic": True,
+                },
+                {
+                    "kind": "space_match",
+                    "requested": profile.get("required_space_sqm"),
+                    "available": row.get("available_stall_space_sqm"),
+                    "score": row.get("space_match_score"),
+                    "synthetic": True,
+                },
+                {
+                    "kind": "budget_match",
+                    "requested": profile.get("max_monthly_budget"),
+                    "monthly_fee": row.get("monthly_fee"),
+                    "score": row.get("budget_match_score"),
+                    "synthetic": True,
+                },
+            ])
+    available = row.get("available_capacity")
+    if pd.notna(available):
+        reasons.append({"kind": "live_availability", "value": int(available)})
+    return reasons
+
+
+def _requirement_coverage(profile):
+    """Disclose which saved inputs can currently affect ranking."""
+    if not profile:
+        return []
+    active = requirement_ranking_enabled()
+    coverage = []
+    for name, reason in (
+        ("preferred_operating_period", "REVIEWED_ZONE_OPERATING_HOURS_UNAVAILABLE"),
+        ("required_space_sqm", "REVIEWED_ZONE_USABLE_SPACE_UNAVAILABLE"),
+        ("max_monthly_budget", "REVIEWED_ZONE_COST_DATA_UNAVAILABLE"),
+    ):
+        value = profile.get(name)
+        coverage.append({
+            "input": name,
+            "value": value,
+            "status": "SYNTHETIC_DEMO_EVALUATED" if active and value is not None else "NOT_PROVIDED" if value is None else "NOT_EVALUATED",
+            "reason": REQUIREMENT_SOURCE if active and value is not None else "VENDOR_INPUT_NOT_PROVIDED" if value is None else reason,
+        })
+    return coverage
 
 
 @router.get("/api/recommendations/{zone_id}/ai-explanation")
@@ -202,6 +301,7 @@ def recommendations(
             location=location,
             radius_km=radius_km,
             location_policy=location_policy,
+            vendor_requirements=profile,
         )
 
 
@@ -338,6 +438,7 @@ def recommendations(
             weight_profile[
                 "multipliers"
             ],
+        "requirement_coverage": _requirement_coverage(profile),
     }
 
     if result.attrs.get("business_aware_mcda_experiment_enabled", False):
@@ -475,6 +576,15 @@ def recommendations(
         dependencies.DATABASE_PATH,
     )
     capacity_by_zone = zone_capacity_analysis(dependencies.DATABASE_PATH)
+    scoreable_candidates = all_candidates.loc[all_candidates.score.notna()].copy()
+    comparative_ranks = {}
+    for factor in FACTOR_ORDER:
+        column = f"{factor}_score"
+        if column in scoreable_candidates:
+            comparative_ranks[factor] = scoreable_candidates.set_index("zone_id")[column].rank(
+                method="min", ascending=False, na_option="bottom"
+            ).to_dict()
+    comparative_count = len(scoreable_candidates)
     records = []
 
 
@@ -499,6 +609,10 @@ def recommendations(
             row,
             effective_weights,
         )
+        for factor in item["factors"]:
+            rank = comparative_ranks.get(factor.get("key"), {}).get(str(row.get("zone_id")))
+            factor["candidate_rank"] = int(rank) if pd.notna(rank) else None
+            factor["candidate_count"] = comparative_count
         live_evidence = active_category_counts.get(str(row.get("zone_id")), {})
         capacity_evidence = capacity_by_zone.get(str(row.get("zone_id")), {})
         item.update({
@@ -523,7 +637,8 @@ def recommendations(
                     {"label": "Historical text-associated records", "value": item["historical_text_association_records"] or 0},
                     {"label": "Accepted historical associations", "value": item["accepted_historical_association_count"]},
                 ]
-        item.update({"title":row.zone_id, "description":row.get("official_description"), "location_source":row.get("reference_location_source")})
+        item.update({"title":row.zone_id, "description":row.get("official_description"), "location_source":row.get("reference_location_source"),
+                     "why_recommended": _why_recommended(row, profile, business, division)})
         item.update(_ranking_reason(row))
 
 
