@@ -4,7 +4,7 @@ import L from "leaflet";
 
 import {getPilotLayout} from "../../services/api.js";
 
-const MAPTILER_API_KEY = (import.meta.env.VITE_MAPTILER_API_KEY || "").trim();
+const MAPTILER_API_KEY = (import.meta.env.M_API_KEY || "").trim();
 const MAPTILER_ATTRIBUTION = '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>';
 const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>';
 const COLORS = {AVAILABLE:"#218657", RESERVED:"#e5b93b", OCCUPIED:"#c43e3e", BLOCKED:"#788491"};

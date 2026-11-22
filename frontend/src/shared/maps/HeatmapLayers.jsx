@@ -2,7 +2,7 @@ import React, {useEffect} from "react";
 import L from "leaflet";
 import {TileLayer, useMap} from "react-leaflet";
 
-const MAPTILER_API_KEY = (import.meta.env.VITE_MAPTILER_API_KEY || "").trim();
+const MAPTILER_API_KEY = (import.meta.env.M_API_KEY || "").trim();
 const MAPTILER_ATTRIBUTION = '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>';
 const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>';
 const HEAT_GRADIENT = {0.2: "#2563eb", 0.45: "#16a34a", 0.7: "#fde047", 1: "#dc2626"};

@@ -13,7 +13,7 @@ import "./PilotSlotMap.css";
 import "./SlotWorkspace.css";
 
 const COLORS = {AVAILABLE: "#218657", OCCUPIED: "#c43e3e", RESERVED: "#e5b93b", BLOCKED: "#788491"};
-const MAPTILER_API_KEY = (import.meta.env.VITE_MAPTILER_API_KEY || "").trim();
+const MAPTILER_API_KEY = (import.meta.env.M_API_KEY || "").trim();
 const MAPTILER_ATTRIBUTION = '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>';
 const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>';
 const handleIcon = L.divIcon({className: "pilot-drag-handle", html: "↔", iconSize: [30, 30], iconAnchor: [15, 15]});
