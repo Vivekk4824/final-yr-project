@@ -26,8 +26,17 @@ def eligible_slot_vendors(request: FastAPIRequest, zone_id: str, q: str = "",
     pilot_slots.validate_zone(zone_id)
     db = connect(dependencies.DATABASE_PATH)
     try:
-        rows = db.execute("""SELECT allocation_id,vendor_id,allocation_source FROM allocations
-            WHERE zone_id=? AND status='ACTIVE' ORDER BY allocated_at DESC""", (zone_id,)).fetchall()
+        rows = db.execute("""SELECT a.allocation_id,a.vendor_id,a.allocation_source
+            FROM allocations AS a
+            WHERE a.zone_id=? AND a.status='ACTIVE' AND a.slot_id IS NULL
+              AND (a.allocation_source='LEGACY_IMPORT' OR EXISTS (
+                  SELECT 1 FROM allocation_requests AS r
+                  WHERE r.request_id=a.request_id AND r.status='APPROVED'
+                    AND r.vendor_id=a.vendor_id AND r.zone_id=a.zone_id))
+              AND NOT EXISTS (
+                  SELECT 1 FROM pilot_slots AS s
+                  WHERE s.assigned_vendor_id=a.vendor_id AND s.is_deleted=0)
+            ORDER BY a.allocated_at DESC""", (zone_id,)).fetchall()
     finally:
         db.close()
     term = q.strip().casefold()

@@ -193,12 +193,12 @@ export default function useVendorWorkspace({sessionProfile = null, onboarding = 
   };
   const findZones = ({navigate = true, expandSearch = false} = {}) => run(() => loadRecommendations(profile, {navigate, expandSearch}));
   useEffect(() => {
-    const recommendationView = view === "vendor-recommendations" || view === "vendor-recommendation-detail";
+    const recommendationView = view === "vendor-recommendations" || view === "vendor-recommendation-detail" || view === "vendor-location-insights";
     if (recommendationView && profileReady && profile && !recommendationData && (view === "vendor-recommendation-detail" || !dashboard?.action_state?.has_pending_request)) findZones({navigate: false});
   }, [view, profileReady, profile?.vendor_id, recommendationData, dashboard?.action_state?.has_pending_request]);
   useEffect(() => () => {recommendationRequest.current.invalidate(); actionRequest.current.invalidate();}, []);
   const submitZone = () => run(async () => {
-    const requestType = activeAllocation ? "RELOCATION" : "NEW_ALLOCATION";
+    const requestType = confirmZone.request_type || (activeAllocation ? "RELOCATION" : "NEW_ALLOCATION");
     const created = await createAllocationRequest({
       vendor_id: profile.vendor_id, zone_id: confirmZone.zone_id, request_type: requestType,
       slot_id: confirmZone.slot_id || null,

@@ -41,7 +41,7 @@ DATABASE_BACKEND = get_database_backend()
 OFFICIAL_ZONES_PATH = dataset_path("official_zones")
 
 ZONE_STATUSES = ("OPEN", "FULL", "CLOSED", "SUSPENDED", "RESTRICTED", "NO_VENDING")
-REQUEST_TYPES = ("NEW_ALLOCATION", "RELOCATION")
+REQUEST_TYPES = ("NEW_ALLOCATION", "RELOCATION", "SLOT_CHANGE")
 REQUEST_STATUSES = ("PENDING", "APPROVED", "REJECTED", "CANCELLED")
 ALLOCATION_STATUSES = ("ACTIVE", "RELEASED")
 ALLOCATION_SOURCES = ("ADMIN_APPROVED", "LEGACY_IMPORT")
@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS allocation_requests (
     vendor_id TEXT NOT NULL,
     zone_id TEXT NOT NULL,
     slot_id TEXT NULL,
+    request_kind TEXT NULL,
     request_type TEXT NOT NULL CHECK (request_type IN ('NEW_ALLOCATION', 'RELOCATION')),
     status TEXT NOT NULL CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED')),
     business_category TEXT NULL,
@@ -394,6 +395,9 @@ def _build_metadata() -> MetaData:
         Column("request_id", Text, primary_key=True), Column("vendor_id", Text, nullable=False),
         Column("zone_id", Text, ForeignKey(zones.c.zone_id), nullable=False),
         Column("slot_id", Text),
+        # request_kind extends the legacy request_type constraint without a
+        # destructive SQLite table rebuild. New APIs expose this value when set.
+        Column("request_kind", Text),
         Column("request_type", Text, nullable=False), Column("status", Text, nullable=False),
         Column("business_category", Text), Column("preferred_division", Text),
         Column("created_at", Text, nullable=False), Column("updated_at", Text, nullable=False),
@@ -910,6 +914,8 @@ def initialize_database(
         request_columns = set(schema.get("allocation_requests", {}).get("columns", []))
         if "slot_id" not in request_columns:
             connection.execute("ALTER TABLE allocation_requests ADD COLUMN slot_id TEXT NULL")
+        if "request_kind" not in request_columns:
+            connection.execute("ALTER TABLE allocation_requests ADD COLUMN request_kind TEXT NULL")
         for table, columns in {
             "vendor_auth_identities": set(schema.get("vendor_auth_identities", {}).get("columns", [])),
             "auth_otp_challenges": set(schema.get("auth_otp_challenges", {}).get("columns", [])),
@@ -1159,7 +1165,7 @@ def get_vendor_dashboard_activity(
     connection = connect(database_path)
     try:
         active = connection.execute(
-            """SELECT a.*, r.request_type AS allocation_type,
+            """SELECT a.*, COALESCE(r.request_kind, r.request_type) AS allocation_type,
                       z.status AS live_zone_status, z.official_capacity,
                       z.current_vendor_count, z.available_capacity
                FROM allocations AS a
@@ -1196,9 +1202,12 @@ def get_vendor_dashboard_activity(
                 old_zone_id = details.get("old_zone_id")
                 if old_zone_id:
                     previous_zone_by_request[audit["entity_id"]] = old_zone_id
+        public_requests = [dict(row) for row in requests]
+        for row in public_requests:
+            row["request_type"] = row.get("request_kind") or row["request_type"]
         return {
             "active_allocation": dict(active) if active is not None else None,
-            "requests": [dict(row) for row in requests],
+            "requests": public_requests,
             "previous_zone_by_request": previous_zone_by_request,
         }
     finally:
@@ -1295,27 +1304,36 @@ def create_allocation_request(
         if zone is None:
             raise OperationalNotFoundError(f"Unknown zone_id: {zone_id}")
         zone = _zone_with_derived_occupancy(connection, zone)
-        from backend.services.eligibility import zone_ineligibility_reason
-        reason = zone_ineligibility_reason(policy_types.get(zone_id), zone)
-        if reason:
-            raise OperationalConflictError(f"Zone {zone_id} is ineligible ({reason})")
-        if zone["official_capacity"] is not None and zone["available_capacity"] <= 0:
-            raise OperationalConflictError(f"Zone {zone_id} has no available capacity")
-        if zone["status"] != "OPEN":
-            raise OperationalConflictError(
-                f"Zone {zone_id} is not open for allocation (status: {zone['status']})"
-            )
-
         active_allocation = connection.execute(
-            "SELECT allocation_id, zone_id FROM allocations WHERE vendor_id = ? AND status = 'ACTIVE'",
+            "SELECT allocation_id, zone_id, slot_id FROM allocations WHERE vendor_id = ? AND status = 'ACTIVE'",
             (vendor_id,),
         ).fetchone()
+        if request_type != "SLOT_CHANGE":
+            from backend.services.eligibility import zone_ineligibility_reason
+            reason = zone_ineligibility_reason(policy_types.get(zone_id), zone)
+            if reason:
+                raise OperationalConflictError(f"Zone {zone_id} is ineligible ({reason})")
+            if zone["official_capacity"] is not None and zone["available_capacity"] <= 0:
+                raise OperationalConflictError(f"Zone {zone_id} has no available capacity")
+            if zone["status"] != "OPEN":
+                raise OperationalConflictError(
+                    f"Zone {zone_id} is not open for allocation (status: {zone['status']})"
+                )
         if request_type == "NEW_ALLOCATION" and active_allocation is not None:
             raise OperationalConflictError("Vendor already has an active allocation")
         if request_type == "RELOCATION" and active_allocation is None:
             raise OperationalConflictError("Relocation requires an active allocation")
         if request_type == "RELOCATION" and active_allocation["zone_id"] == zone_id:
             raise OperationalConflictError("Relocation target must differ from the active allocation zone")
+        if request_type == "SLOT_CHANGE":
+            if active_allocation is None:
+                raise OperationalConflictError("Slot change requires an active allocation")
+            if active_allocation["zone_id"] != zone_id:
+                raise OperationalConflictError("Slot change must stay inside the active allocation zone")
+            if not slot_id:
+                raise OperationalValidationError("Slot change requires a selected slot")
+            if active_allocation["slot_id"] == slot_id:
+                raise OperationalConflictError("The selected slot is already assigned to this vendor")
 
         duplicate = connection.execute(
             """SELECT request_id FROM allocation_requests
@@ -1344,17 +1362,18 @@ def create_allocation_request(
             connection.execute(
                 """
                 INSERT INTO allocation_requests (
-                    request_id, vendor_id, zone_id, slot_id, request_type, status,
+                    request_id, vendor_id, zone_id, slot_id, request_kind, request_type, status,
                     business_category, preferred_division, created_at,
                     updated_at, notes
-                ) VALUES (?, ?, ?, ?, ?, 'PENDING', ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?, ?, ?)
                 """,
                 (
                     request_id,
                     vendor_id,
                     zone_id,
                     slot_id,
-                    request_type,
+                    request_type if request_type == "SLOT_CHANGE" else None,
+                    "RELOCATION" if request_type == "SLOT_CHANGE" else request_type,
                     business_category,
                     preferred_division,
                     now,
@@ -1671,6 +1690,7 @@ def approve_allocation_request(
             raise OperationalConflictError(
                 f"Only PENDING requests can be approved (current status: {request['status']})"
             )
+        workflow_type = request.get("request_kind") or request["request_type"]
         requested_slot = None
         if request.get("slot_id"):
             requested_slot = connection.execute(
@@ -1692,16 +1712,17 @@ def approve_allocation_request(
         if target_zone is None:
             raise OperationalNotFoundError(f"Unknown zone_id: {request['zone_id']}")
         target_zone = _zone_with_derived_occupancy(connection, target_zone)
-        from backend.services.eligibility import zone_ineligibility_reason
-        reason = zone_ineligibility_reason(policy_types.get(request["zone_id"]), target_zone)
-        if reason:
-            raise OperationalConflictError(f"Zone {request['zone_id']} is ineligible ({reason})")
-        if target_zone["official_capacity"] is not None and target_zone["available_capacity"] <= 0:
-            raise OperationalConflictError(f"Zone {request['zone_id']} has no available capacity")
-        if target_zone["status"] != "OPEN":
-            raise OperationalConflictError(
-                f"Zone {request['zone_id']} is not open for allocation (status: {target_zone['status']})"
-            )
+        if workflow_type != "SLOT_CHANGE":
+            from backend.services.eligibility import zone_ineligibility_reason
+            reason = zone_ineligibility_reason(policy_types.get(request["zone_id"]), target_zone)
+            if reason:
+                raise OperationalConflictError(f"Zone {request['zone_id']} is ineligible ({reason})")
+            if target_zone["official_capacity"] is not None and target_zone["available_capacity"] <= 0:
+                raise OperationalConflictError(f"Zone {request['zone_id']} has no available capacity")
+            if target_zone["status"] != "OPEN":
+                raise OperationalConflictError(
+                    f"Zone {request['zone_id']} is not open for allocation (status: {target_zone['status']})"
+                )
 
         active = connection.execute(
             "SELECT * FROM allocations WHERE vendor_id = ? AND status = 'ACTIVE'" + for_update(connection),
@@ -1709,10 +1730,83 @@ def approve_allocation_request(
         ).fetchone()
         released_allocation = None
         old_zone_id = None
-        if request["request_type"] == "NEW_ALLOCATION":
+        if workflow_type == "SLOT_CHANGE":
+            if active is None:
+                raise OperationalConflictError("Slot change requires an active allocation")
+            if active["zone_id"] != request["zone_id"]:
+                raise OperationalConflictError("Slot change must stay inside the active allocation zone")
+            if requested_slot is None:
+                raise OperationalConflictError("Slot change requires a reserved target slot")
+            if active.get("slot_id") == request["slot_id"]:
+                raise OperationalConflictError("The requested slot is already assigned to this vendor")
+
+            old_slots = connection.execute(
+                """SELECT * FROM pilot_slots
+                   WHERE zone_id=? AND assigned_vendor_id=? AND slot_id<>?""",
+                (request["zone_id"], request["vendor_id"], request["slot_id"]),
+            ).fetchall()
+            for slot in old_slots:
+                connection.execute(
+                    """UPDATE pilot_slots SET status='AVAILABLE', assigned_vendor_id=NULL,
+                              pending_request_id=NULL, active_allocation_id=NULL, updated_at=?
+                       WHERE zone_id=? AND slot_id=?""",
+                    (now, slot["zone_id"], slot["slot_id"]),
+                )
+                connection.execute(
+                    """INSERT INTO pilot_slot_events(zone_id,slot_id,actor,before_json,after_json,created_at)
+                       VALUES(?,?,?,?,?,?)""",
+                    (slot["zone_id"], slot["slot_id"], approved_by, json.dumps(dict(slot)),
+                     json.dumps({"status": "AVAILABLE", "reason": "SLOT_CHANGE",
+                                 "request_id": request_id}), now),
+                )
+            connection.execute(
+                "UPDATE allocations SET slot_id=?, updated_at=? WHERE allocation_id=? AND status='ACTIVE'",
+                (request["slot_id"], now, active["allocation_id"]),
+            )
+            connection.execute(
+                """UPDATE pilot_slots SET status='OCCUPIED', assigned_vendor_id=?,
+                          pending_request_id=NULL, active_allocation_id=?, updated_at=?
+                   WHERE zone_id=? AND slot_id=? AND pending_request_id=?""",
+                (request["vendor_id"], active["allocation_id"], now,
+                 request["zone_id"], request["slot_id"], request_id),
+            )
+            connection.execute(
+                """INSERT INTO pilot_slot_events(zone_id,slot_id,actor,before_json,after_json,created_at)
+                   VALUES(?,?,?,?,?,?)""",
+                (request["zone_id"], request["slot_id"], approved_by,
+                 json.dumps(dict(requested_slot)),
+                 json.dumps({"status": "OCCUPIED", "reason": "SLOT_CHANGE",
+                             "assigned_vendor_id": request["vendor_id"],
+                             "active_allocation_id": active["allocation_id"]}), now),
+            )
+            connection.execute(
+                """UPDATE allocation_requests SET status='APPROVED', reviewed_at=?, reviewed_by=?,
+                          updated_at=?, notes=COALESCE(?, notes) WHERE request_id=?""",
+                (now, approved_by, now, notes, request_id),
+            )
+            details = {
+                "request_id": request_id, "request_type": workflow_type,
+                "vendor_id": request["vendor_id"], "zone_id": request["zone_id"],
+                "old_slot_id": active.get("slot_id"), "slot_id": request["slot_id"],
+                "allocation_id": active["allocation_id"],
+            }
+            _audit(connection, "SLOT_CHANGE_APPROVED", "allocation", active["allocation_id"],
+                   approved_by, details, now)
+            _audit(connection, "ALLOCATION_REQUEST_APPROVED", "allocation_request", request_id,
+                   approved_by, details, now)
+            return {
+                "request": connection.execute(
+                    "SELECT * FROM allocation_requests WHERE request_id=?", (request_id,)
+                ).fetchone(),
+                "allocation": connection.execute(
+                    "SELECT * FROM allocations WHERE allocation_id=?", (active["allocation_id"],)
+                ).fetchone(),
+                "released_allocation": None,
+            }
+        if workflow_type == "NEW_ALLOCATION":
             if active is not None:
                 raise OperationalConflictError("Vendor already has an active allocation")
-        elif request["request_type"] == "RELOCATION":
+        elif workflow_type == "RELOCATION":
             if active is None:
                 raise OperationalConflictError("Relocation requires an active allocation")
             if active["zone_id"] == request["zone_id"]:
@@ -1849,7 +1943,7 @@ def approve_allocation_request(
             "new_count": new_count,
             "available_capacity": new_available,
             "zone_status": new_status,
-            "request_type": request["request_type"],
+            "request_type": workflow_type,
         }
         _audit(
             connection, "ALLOCATION_CREATED", "allocation", allocation_id,

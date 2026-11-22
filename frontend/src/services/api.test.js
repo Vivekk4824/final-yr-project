@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {apiRequest, deletePilotSlot, getAllocations, getCapacityPressure, getCurrentUser, getRecommendationAiExplanation, getRecommendations, getPilotRoute, getVendorRelocationRecommendations, loginAdmin, requestVendorOtp, savePilotGeometry, verifyVendorOtp} from "./api.js";
+import {apiRequest, deletePilotSlot, getAllocations, getCapacityPressure, getCurrentUser, getRecommendationAiExplanation, getRecommendations, getPilotRoute, getVendorLocationInsights, getVendorRelocationRecommendations, loginAdmin, requestVendorOtp, savePilotGeometry, verifyVendorOtp} from "./api.js";
 import {indexAiFactorExplanations} from "../features/vendor/viewModel.js";
 
 test("shared client includes the session cookie and preserves the endpoint", async t => {
@@ -115,6 +115,16 @@ test("admin planning APIs are read-only GET requests", async t => {
   assert.equal(seen[0][1] || "GET", "GET");
   assert.ok(seen[1][0].endsWith("/api/admin/capacity-pressure"));
   assert.equal(seen[1][1] || "GET", "GET");
+});
+
+test("vendor location insights requests only the recommended zone identifiers", async t => {
+  t.mock.method(globalThis, "fetch", async (url, options) => {
+    assert.equal(url, "http://127.0.0.1:8000/api/vendors/me/location-insights?zone_id=PAN_F_019&zone_id=NN_F_013");
+    assert.equal(options.method, undefined);
+    assert.equal(options.credentials, "include");
+    return new Response(JSON.stringify({heatmap: {cells: []}}));
+  });
+  assert.deepEqual(await getVendorLocationInsights(["PAN_F_019", "NN_F_013"]), {heatmap: {cells: []}});
 });
 
 test("shared client reports an unavailable service", async t => {

@@ -1,0 +1,624 @@
+K. K. WAGH INSTITUTE OF ENGINEERING EDUCATION RESEARCH
+
+
+
+
+                                                           K. K. WAGH INSTITUTE OF ENGINEERING
+                                                                  EDUCATION & RESEARCH
+                                                            Department of Information Technology A.Y :2026-2027
+
+
+                                                               SahiiDSA– Learn.Think.Solve
+
+                                                         Group Id : 08
+                                                         Guide : Dr. Swapnali Jagtap
+                      TEAM MEMBERS
+
+
+
+
+                                     TEAM MEMBERS
+
+Division / Roll   Exam Seat                Name of the                Email                 Contact Number
+No.               Number                   student                    ID
+
+BE-Q / 03         B231308004                Isha Amodkar    isamodkar370823@kkwagh.edu.in   9359746522
+
+BE-Q / 23         B231308040                 Sayee Gosavi   sygosavi370823@kkwagh.edu.in    8446379211
+BE-Q / 26         B231308046                Mohit Jagtap     majagtap370823@kkwagh.edu.in   8767809351
+BE-Q / 45         B231308093                Sarvesh Patil     sspatil370823@kkwagh.edu.in
+                                                                                            9503021968
+Contents
+
+
+
+
+           Contents
+
+           1. Problem Definition
+           2. Scope and Objectives
+           3. Literature Review
+           4. Block Diagram
+           5. Experimental Setup
+           6. Performance Parameters
+           7. Efficiency Issues
+           8. Tools and Techniques used
+           9. Testing
+           10. Results
+           11. Team Work(roles of members)
+           12. Conclusion and Future Work
+           13. References
+
+
+                                             3
+Basics: Terms You Will Hear
+
+
+
+
+                                             Basics: Terms You Will Hear
+                                     Terms                                     Simple Meaning
+                                      DSA                              Data Structures and Algorithms
+                                       AI                                   Artificial Intelligence
+                                      LLM                                  Large Language Model
+                                      RAG                             Retrieval-Augmented Generation
+
+                                     FAISS                       Vector similarity search and indexing library
+
+                                 Embeddings                           Numerical representations of text
+
+                                  LangChain                Framework for integrating language models and retrieval
+
+
+                               Socratic Tutoring              Guiding students through questions and reasoning
+
+
+                              Intent Classification             Identifying the purpose of a student's request
+
+
+                               Progressive Hints                Providing increasingly detailed hints in stages
+                                                                                                                  3
+       Problem Definition
+
+
+
+
+                                                                           Problem Definition
+
+        Why it is hard?
+        Students often depend on AI-generated solutions without understanding the actual problem-solving
+        process.
+
+
+                            Students Struggle With:                           Students' Limitations:           Limitations of Existing AI Answers
+                                                                          • Lack of consistent problem-
+     • Understanding complex DSA                                                                               • Directly provides
+                                                                            solving practice.
+       problems.                                                                                                 complete solutions.
+                                                                          • Weak programming
+     • Identifying suitable algorithms                                                                         • Reduces independent
+                                                                            fundamentals.
+       and patterns.                                                                                             problem-solving practice.
+                                                                          • Difficulty converting logic into
+     • Developing logical problem-                                                                             • Provides limited step-by-
+                                                                            code.
+       solving approaches.                                                                                       step guidance.
+                                                                          • Fear of solving unfamiliar
+     • Debugging programming errors.                                                                           • Does not adequately track
+                                                                            problems.
+     • Understanding time and space                                                                              individual learning
+                                                                          • Limited self-evaluation of
+       complexity.                                                                                               progress.
+                                                                            learning progress.
+
+22 November 2026                          Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                        5
+                                          Problem Statement
+
+
+
+
+       Problem Statement Problem Statement
+
+
+         To develop an AI-powered intelligent tutoring system that helps students learn Data
+         Structures and Algorithms through guided problem-solving, contextual explanations,
+         progressive hints, code debugging assistance and learner activity tracking.
+
+
+
+
+                   Input                                                  Process                        Output
+        • DSA Problems                                        • Intent Classification         • Conceptual Explanations
+        • Student Queries.                                    • Retrieval-Augmented           • Progressive Hints
+        • Student’s Code.                                       Generation                    • Code Assistance
+        • Programming Code                                    • AI-Based Guidance             • Solution Explanations
+                                                              • Progressive Hint Generation   • Learner Progress Information
+
+
+22 November 2026       Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                      6
+       Scope and Objectives
+
+
+
+
+                                                                        Scope and Objectives
+                                             Objectives                                                                             In scope
+                                                                                                              1.   DSA Problem Searching and Browsing
+     1. To encourage guided problem-solving                                                                   2.   AI Mentor Interaction
+                                                                                                              3.   Progressive Hint Generation
+     2. To develop independent problem-solving                                                                4.   Code Assistance
+                                                                                                              5.   Solution Explanation
+                              skills                                                                          6.   Time and Space Complexity Analysis
+                                                                                                              7.   Learner Profile and Progress Tracking
+     3. To provide personalized learning support
+                                                                                                                                  Limitations
+     4. To ensure accurate and reliable learning
+                                                                                                              ▪ Response quality depends on the LLM and
+                              guidance                                                                          knowledge base.
+                                                                                                              ▪ AI-generated answers may require
+     5. To support faculty with student learning                                                                verification.
+                                                                                                              ▪ Learner profiles mainly represent recorded
+                              insights                                                                          activity.
+                                                                                                              ▪ Problem coverage depends on available
+                                                                                                                knowledge-base data.
+22 November 2026                         Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.
+                                                                                                              ▪ Code execution depends on configured         7
+                                                                                                                environments.
+Literature Review: Existing Research on AI-Based Learning Systems
+
+
+
+
+                                                                    Literature Review: Existing Research on AI-Based Learning Systems
+                                                                                                                                                      TECHNOLOGIES /
+                                                                    SR. NO.         TITLE             AUTHOR & DATE           METHODOLOGY                                    LIMITATIONS
+                                                                                                                                                        CONCEPTS
+                                                                                                                                  RAG-based
+                                                                              Personalized Learning
+                                                                                                        Pandey, Pillai &     personalized learning
+                                                                                  in CS: A RAG                                                         RAG, Language
+                                                                      1.                              Semmandampalayam       using domain-specific                            Not specified
+                                                                               Framework for Data                                                         Models
+                                                                                                            (2026)              knowledge and
+                                                                               Structures Tutoring
+                                                                                                                              contextual guidance.
+                                                                                                                             Adaptive chatbot using
+                                                                               Nex Gen Tutor: An
+                                                                                                                              retrieval-augmented     AI, RAG, Language
+                                                                      2.      Adaptive AI-Powered     Eekshita et al. (2026)                                                  Not specified
+                                                                                                                                 generation and            Models
+                                                                                Learning Chatbot
+                                                                                                                             personalized pedagogy.
+                                                                                                                               Study of document                          Retrieval precision,
+                                                                              Retrieval-Augmented
+                                                                                                                               indexing, retrieval                            knowledge
+                                                                              Generation for Large                                                  RAG, Large Language
+                                                                      3.                                Gao et al. (2024)       enhancement and                         inconsistencies, context
+                                                                              Language Models: A                                                          Models
+                                                                                                                             context-based response                          capacity and
+                                                                                     Survey
+                                                                                                                                   generation.                               hallucination.
+                                                                              Retrieval-Augmented                             Combines external
+                                                                                                                                                       Neural Retriever,
+                                                                                  Generation for                              knowledge retrieval
+                                                                      4.                               Lewis et al. (2020)                            Pretrained Language     Not specified
+                                                                              Knowledge-Intensive                                with pretrained
+                                                                                                                                                             Models
+                                                                                   NLP Tasks                                   language models.
+                                                                              The ICAP Framework:                                 Categorizes
+                                                                              Connecting Cognitive                              engagement into
+                                                                                                                                                       ICAP Framework,
+                                                                      5.        Engagement With       Chi & Wylie (2014)          Interactive,                                Not specified
+                                                                                                                                                        Active Learning
+                                                                                 Active Learning                             Constructive, Active                                             3
+                                                                                    Outcomes                                 and Passive learning.
+Literature Review: Existing Research on AI-Based Learning Systems
+
+
+
+
+                                                                    Literature Review: Existing Research on AI-Based Learning Systems
+                                                                                                                                                         TECHNOLOGIES /
+                                                                    SR. NO.           TITLE             AUTHOR & DATE         METHODOLOGY                                             LIMITATIONS
+                                                                                                                                                           CONCEPTS
+                                                                                   The Relative
+                                                                                                                             Reviews answer-based,
+                                                                              Effectiveness of Human
+                                                                                                                             step-based and substep-      Intelligent Tutoring
+                                                                      6.        Tutoring, Intelligent    Van Lehn (2011)                                                                Not specified
+                                                                                                                                  based tutoring                 Systems
+                                                                               Tutoring Systems, and
+                                                                                                                                   approaches.
+                                                                              Other Tutoring Systems
+                                                                                Building Intelligent
+                                                                                                                              Focuses on student
+                                                                                Interactive Tutors:
+                                                                                                                             modelling, instructional     Intelligent Tutoring
+                                                                                 Student-Centered
+                                                                      7.                                  Woolf (2009)         planning, adaptive          Systems, Student             Not specified
+                                                                                   Strategies for
+                                                                                                                                  feedback and                 Modelling
+                                                                                Revolutionizing E-
+                                                                                                                                   assessment.
+                                                                                     Learning
+                                                                                                                                Studies task-level,
+                                                                                                        Hattie & Timperley      process-level, self-        Feedback-Based
+                                                                      8.      The Power of Feedback                                                                                     Not specified
+                                                                                                               (2007)        regulation and personal-          Learning
+                                                                                                                                  level feedback.
+
+                                                                                                                               Compares novice and                                 Beginners struggle with
+                                                                               Learning and Teaching                           expert programmers,                                    program design,
+                                                                                                        Robins, Rountree &
+                                                                      9.      Programming: A Review                          programming knowledge Programming Education           programming concepts
+                                                                                                         Rountree (2003)
+                                                                                  and Discussion                               and problem-solving                                 and transfer of previous
+                                                                                                                                   approaches.                                           knowledge.
+
+                                                                                                                             Uses self-explanation to
+                                                                                  Eliciting Self-
+                                                                                                                             improve understanding      Self-Explanation, Active
+                                                                      10.     Explanations Enhances      Chi et al. (2001)                                                              Not specified
+                                                                                                                              through reasoning and            Learning
+                                                                                 Understanding                                                                                                          3
+                                                                                                                                 prior knowledge.
+Research Gaps and Our Answer
+
+
+
+
+                                                         Research Gaps and Our Answer
+
+                                            Gap Found in Existing Work                        How Our System Addresses It
+
+                                                                                   Five-level progressive hints encourage students to
+                                    AI tools provide direct solutions, reducing
+                               1                                                    solve problems independently before accessing
+                                          independent problem-solving.
+                                                                                                     full solutions.
+
+                                      Limited step-by-step guidance during            Socratic tutoring guides students through
+                               2
+                                                problem-solving.                   questions, pattern nudges and detailed strategies.
+
+                                                                                     RAG with FAISS retrieves relevant coding
+                                   Generic responses without sufficient problem
+                               3                                                    problems and learning-session information for
+                                                     context.
+                                                                                               contextual responses.
+                                                                                     Learner profiles store problem history, solved
+                                    Lack of personalized learning support and
+                               4                                                      problems, difficulty levels and algorithmic-
+                                                progress tracking.
+                                                                                                    pattern activity.
+                                                                                    Intent classification routes requests to problem
+                                    Different student requests require different
+                               5                                                    lookup, debugging, hints, conceptual questions
+                                                types of assistance.
+                                                                                                and solution assistance.            3
+Block Diagram
+
+
+
+
+                Block Diagram
+
+
+
+
+                                3
+       Experimental Setup
+
+
+
+
+                                                                             Experimental Setup
+
+                                     24                                   6                                            5                         25
+                            Intent classification                 Intent categories                               DSA problems             Hint generation
+                                 messages                                                                           sampled                   attempts
+
+                                                                                                             Setup Details:
+                                                                                                             • Vector Retrieval: Two separate FAISS indexes for
+                                                                                                               problems and learning sessions.
+                                                                                                             • Retrieval Configuration: Problem Top-K: 3; Session
+                                                                                                               Top-K: 2.
+                                                                                                             • Language Models: Ollama (Llama 3.2) and Google
+                                                                                                               Gemini (Gemini 2.5 Flash).
+                                                                                                             • Data Storage: JSON-based learner profiles, problem
+                                                                                                               records and session logs.
+                                                                                                             • Embedding Model: BAAI/bge-small-en-v1.5.
+                                                                                                             • Testing Methods: Unit Testing, Integration Testing,
+                                                                                                               Functional Testing, Error Handling Testing and End-to-
+                                                                                                               End Workflow Testing.
+22 November 2026                             Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                                  12
+        Performance Parameters
+
+
+
+
+                                                                    Performance Parameters
+                                                                                                                   Forensic checks
+                                                                                                    25
+                              100%                        53.49 sec                         Hint Generations
+                        Intent Accuracy                Avg. Hint Time                          5 problems                Metric                     Result
+                         24 development                 Per generated                                ×
+                             samples                      response                               5 levels          OCR field extraction      Over 96% on receipts
+
+
+                                                                                                                   Amount conflict detection 100% on amount gaps
+                                                               5                                    6
+                                8/8                       Hint Levels
+                          Functional Tests                                                 Intent Categories       Golden Hour trigger       Immediate priority flag
+                                                          Progressive                     Request classification
+                         Recorded as passed                guidance
+
+
+
+    1. Tested 24 intent messages and achieved 100% development-set accuracy.
+    2. Tested 5 DSA problems across 5 progressive hint levels using Ollama Llama 3.2.
+    3. Conducted functional testing; 30 retrieval queries prepared, but benchmark results are pending.
+
+22 November 2026                          Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                                           13
+Efficiency Issues
+
+
+
+
+                                                        Efficiency Issues
+
+                      Issue                    Observed                             How We Handled It
+
+               Slow AI response                                       Supports local Ollama and Google Gemini
+                                Average 53.49 seconds per hint
+               generation                                             providers
+
+               Higher-level hint   Tier 4: 75.76 sec; Tier 5: 90.85
+                                                                      Uses five progressive hint levels
+               delays              sec
+
+               Retrieval           30 queries available; benchmark Uses FAISS with separate problem and session
+               limitations         incomplete                      indexes
+
+               Language model      Responses depend on provider     Supports Ollama local execution and Gemini
+               dependency          availability and model behaviour cloud integration
+
+               Limited learner     Pattern confidence based on        Stores learner profiles, problem records and
+               profiling           solved-count thresholds            session logs
+                                                                                                                     3
+       Tools and Techniques Used
+
+
+
+
+                                                                      Tools and Techniques Used
+                                                Tools                                                                                 Techniques
+                                                                                                            •       Intent classification and request routing.
+                                     Area                  Technology
+                                                                                                            •       Pattern classification using DSA taxonomy.
+                                              Python 3.10 to 3.13; JavaScript,                              •       Semantic embeddings and cosine similarity
+                                   Language
+                                              HTML5, CSS3                                                           search.
+                                              scikit-learn, NumPy, SciPy, joblib
+                                                                                                            •       Retrieval-Augmented Generation (RAG).
+                                   ML / NLP
+                                                                                                            •       Top-K retrieval using FAISS indexes.
+      Voice and OCR
+                                              OpenAI Whisper (local), Tesseract +                           •       Five-level progressive hint generation.
+                                              PyTesseract                                                   •       Socratic tutoring and guided learning.
+                  Backend / UI                                                                              •       Learner profile aggregation and confidence
+                                              FastAPI ; HTML,CSS
+                                                                                                                    thresholding.
+      Data and reports SQLite, ReportLab (PDF), JSON                                                        •       Subprocess-based code execution.
+                                                                                                            •       Test-case evaluation using output comparison.
+      Version control                         Git and GitHub
+
+
+
+22 November 2026                               Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                                   15
+Testing
+
+
+
+
+                                             Testing
+
+                Area              Test Cases                  What Was Verified
+
+          Problem Retrieval       FT-01, FT-02      Valid and invalid problem searches
+
+                                                    Hint requests and code debugging
+           Intent Handling        FT-03, FT-04
+                                                    requests
+          Progressive Hints          FT-05          Sequential hint generation
+
+           Solution Access           FT-06          Solution locked until hint threshold
+
+          Mentor Interaction         FT-07          DSA concept explanations
+
+           Learner Progress          FT-08          Learning progress storage and updates
+
+                               8 / 8 Functional Test Cases Passed
+                                                                                            3
+       Results: System Evaluation
+
+
+
+
+                                                                              Results: System Evaluation
+      Time per complaint on CPU (lower is better)                                                                           What we observed
+100
+                                                                                                                            • High retrieval precision in the selected
+                                                                                                                              test case.
+                                                                                            84.5
+ 80
+                                                                                                                            • Hallucination detection and query
+                                                                                                                              rewriting achieved 100%.
+ 60                                                                                                                         • Intent classification performance
+                                                                                                                              requires further improvement.
+ 40
+                                                                                                                            • Context relevance and answer
+                                                                                                                              relevance need further improvement.
+                                                                                                                            • Independent testing is required for
+ 20
+                                                                                                                              stronger generalisation evaluation.
+                                         2.18
+  0
+                                    LinearSVC (ours)                                    DistilBERT
+
+
+
+
+22 November 2026                                       Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                                17
+       Results: System Screens
+
+
+
+
+                                                                           Results: System Screens
+
+
+
+
+                                 SahiiiDSA Platform: Find Problems                                                   Coding And Assessment Window
+
+                                   Type the problem to practice through patterns                                     Code Editor to type and execute code
+                                   Recommendations as per solving                                                    Debug window to debug code simultaneously
+
+
+22 November 2026                                Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                               18
+       Results: System Screens
+
+
+
+
+                                                                         Results: System Screens
+
+
+
+
+                                 Hints and Socratic Mentor                                                         Overview Dashboard
+
+
+
+
+22 November 2026                              Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                        19
+       Team Work: Roles of Members
+
+
+
+
+                                                                       Team Work: Roles of Members
+     Member :Isha Amodkar                                            Member: Sayee Gosavi                           Member : Sarvesh Patil       Member: Mohit Jagtap
+
+                    Data Engineering &                                   RAG Pipeline & AI                           Application & Code            Personalization,
+                    Knowledge Base                                       Agent Development                           Execution                     Evaluation & Testing
+
+                                     LeetCode GraphQL                      Semantic retrieval                              Streamlit dashboard     User profile and
+                                     API integration                       and query rewriting                             development             session management
+                                                                           RAG pipeline                                    DSA problem             Problem-solving
+                                     Problem parsing
+                                                                           implementation                                  selection and           history tracking
+                                     and preprocessing
+                                                                            LLM integration                                interface               Pattern mastery and
+                                     DSA pattern                                                                                                   weakness analysis
+                                                                           (Ollama / Gemini)                               Multi-language
+                                     classification                                                                        code execution
+                                                                            Intent classification                                                  Personalized learning
+                                     Embedding generation                                                                  (C/C++/Python)          context
+                                                                           and routing
+                                     and FAISS indexing                                                                    LeetCode-style test     Retrieval and hint
+                                                                           MentorAgent and
+                                     Knowledge base                                                                        harness                 quality evaluation
+                                                                           Socratic prompting
+                                     construction                                                                          Application and         Functional and
+                                                                           Five-tier progressive
+                                                                                                                           module integration      integration testing
+                                                                           hint generation
+
+
+
+22 November 2026                                      Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                                   20
+       Conclusion and Future Work
+
+
+
+
+                                                          Conclusion and Future Work
+
+                                          Conclusion                                                                  Future Work
+                                                                                                 Expand DSA topics: Trees, Graphs, Dynamic
+                   AI-powered DSA learning with guided problem-solving.
+                                                                                                 Programming, Sorting and Searching.
+
+                   Intent-based request handling through Mentor Agent.                           Advanced learner modelling and adaptive assistance.
+
+                   RAG integration using FAISS and BAAI embeddings.                              Dynamic Socratic questioning and misconception detection.
+
+                                                                                 Advanced code evaluation with time and space complexity
+                   Five-level progressive hints with controlled solution access.
+                                                                                 analysis.
+
+                   Learner profiles and activity tracking using JSON.                            Hybrid retrieval using vector and keyword search.
+
+                                                                                                 Faculty monitoring, learning analytics and voice-based
+                   Supports independent learning and problem-solving skills.
+                                                                                                 interaction.
+                                                                                                 Extend programming language support and mobile
+                                                                                                 interface.
+
+22 November 2026                      Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.                                                     21
+       References
+
+
+
+
+                                                                                     References
+    [1] B. P. Woolf, Building Intelligent Interactive Tutors: Student-Centered Strategies for     [11] C. D. Manning, P. Raghavan, and H. Schutze, Introduction to Information
+    Revolutionizing E-Learning. Morgan Kaufmann, 2009.                                            Retrieval. Cambridge University Press, 2008.
+    [2] K. VanLehn, “The Relative Effectiveness of Human Tutoring, Intelligent Tutoring
+                                                                                                  [12] S. Robertson and H. Zaragoza, “The Probabilistic Relevance Framework: BM25
+    Systems, and Other Tutoring Systems,” Educational Psychologist, vol. 46, no. 4, pp. 197–
+                                                                                                  and Beyond,” Foundations and Trends in Information Retrieval, vol. 3, no. 4, pp. 333–
+    221, 2011.
+                                                                                                  389, 2009.
+    [3] A. Robins, J. Rountree, and N. Rountree, “Learning and Teaching Programming: A
+    Review and Discussion,” Computer Science Education, vol. 13, no. 2, pp. 137–172, 2003.        [13] V. Karpukhin et al., “Dense Passage Retrieval for Open-Domain Question
+                                                                                                  Answering,” EMNLP, pp. 6769–6781, 2020.
+    [4] M. T. H. Chi, N. de Leeuw, M.-H. Chiu, and C. LaVancher, “Eliciting Self-Explanations
+    Improves Understanding,” Cognitive Science, vol. 25, no. 4, pp. 471–533, 2001.                [14] N. Reimers and I. Gurevych, “Sentence-BERT: Sentence Embeddings Using
+                                                                                                  Siamese BERT-Networks,” EMNLP-IJCNLP, pp. 3982–3992, 2019.
+    [5] M. T. H. Chi and R. Wylie, “The ICAP Framework: Linking Cognitive Engagement to
+    Active Learning Outcomes,” Educational Psychologist, vol. 49, no. 4, pp. 219–243, 2014.       [15] J. Johnson, M. Douze, and H. Jégou, “Billion-Scale Similarity Search with
+                                                                                                  GPUs,” IEEE Transactions on Big Data, vol. 7, no. 3, pp. 535–547, 2021.
+    [6] J. Hattie and H. Timperley, “The Power of Feedback,” Review of Educational Research,
+    vol. 77, no. 1, pp. 81–112, 2007.                                                             [16] A. Vaswani et al., “Attention Is All You Need,” Advances in Neural Information
+                                                                                                  Processing Systems, vol. 30, pp. 5998–6008, 2017.
+    [7] P. Lewis et al., “Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,”
+    Advances in Neural Information Processing Systems, vol. 33, pp. 9459–9474, 2020.
+                                                                                                  [17] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, “BERT: Pre-Training of
+                                                                                                  Deep Bidirectional Transformers for Language Understanding,” NAACL-HLT, vol. 1,
+    [8] Y. Gao et al., “Retrieval-Augmented Generation for Large Language Models: A Survey,”
+                                                                                                  pp. 4171–4186, 2019.
+    arXiv:2312.10997, 2024.
+
+    [9] J. Pandey, H. R. Pillai, and P. Semmandampalayam, “Personalized Learning in Computer      [18] T. B. Brown et al., “Language Models Are Few-Shot Learners,” Advances in
+    Science: A Retrieval-Augmented Generation (RAG) Framework for Data Structures                 Neural Information Processing Systems, vol. 33, pp. 1877–1901, 2020.
+    Tutoring,” ICADAAI, 2026.
+                                                                                                  [19] L. Ouyang et al., “Training Language Models to Follow Instructions with Human
+    [10] A. Eekshita et al., “NexGen Tutor: An Adaptive AI-Powered Learning Chatbot Using         Feedback,” Advances in Neural Information Processing Systems, vol. 35, pp. 27730–
+    Retrieval-Augmented Generation and Personalized Pedagogy,” ICDSCNC, 2026.                     27744, 2022.
+                                                                                                                                                                                          22
+22 November 2026                      Dept. of Information Technology | SahiiiDSA – Learn. Think. Solve.
+THANK YOU !!
+
+
+
+
+               THANK YOU !!
+
+
+
+
+                              26
+

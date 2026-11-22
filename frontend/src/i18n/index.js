@@ -82,6 +82,6 @@ export function setDocumentLanguage(language, documentRef = globalThis.document)
 export const CANONICAL_TERMINOLOGY = Object.freeze({
   statuses: ["OPEN", "FULL", "CLOSED", "SUSPENDED", "RESTRICTED", "NO_VENDING", "PENDING", "APPROVED", "REJECTED", "CANCELLED", "ACTIVE", "RELEASED"],
   categories: ["vegetable_fruit", "flower", "clothing", "general_goods", "food", "other", "unknown"],
-  requestTypes: ["NEW_ALLOCATION", "RELOCATION"],
+  requestTypes: ["NEW_ALLOCATION", "RELOCATION", "SLOT_CHANGE"],
   factors: ["business", "commercial", "access", "facilities", "preference", "historical"],
 });

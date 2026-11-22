@@ -1,0 +1,667 @@
+K. K. WAGH INSTITUTE OF ENGINEERING EDUCATION AND RESEARCH
+              Department of Information Technology | A.Y. 2026-27
+
+
+
+
+                 VendorMap
+   A GIS-Enabled Data-Driven Decision Support
+  System for Street Vendor Zoning, Allocation and
+                   Management
+
+                 PROJECT FINAL EXAMINATION
+
+
+                       Guide: Prof. R. M. Bora
+                                                                 Team Members
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                                      Roll No.                     Student                              Contribution Focus
+
+
+                                                        19        Darshan Gavate                          GIS pipeline, architecture and evaluation
+
+
+
+                                                        48        Vivek Patil                             Backend services, database and allocation
+                                                                                                          workflows
+
+
+                                                        65        Sneha Tingare                           Frontend experience, multilingual and PWA flows
+
+
+
+                                                        66        Kalyani Ugale                           Recommendation logic, testing and documentation
+
+
+
+
+                                                                      Academic guide   Prof. R. M. Bora
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                         2
+                                                       Presentation Story
+PROJECT FINAL EXAMINATION
+
+
+
+
+               1           Problem                          2      Data                          3      Intelligence
+
+              Why current allocation needs evidence         NMC records, OSM and operational     K-Means profiles and MCDA ranking
+                                                            state
+
+
+
+
+               4           System                           5      Evidence                      6      Plan
+
+              Vendor, officer and WhatsApp workflows        Tests, screenshots and sensitivity   COCOMO, deployment and future work
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                   3
+                                                                         Problem Definition
+PROJECT FINAL EXAMINATION
+
+
+
+
+                Street-vendor allocation combines policy, capacity, livelihood and spatial constraints.
+
+
+                                                  Fragmented records                                                 Manual decisions
+                       Vendor, zone, document and allocation data are difficult to reconcile.     Static lists do not explain why one zone is preferable to another.
+
+
+
+
+                                                      Live constraints                                              Spatial uncertainty
+                    Capacity, status and relocation rules can change after a recommendation.    Reference coordinates are analytical evidence, not legal boundaries.
+
+
+
+
+                                Decision-support goal: make evidence visible while keeping final municipal authority with the officer.
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                    4
+                                                                 Scope and Objectives
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                                      In scope                                        Evidence boundary
+
+              - Authenticated vendor and officer workspaces                             - Recommendations remain advisory
+              - Official-zone catalog and capacity controls                             - K-Means describes environmental groups
+              - Explainable ranked recommendations                                      - MCDA expresses explicit factor trade-offs
+              - Request, approval and relocation lifecycle                              - Reference coordinates are not certified polygons
+              - Pilot slot geometry and navigation                                      - Field safety and legal approval require inspection
+              - Multilingual PWA and WhatsApp access                                    - External providers need production configuration
+
+
+
+
+                                       Outcome: a traceable workflow from evidence and ranking to controlled allocation.
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                            5
+                                                                     Implemented Solution
+PROJECT FINAL EXAMINATION
+
+
+
+
+                       IDENTIFY                                          UNDERSTAND                              RECOMMEND                                ALLOCATE
+      308 official zones and 7,259 historical                         12 GIS features and K-Means        Missing-data-aware MCDA with factor     Capacity checks, audit history and
+                   vendor records                                        environmental profiles                      explanations                     pilot slot assignment
+
+
+
+
+                                  One shared service layer powers the web application and WhatsApp conversation flow.
+
+                                                      Ranking never bypasses policy status, division, capacity, authentication or officer approval.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                                   6
+                                                         Data Foundation
+PROJECT FINAL EXAMINATION
+
+
+
+
+                              308                             7,259                                                     258                                             146
+                       official NMC zones               historical vendor records                            usable zone references                         scoreable free-zone candidates
+
+
+
+
+                                               Source                               Prepared evidence                                                  Role in system
+
+           NMC official records                               Zone type, division, capacity, descriptions                     Policy and eligibility
+
+
+
+           Historical vendor registry                         Business category and past associations                         Context only; not live occupancy
+
+
+
+           OpenStreetMap                                      Roads, facilities, transport and land-use layers                Environmental features
+
+
+
+           Operational database                               Profiles, requests, allocations, slots and audit events         Current system state
+
+
+
+           Versioned model assets                             K-Means model, MCDA policy and metadata                         Reproducible analytics
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                                          7
+                                                              Data Processing Pipeline
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                 1. Ingest                                          2. Standardize                                3. Validate
+                         NMC CSV/PDF extracts                                     IDs, categories, divisions                   Missingness, duplicates
+                         OSM GeoPackage layers                                  translations and coordinates                  geometry and provenance
+
+
+
+
+                               4. Engineer                                             5. Version                                   6. Serve
+                           Road, POI, facility and                                Training snapshot, model                   Recommendation API, maps
+                            transport features                                 metadata and candidate catalog                   and evidence panels
+
+
+
+
+                                                 Every output retains source limitations; missing values never become invented facts.
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                      8
+                                               GIS Feature Engineering and Data Quality
+PROJECT FINAL EXAMINATION
+
+
+
+
+                           Twelve active environmental features                                                        Quality controls
+           Road access: distance to major road, road density, pedestrian-road                         - Projected metric analysis in EPSG:32643
+           density                                                                                    - Deduplicated transport and facility layers
+           Commercial context: commercial, market and food POI counts                                 - 258 usable references; 50 missing references
+           Transport: bus access count and distance                                                   - Invalid geometry count: 0
+           Facilities: healthcare, education, toilet and parking counts                               - Source confidence preserved in metadata
+                                                                                                      - Ready-for-feature-engineering audit: passed
+
+
+
+
+                  Excluded from clustering             capacity, zone type, geometry area, historical vendor evidence and sparse land-use shares
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                    9
+                                                        K-Means Environmental Profiling
+PROJECT FINAL EXAMINATION
+
+
+
+
+           Selected configuration
+           K = 2 | 258 rows | 12 features | five seeds                                 Silhouette 0.3406 Davies-Bouldin 1.4645 ARI 1.0000
+
+
+                                                  Interpretation: stable environmental typology, not a prediction of suitability or business success.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                     10
+                                     Explainable Zone Recommendation with MCDA
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                                      Score(z) = sum [ weight(i) x normalized factor(i,z) ]
+
+
+
+           Business fit                                 25%                 Commercial activity                  20%              Access                               20%
+           Contribution shown in every result                               Contribution shown in every result                    Contribution shown in every result
+
+
+
+
+           Facilities                                   15%                 Vendor preference                    10%              Historical evidence                  10%
+           Contribution shown in every result                               Contribution shown in every result                    Contribution shown in every result
+
+
+
+
+                                    Eligibility filters run before ranking: division, zone type, live status, verified capacity and current-zone exclusion.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                          11
+                                       Recommendation Sensitivity and Interpretation
+PROJECT FINAL EXAMINATION
+
+
+
+
+                              224                                      100%                                   85.57%                                     0.9977
+               weight-perturbation scenarios                         top result stability                    mean top-3 retention                     mean rank correlation
+
+
+
+
+             Documented scenario
+
+             Food vendor | Nashik West | 146 candidates | Top 3: NW_F_025, NW_F_005, NW_F_001
+
+
+
+                                                      The first result is robust for this request. Lower-ranked positions still change, so the interface shows multiple
+                  What this proves
+                                                      candidates and factor evidence.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                           12
+                                  End-to-End Recommendation and Allocation Flow
+PROJECT FINAL EXAMINATION
+
+
+
+
+                 Authenticate                                           Load context                               Filter                                Rank
+                Role and ownership                               Profile, division and current zone     Policy, capacity and live status      MCDA score and contributions
+
+
+
+
+                       Explain                                             Request                                Review                               Commit
+            Map, factors and cautions                              New allocation or relocation                Officer decision               Transaction, capacity and audit
+
+
+
+
+                                                      The same ranking service supports the web application and WhatsApp conversation flow.
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                             13
+                                                             Final System Architecture
+PROJECT FINAL EXAMINATION
+
+
+
+
+               Vendor PWA                                                    FastAPI Service Layer                                          Operational Database
+                 React + Vite                                         Authentication, schemas, role checks and API                                 SQLite / PostgreSQL
+           English / Marathi / Hindi                                                  orchestration                                    profiles, requests, allocations, slots, audit
+
+
+
+
+         Officer Workspace                                                      Domain Services
+               Dashboard, review                                     Recommendations, allocations, relocation, pilot
+                and slot planning                                           geometry and explanations                                       Versioned GIS Assets
+                                                                                                                                             GeoJSON / GeoPackage / CSV
+                                                                                                                                              model and policy metadata
+
+
+
+       WhatsApp Cloud API
+                Signed webhook                                                       Analytics
+                 and simulator                                               K-Means environmental model
+                                                                               MCDA + AHP + sensitivity                                        External Providers
+                                                                                                                                        OSM tiles, routing, OTP, Gemini and Meta
+
+
+
+
+                                                      Separation of concerns keeps analytical evidence distinct from mutable operational state.
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                                    14
+                                                      Backend, Data and Privacy Controls
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                         Control area                                       Implemented control                                              Why it matters
+
+
+        Authorization                                                     Server-enforced VENDOR, ONBOARDING and ADMIN roles          UI visibility alone never grants access
+
+
+
+        Sessions                                                          HttpOnly, SameSite cookies; hashed server tokens            Reduces token exposure
+
+
+
+        Mobile identity                                                   Conservative normalization and HMAC mapping                 Plain phone numbers stay out of SQLite/model files
+
+
+
+        Transactions                                                      Atomic approval, capacity and relocation updates            Prevents final-slot race conditions
+
+
+
+        PWA privacy                                                       Static allowlist only; API and private pages bypass cache   No authenticated data in Cache Storage
+
+
+
+
+                                                 External provider credentials remain deployment secrets; debug OTP is restricted to development.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                                        15
+                                        Vendor Journey: Discover, Compare and Apply
+PROJECT FINAL EXAMINATION
+
+
+
+
+                          1. Personal dashboard                                    2. Ranked recommendations                         3. Server-backed request status
+
+
+
+                                                Each recommendation includes map position, eligibility context, factor contributions and cautions.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                    16
+                                          Officer Journey: Review, Decide and Monitor
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                        City overview and pending work             Searchable vendor registry
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                             17
+                                                      Spatial Decision Support and Pilot Slots
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                                       Zone map                                               Pilot slot map and inspector
+
+                         10 saved test slots passed computational containment, spacing and clearance checks. Physical verification is still required.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                     18
+                                Access Channels: Multilingual PWA and WhatsApp
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                                      Installable PWA                                                         Three languages
+            Production build supports installability, controlled updates and a generic offline    English, Marathi and Hindi labels use stable backend values and locale-aware
+                                                  page.                                                                              display.
+
+
+
+
+                                                      WhatsApp bot                                                             Safe fallbacks
+              Direct Meta Cloud API webhook reuses authentication, recommendation and            Routing, AI explanation and messaging failures return explicit alternatives without
+                                          request services.                                                                     changing scores.
+
+
+
+
+                                                                        One domain model, multiple access paths.
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                                    19
+                                                         Testing and Verification Evidence
+PROJECT FINAL EXAMINATION
+
+
+
+
+                         97 / 97                                     64 / 64                                                     1,690                                                  234
+            focused backend tests in the final                  current frontend unit tests                         modules transformed in verified                     backend cases currently collected
+                        report                                                                                            production build
+
+
+
+
+                                                Test layer                             Representative evidence                                                Risk controlled
+
+               Domain                                                   MCDA, division, capacity, relocation and slot geometry           Incorrect recommendation or state transition
+
+
+
+
+               Security                                                 Sessions, roles, ownership, OTP and production config            Unauthorized access and insecure deployment
+
+
+
+
+               Integration                                              Vendor-to-officer flow, PostgreSQL migration and WhatsApp        Broken cross-module workflow
+
+
+
+
+               Frontend                                                 PWA privacy, API client, localization and map grouping           Data leakage and UI inconsistency
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                                                         20
+                                                 Verified Results and Project Contribution
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                                       Data                                                                      Analytics
+                 Traceable NMC + OSM preparation with explicit missingness and provenance.        Stable two-cluster typology and scenario-specific MCDA sensitivity evidence.
+
+
+
+
+                                                      Software                                                                    Spatial
+             Role-separated vendor/officer workflows with live capacity and transaction safety.     Interactive zone maps and computationally validated pilot slot geometry.
+
+
+
+
+                                                      Access                                                                   Governance
+                        Responsive multilingual PWA plus shared WhatsApp service logic.               Explanations, audit history and clear limits on automated authority.
+
+
+
+
+                                      VendorMap delivers a completed academic decision-support system, not an autonomous municipal authority.
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                              21
+                                         COCOMO II: Repository-Based Size Estimate
+PROJECT FINAL EXAMINATION
+
+
+
+
+                         Approximate maintained source size
+                                                                              Model assumptions
+                                  31.5 KSLOC                                 Post-architecture form
+                                                                                    E = 1.1153
+         Nonblank production and research source lines; tests and            Effort multiplier = 1.287
+         dependencies excluded.
+
+
+
+
+         Backend                                                                                         20930
+
+
+
+         Scripts / models                                                                                5899
+
+
+
+         Frontend                                                                                        4664
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                              22
+                                   COCOMO II: Effort, Schedule and Cost Scenario
+PROJECT FINAL EXAMINATION
+
+
+
+
+                    177.37 PM                               19.35 months                                   9.17 FTE                                 INR 2.44 Cr
+                estimated professional effort                   estimated schedule                        implied average team                 initial professional-equivalent budget
+
+
+
+
+             Effort formula                                                                          Schedule formula
+
+             PM = 2.94 x 31.493^1.1153 x 1.287                                                       TDEV = 3.67 x 177.37^0.32106
+
+
+                                                      This is a hypothetical replacement-cost model, not student expenditure or recorded project history. Field survey,
+                  Planning interpretation             security review and operational support remain separate.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                                     23
+                                                      Deployment and Operational Readiness
+PROJECT FINAL EXAMINATION
+
+
+
+
+                 Client                                            API                       Database                       Providers                       Operations
+       Vite production build                            FastAPI behind reverse proxy    SQLite for academic pilot      OTP, Meta, routing and AI       Backups, restore drills
+     HTTPS host + PWA headers                             secure cookies + origin      PostgreSQL migration path      configured through secrets       monitoring and incident
+                                                                  controls                      available                                                     handling
+
+
+
+
+                                      Pilot hosting estimate
+                                                                                       Illustrative host, storage, domain allocation and monitoring only.
+                                 INR 3,500 / month
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                              24
+                                                           Limitations and Responsible Use
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                                      Spatial authority                                                              Outcome evidence
+                          Analytical reference points are not certified vending boundaries.                      No verified footfall, revenue, safety or displacement outcomes exist.
+
+
+
+
+                                                      Model meaning                                                                     Field validation
+                            K-Means is descriptive; MCDA sensitivity is scenario-specific.                            Pilot slots lack obstruction survey and physical approval.
+
+
+
+
+                                                      External services                                                               Operational scale
+                    Production OTP, WhatsApp, routing and AI need live-provider validation.               Load, accessibility, backup recovery and long-term monitoring need formal testing.
+
+
+
+
+                                                  Final allocation remains a municipal decision supported by evidence, policy and field inspection.
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                                                            25
+                                                       Future Scope and Conclusion
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                        Next validation phase                                                  Operational hardening
+           - Survey authoritative vending polygons and accessibility                             - Deploy PostgreSQL, backups and restore drills
+           constraints                                                                           - Complete load, security and accessibility testing
+           - Verify capacity, obstructions and pilot slots in the field                          - Validate OTP, WhatsApp and routing providers over HTTPS
+           - Collect privacy-reviewed outcome labels for supervised                              - Add monitoring, rate limits and incident procedures
+           evaluation
+           - Run sensitivity across vendor categories and divisions
+
+
+
+
+                                                      VendorMap connects GIS evidence, transparent ranking and controlled allocation in one
+                    Conclusion                        auditable workflow while preserving the limits of the available data.
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                                                          26
+                                                      References and Discussion
+PROJECT FINAL EXAMINATION
+
+
+
+
+                                      Primary project evidence
+           1. VendorMap Project Report, final LaTeX/PDF build
+           2. Versioned K-Means metrics and comparison artifacts
+           3. MCDA sensitivity summary and scenario CSVs
+           4. Data-quality audit and feature dictionary                       Questions and Discussion
+           5. Browser-captured vendor, officer and pilot-slot interfaces
+           6. Automated backend/frontend test suites and production build
+
+                                                                                  VendorMap | Project Final Examination
+
+
+
+
+Department of Information Technology | A.Y. 2026-27                                                                       27
+

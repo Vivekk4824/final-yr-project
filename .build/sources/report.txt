@@ -1,0 +1,2257 @@
+                       A PROJECT REPORT ON
+
+                               VendorMap
+
+ A GIS-Enabled Data-Driven Decision Support System
+ for Street Vendor Zoning, Allocation and Management
+      Submitted in partial fulfillment for the award of the Degree of
+            Bachelor of Technology in Information Technology
+
+                                         By
+      Darshan Gavate                                              Roll No. 19
+      Vivek Patil                                                 Roll No. 48
+      Sneha Tingare                                               Roll No. 65
+      Kalyani Ugale                                               Roll No. 66
+
+                             Under the guidance of
+
+                              Prof. Rupali Bora
+
+
+
+
+             K. K. WAGH EDUCATION SOCIETY’S
+K. K. WAGH INSTITUTE OF ENGINEERING EDUCATION
+                             AND RESEARCH
+     Hirabai Haridas Vidyanagari, Amrutdham, Panchavati, Nashik,
+                              Maharashtra 422003
+ (An Autonomous Institute since 2022, affiliated to Savitribai Phule Pune University)
+
+                 Department of Information Technology
+                                    2026–2027
+
+
+
+
+                                          i
+K. K. Wagh Institute of Engineering Education and Research
+                       Department of Information Technology
+
+                                   CERTIFICATE
+                                       Submitted by
+
+Darshan Gavate                                                                   Roll No. 19
+Vivek Patil                                                                      Roll No. 48
+Sneha Tingare                                                                    Roll No. 65
+Kalyani Ugale                                                                    Roll No. 66
+
+
+This is to certify that the Project titled VendorMap - A GIS-Enabled Data-Driven Decision
+Support System for Street Vendor Zoning, Allocation and Management is a bona fide work
+carried out by the above students under the supervision of Prof. Rupali Bora and is submitted
+towards the partial fulfillment of the requirements for the degree of Bachelor of Technology in
+Information Technology during the academic year 2026–2027.
+
+Date:                                                                           Place: Nashik
+
+
+
+
+              Prof. Rupali Bora                              Dr. Preeti Bhamre
+                    Guide                                  Head of the Department
+
+
+This project report has been examined as per the Savitribai Phule Pune University requirements
+at K. K. Wagh Institute of Engineering Education and Research, Nashik, on                     .
+
+
+
+
+             (Name & Signature)                             (Name & Signature)
+              Internal Examiner                              External Examiner
+
+
+
+
+                                              ii
+                              Acknowledgement
+
+We would like to express our sincere gratitude to our project guide, Prof. Rupali Bora, for her
+continuous guidance, valuable insights, and encouragement throughout the development of this
+project. Her thoughtful suggestions, patience, and consistent support played a significant role
+in helping us refine our ideas and complete this work successfully. We are deeply thankful for
+the time and effort she invested in reviewing our progress and providing constructive feedback
+at every stage.
+    We would also like to extend our heartfelt thanks to the Head of Department, Dr. Preeti
+Bhamre, for providing the necessary facilities, resources, and a supportive learning environ-
+ment that made this project possible.
+    We are equally grateful to our colleagues, friends, and families for their constant encourage-
+ment, thoughtful feedback, and moral support. Their motivation and willingness to help have
+been invaluable throughout our journey.
+
+
+
+
+                                                                                 Darshan Gavate
+                                                                                     Vivek Patil
+                                                                                  Sneha Tingare
+                                                                                  Kalyani Ugale
+
+
+
+
+                                               iii
+Contents
+
+
+LIST OF FIGURES                                                                                vii
+
+LIST OF GRAPHS                                                                                 viii
+
+LIST OF TABLES                                                                                  ix
+
+1   Introduction                                                                                 1
+    1.1 Background and Motivation . . . . . . . . . . . . . . . . . . . . . . . . . . .          1
+    1.2 Problem Context . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        1
+    1.3 Aim . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      2
+    1.4 Scope . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      2
+    1.5 Objectives . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     2
+    1.6 Significance and Stakeholders . . . . . . . . . . . . . . . . . . . . . . . . . .        3
+    1.7 Operational Scenario . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       3
+    1.8 Organization of the Report . . . . . . . . . . . . . . . . . . . . . . . . . . . .       4
+    1.9 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        4
+
+2   Literature Review                                                                            5
+    2.1 Street Vending and Governance . . . . . . . . . . . . . . . . . . . . . . . . . .        5
+    2.2 GIS-Based Multi-Criteria Decision Analysis . . . . . . . . . . . . . . . . . . .         5
+    2.3 AHP and Policy Weighting . . . . . . . . . . . . . . . . . . . . . . . . . . . .         6
+    2.4 Environmental Clustering . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       6
+    2.5 Allocation Optimization and Explainability . . . . . . . . . . . . . . . . . . .         6
+    2.6 Comparison and Research Gap . . . . . . . . . . . . . . . . . . . . . . . . . .          7
+    2.7 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        8
+
+3   System Architecture                                                                    9
+    3.1 Formal Problem Statement . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+    3.2 Overall Methodology . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+    3.3 Major Components . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+         3.3.1 Web Client . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+         3.3.2 API and Service Layer . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+         3.3.3 Persistence and Security . . . . . . . . . . . . . . . . . . . . . . . . . 12
+
+
+                                               iv
+    3.4   Recommendation Algorithm . . . . . . . . . . . . . . . . . . . . . . . . . . .        12
+    3.5   Allocation and Slot Geometry . . . . . . . . . . . . . . . . . . . . . . . . . .      13
+    3.6   External Integrations and Failure Boundaries . . . . . . . . . . . . . . . . . .      13
+    3.7   Data Lifecycle and Provenance . . . . . . . . . . . . . . . . . . . . . . . . . .     13
+    3.8   Decision Controls . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   14
+    3.9   Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     14
+
+4   Project Requirement Specifications                                                          15
+    4.1 Hardware Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         15
+    4.2 Software Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       15
+    4.3 Functional Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       15
+    4.4 Non-Functional Requirements . . . . . . . . . . . . . . . . . . . . . . . . . .         17
+    4.5 Constraints and Assumptions . . . . . . . . . . . . . . . . . . . . . . . . . . .       18
+    4.6 API and Dependency Requirements . . . . . . . . . . . . . . . . . . . . . . .           18
+    4.7 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       18
+
+5   High Level Design                                                                           19
+    5.1 Data Model . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      19
+    5.2 Data Flow Diagrams . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        20
+    5.3 UML Use Cases . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       21
+    5.4 Component Diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         21
+    5.5 Sequence and Activity Designs . . . . . . . . . . . . . . . . . . . . . . . . . .       22
+    5.6 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       23
+
+6   Experimental Setup                                                                          24
+    6.1 Development Environment . . . . . . . . . . . . . . . . . . . . . . . . . . . .         24
+    6.2 Dataset Inventory . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     24
+    6.3 Preprocessing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     25
+    6.4 K-Means Selection Procedure . . . . . . . . . . . . . . . . . . . . . . . . . .         26
+    6.5 Recommendation and Sensitivity Procedure . . . . . . . . . . . . . . . . . . .          27
+    6.6 Pilot Geometry Procedure . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      27
+    6.7 Implementation of Operational Workflows . . . . . . . . . . . . . . . . . . . .         27
+    6.8 Performance Parameters and Efficiency Considerations . . . . . . . . . . . . .          28
+    6.9 Testing Strategy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    28
+    6.10 Configuration and Deployment Procedure . . . . . . . . . . . . . . . . . . . .         29
+    6.11 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      30
+
+7   Results and Evaluation                                                                   31
+    7.1 Analytical Results . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+         7.1.1 Data and Environmental Typology . . . . . . . . . . . . . . . . . . . . 31
+
+
+                                                v
+          7.1.2 MCDA Sensitivity . . . . . . . . . . . . . . . . . . . . . . . . . . . .         32
+          7.1.3 Pilot Slot Geometry . . . . . . . . . . . . . . . . . . . . . . . . . . .        32
+    7.2   Verified Software Results . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    32
+    7.3   Working Interface Evidence . . . . . . . . . . . . . . . . . . . . . . . . . . .       33
+    7.4   Feature Evaluation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     35
+    7.5   Functional Walkthrough . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       36
+    7.6   Interpretation of the Evaluation . . . . . . . . . . . . . . . . . . . . . . . . . .   36
+    7.7   Cost Analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    37
+    7.8   Observed Limitations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     37
+    7.9   Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      37
+
+8   Project Planning                                                                             39
+    8.1 Work Breakdown . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         39
+    8.2 Milestones and Dependencies . . . . . . . . . . . . . . . . . . . . . . . . . . .        40
+    8.3 Gantt Chart . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      41
+    8.4 Resources and Estimated Cost . . . . . . . . . . . . . . . . . . . . . . . . . .         42
+    8.5 Risk Register . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      42
+    8.6 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        42
+
+9   Conclusions                                                                                  43
+    9.1 Summary of Implemented Work . . . . . . . . . . . . . . . . . . . . . . . . .            43
+    9.2 Achievement of Objectives . . . . . . . . . . . . . . . . . . . . . . . . . . . .        43
+    9.3 Current Limitations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      44
+    9.4 Future Scope . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       44
+    9.5 Chapter Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        45
+
+Bibliography                                                                                     46
+
+
+
+
+                                                vi
+List of Figures
+
+
+ 3.1   Analytical data and recommendation pipeline used in VendorMap. . . . . . . . 10
+ 3.2   Layered system architecture implemented in VendorMap. . . . . . . . . . . . . 11
+
+ 5.1   Entity-relationship view of the operational SQLite schema. . . . . . . . . . . .     19
+ 5.2   Level 0 data flow diagram. . . . . . . . . . . . . . . . . . . . . . . . . . . . .   20
+ 5.3   Level 1 data flow diagram. . . . . . . . . . . . . . . . . . . . . . . . . . . . .   20
+ 5.4   Implemented actor and use-case relationships. . . . . . . . . . . . . . . . . . .    21
+ 5.5   Component and dependency design. . . . . . . . . . . . . . . . . . . . . . . .       22
+ 5.6   Sequence for recommendation and request submission. . . . . . . . . . . . . .        22
+ 5.7   Activity diagram for the reviewed allocation workflow. . . . . . . . . . . . . .     23
+
+ 6.1   Silhouette comparison across candidate cluster counts for the active model. . . 26
+ 6.2   Environmental-profile visualization for the 258 GIS-ready zone references. . . 27
+ 6.3   Modular testing and defect-correction workflow. . . . . . . . . . . . . . . . . 29
+
+ 7.1   Cluster-size comparison used to evaluate the active model. . . . . . . . . . . .     31
+ 7.2   Role-separated workspaces captured during implementation. . . . . . . . . . .        34
+ 7.3   Officer workflow screenshots captured during implementation. . . . . . . . . .       34
+ 7.4   Implemented pilot vending-slot map and inspector interface. . . . . . . . . . .      35
+
+ 8.1   Reconstructed project timeline; not a measured historical schedule. . . . . . . . 41
+
+
+
+
+                                            vii
+List of Graphs
+
+ 6.1   Silhouette comparison across candidate cluster counts for the active model. . . 26
+ 6.2   Environmental-profile visualization for the 258 GIS-ready zone references. . . 27
+ 7.1   Cluster-size comparison used to evaluate the active model. . . . . . . . . . . . 31
+
+
+
+
+                                          viii
+List of Tables
+
+
+ 2.1   Comparison of approaches relevant to VendorMap . . . . . . . . . . . . . . . .     7
+
+ 4.1   Core functional requirements and implementation status . . . . . . . . . . . . 16
+ 4.2   Extended functional requirements and implementation status . . . . . . . . . . 17
+
+ 6.1   Project data inventory and evidence limits . . . . . . . . . . . . . . . . . . . . 25
+
+ 7.1   Stored MCDA sensitivity results for one documented scenario . . . . . . . . . 32
+ 7.2   Final verification summary for completed functions . . . . . . . . . . . . . . . 33
+
+ 8.1   Reconstructed sixteen-week project schedule . . . . . . . . . . . . . . . . . . 40
+
+ 9.1   Achievement of the stated project objectives . . . . . . . . . . . . . . . . . . . 44
+
+
+
+
+                                           ix
+                                           Abstract
+VendorMap is an implemented decision-support web application for managing street-vendor profiles, dis-
+covering candidate vending zones, submitting allocation or relocation requests, and reviewing those re-
+quests in a municipal officer workspace. The implemented system combines a React 18 progressive web
+interface, a FastAPI service layer, SQLite operational persistence, geospatial preprocessing, K-Means en-
+vironmental grouping, missing-data-aware multi-criteria decision analysis (MCDA), an advisory mixed-
+integer allocation optimizer, and metric validation of small vending slots. Authentication separates ven-
+dor and administrator roles and stores session, one-time-password, and phone-identity derivatives rather
+than plaintext secrets.
+     The active model package contains 308 official zone records, 258 usable analytical references, 146
+scoreable free-zone candidates, and a K-Means model trained on 258 rows. The selected two-cluster solu-
+tion has a stored silhouette coefficient of 0.3406 and perfect adjusted-Rand stability across five recorded
+seeds; these are unsupervised structure measures, not suitability accuracy. A stored MCDA sensitivity
+experiment over 224 perturbation scenarios retained the top-ranked zone in every scenario, while or-
+dered top-three stability was 56.7 percent. A geographic pilot artifact validates ten 2 m by 2 m slots
+for containment and spacing, but explicitly records that field verification and live routing tests were not
+performed.
+     Final verification focused on features that are complete and suitable for demonstration. Two focused
+backend suites completed 97 tests successfully, the frontend suite completed all 58 tests, and the produc-
+tion frontend build compiled 1,690 modules without error. Versioned analytical result files provide the
+K-Means, MCDA-sensitivity, and pilot-geometry values reported here. Together, these results support
+VendorMap as a completed academic decision-support system. The report does not claim field certifica-
+tion, legal boundary authority, or live deployment of third-party routing and messaging services.
+Keywords: street vending, GIS, MCDA, K-Means, FastAPI, React, allocation planning, decision sup-
+port, geospatial validation.
+
+
+
+
+                                                    x
+                                       CHAPTER 1
+
+                                   INTRODUCTION
+
+As the opening chapter, this chapter establishes the street-vending allocation problem addressed
+by VendorMap. It defines the project’s motivation, scope, measurable objectives, stakeholders,
+completed operational workflow, and the boundary between analytical recommendation, ad-
+ministrative approval, and legal authority.
+
+
+1.1 Background and Motivation
+
+Street vending supports livelihoods and provides accessible goods and services, yet the same
+activity must coexist with pedestrian movement, traffic safety, public facilities, and land-use
+regulation. The Street Vendors Act establishes protection and regulation as joint concerns rather
+than treating vending only as an encroachment problem [1]. In practice, a relocation decision
+must combine legal eligibility, available capacity, business suitability, access to customers and
+transport, and the vendor’s own preferences. These inputs are heterogeneous and frequently
+incomplete.
+    VendorMap addresses this decision problem as a traceable software workflow. It does not
+claim to replace a Town Vending Committee or establish legal boundaries. It provides an au-
+thenticated web interface through which a vendor can maintain a profile, inspect ranked candi-
+date zones, submit an allocation or relocation request, follow its status, and, for supported pilot
+allocations, navigate to a slot. Officers receive a separate workspace for zone status, vendor
+records, request review, capacity state, recommendation evidence, and pilot-slot editing. Each
+recommendation remains advisory and allocation changes are checked transactionally against
+operational state.
+
+
+1.2 Problem Context
+
+The proposed system addresses three connected technical problems. First, municipal and
+OpenStreetMap-derived records must be normalized without representing approximate points
+as legal vending polygons. OpenStreetMap is a community-maintained, volunteered geo-
+graphic database rather than an authoritative municipal cadastral source; its use in VendorMap
+is therefore limited to contextual features and map display [2]. Second, candidate zones
+require a reproducible ranking when no verified outcome label such as income or footfall is
+available. Third, a selected zone must still satisfy operational constraints: it must be open,
+possess capacity, match the application context, and optionally contain a geometrically valid
+micro-slot.
+
+
+
+                                                1
+VendorMap Project Report                                                  Chapter 1. Introduction
+
+
+    Spreadsheet-only handling makes these relationships difficult to audit. A purely predictive
+model would also be poorly justified because the active data package contains environmental
+features but no observed business-success target. VendorMap therefore uses K-Means only to
+characterize environmental typology, weighted MCDA to make explicit the policy trade-offs,
+and a mixed-integer optimizer only as an advisory batch-planning tool. The production path
+continues to enforce database checks and human review.
+
+
+1.3 Aim
+
+The aim is to design and implement a transparent and auditable decision-support platform that as-
+sists vendors and municipal officers in explainable zone discovery, allocation-request manage-
+ment, relocation planning, and pilot-slot administration while preserving role and data bound-
+aries.
+
+
+1.4 Scope
+
+The system includes a React and Vite client, FastAPI endpoints, SQLite persistence with an
+optional PostgreSQL migration path, cookie-based sessions, vendor OTP flows, administrator
+login, a multilingual interface, a PWA service worker, live-capacity state, recommendation gen-
+eration, allocation requests, officer decisions, audit records, vendor profile photographs, pilot-
+slot geometry, navigation-provider integration, and an optional signed WhatsApp Cloud API
+webhook.
+    The analytical scope covers 308 official zone records. Stored feature-build metadata reports
+258 usable analytical references and explicitly records incomplete OSM coverage, missing field
+footfall, absence of verified vacancy, and approximate point locations. The active recommenda-
+tion candidate snapshot contains 146 scoreable free zones. The scope does not include legal sur-
+vey certification, automatic municipal approval, observed income prediction, production load
+certification, or confirmed live messaging and routing.
+
+
+1.5 Objectives
+
+The project objectives are to:
+1. maintain authenticated, role-separated vendor and officer workflows;
+2. build reproducible spatial features with documented coordinate semantics;
+3. rank eligible zones using explainable, missing-data-aware MCDA;
+4. expose factor contributions and evidence rather than only a final score;
+5. protect capacity and allocation invariants at the database boundary;
+6. validate pilot slot containment, dimensions, spacing, and coordinate reference;
+7. support multilingual and installable web access without caching private API data;
+
+
+                                                2
+VendorMap Project Report                                                  Chapter 1. Introduction
+
+
+8. preserve test, model, and report evidence with explicit limitations.
+
+
+1.6 Significance and Stakeholders
+
+The primary users are street vendors and municipal officers. Vendors benefit from a single
+view of profile data, candidate evidence, applications, and allocations. Officers benefit from
+searchable registries, consistent status checks, and auditable review actions. Researchers can
+reproduce preprocessing and sensitivity analyses, while system administrators can configure
+authentication and optional providers through environment settings. The principal contribution
+is integration: spatial evidence, explicit policy weights, operational constraints, and user work-
+flows are connected without disguising analytical references as statutory facts.
+
+
+1.7 Operational Scenario
+
+A typical workflow begins when a street vendor signs in through the vendor portal. An existing
+vendor is matched with the protected identity record created during data initialization, while a
+new vendor completes a controlled registration form. The profile records the business category,
+preferred municipal division, locality preference, language, and practical priorities such as ac-
+cess to transport, markets, or parking. These values are used as decision context; they do not
+grant an allocation or modify official zone status.
+     When the vendor requests suitable locations, the server first selects free-zone records that
+satisfy the requested division and verification rules. If live filtering is enabled, zones marked
+closed, suspended, or full are removed before scoring. The remaining zones are evaluated
+using business compatibility, commercial surroundings, accessibility, nearby facilities, personal
+preferences, and historical association evidence. The response shows the score together with
+the contribution of each available factor. A warning is displayed when evidence is missing or
+when a fallback location is used. This allows the vendor and officer to understand why two
+zones receive different positions in the list.
+     After selecting a zone, the vendor submits an allocation or relocation request. The request
+is stored with a pending status and becomes visible in the officer workspace. The officer can
+examine the vendor profile, zone status, recommendation details, current capacity, and previ-
+ous activity before making a decision. Approval is not based on the earlier screen state alone.
+The backend checks the current request status, business category, capacity, and active alloca-
+tion again within the transaction. A successful relocation releases the previous allocation and
+updates the destination state. Rejection records the decision without changing occupancy.
+     For configured pilot areas, an officer may also assign a specific vending slot. The vendor
+can then open the assigned-slot view and request a walking route from the present location. If
+the routing provider is unavailable, the destination remains visible and the interface states that
+
+
+
+
+                                                3
+VendorMap Project Report                                                   Chapter 1. Introduction
+
+
+a route could not be obtained. This fallback is important because a straight line drawn on a map
+could direct a user through an unsafe or inaccessible path.
+
+
+1.8 Organization of the Report
+
+Chapter 2 reviews governance, GIS-MCDA, clustering, and optimization literature. Chapters
+3 and 4 define the architecture and requirements. Chapter 5 presents design diagrams. Chapter
+6 documents implementation and experimental procedure. Chapter 7 reports verified analyti-
+cal, test, build, and interface results. Chapter 8 records the project plan and cost assumptions.
+Chapter 9 concludes with verified contributions, limitations, and future work.
+
+
+1.9 Chapter Summary
+
+This chapter established VendorMap as an advisory, auditable platform that connects spatial
+evidence, explicit decision criteria, role-separated workflows, and transactional controls. It also
+set clear limits: recommendations are not permits, analytical points are not legal boundaries, and
+the completed academic system does not claim production or field certification. Chapter 2 next
+examines the legal, spatial, and computational foundations that justify these design choices.
+
+
+
+
+                                                4
+                                          CHAPTER 2
+
+                               LITERATURE REVIEW
+
+Chapter 1 defined the problem, scope, objectives, and evidence boundaries of VendorMap.
+This chapter reviews the legal, spatial, and computational foundations of the proposed solution.
+It synthesizes work on street-vending governance, GIS-based multi-criteria decision analysis,
+AHP weighting, K-Means clustering, allocation optimization, and explainable GeoAI before
+identifying the integration gap addressed by the project.
+
+
+2.1 Street Vending and Governance
+
+Street vending is simultaneously a livelihood system, a distribution channel, and a public-space
+governance challenge. Recent spatial studies show that vendor activity forms measurable clus-
+ters, but that patterns inferred from street imagery, enforcement records, and resident complaints
+need not coincide [3, 4]. Research in Bengaluru similarly links vending opportunities to neigh-
+bourhood form, occupational history, and social networks [5]. A 2024 Dhaka study finds des-
+ignated space and sidewalk characteristics among the important correlates of vendor sales, rein-
+forcing the need to represent infrastructure rather than location alone [6]. The Indian statutory
+setting requires protection of livelihood alongside survey, certification, and planned vending
+regulation [1]. Accordingly, a software recommendation is not a permit. VendorMap separates
+analytical ranking from officer decisions and stores the latter as operational events.
+
+
+2.2 GIS-Based Multi-Criteria Decision Analysis
+
+GIS-MCDA combines spatial attributes with explicit decision criteria. Recent urban-planning
+research uses GIS with multiple-criteria analysis to combine environmental, access, and plan-
+ning factors while retaining a visible weighting process [7]. Systematic reviews of algorithmic
+planning emphasize stakeholder involvement, auditability, and validation rather than treating a
+computed optimum as self-justifying [8, 9]. These findings motivate VendorMap’s factor-level
+evidence and weight-sensitivity artifacts. The system uses weighted aggregation, but treats
+missing factor evidence by renormalizing over available factors rather than silently converting
+missing values to favorable or unfavorable scores.
+    For candidate zone 𝑖, let 𝑠𝑖 𝑗 ∈ [0, 1] be the available score for factor 𝑗 and 𝑤 𝑗 ≥ 0 the policy
+weight. With availability indicator 𝑎𝑖 𝑗 , the normalized score is
+                                      ∑
+                                          𝑗 𝑎 𝑖 𝑗 𝑤 𝑗 𝑠𝑖 𝑗
+                                                                 ∑
+                            𝑆𝑖 = 100 ∑                       ,       𝑎𝑖 𝑗 𝑤 𝑗 > 0.              (2.1)
+                                            𝑗 𝑎𝑖 𝑗 𝑤 𝑗           𝑗
+
+
+
+
+                                                         5
+VendorMap Project Report                                                        Chapter 2. Literature Review
+
+
+This formulation makes the effective weight coverage reportable for each candidate.
+
+
+2.3 AHP and Policy Weighting
+
+The Analytic Hierarchy Process (AHP) derives weights from pairwise comparisons and pro-
+vides a consistency diagnostic [10]. Recent GIS-MCDA applications continue to use AHP for
+transparent spatial weighting, while participatory-GIS research warns that technically consis-
+tent weights do not substitute for inclusive stakeholder input [7, 9]. If 𝐴 is a positive reciprocal
+matrix, its principal eigenvector is normalized to obtain 𝑤. The consistency ratio compares
+the matrix consistency index with a random index. VendorMap implements template genera-
+tion, expert-review parsing, aggregation, and consistency checks. However, the synthetic AHP
+demonstrations are explicitly marked as unsuitable for production use; the active operational
+weights must therefore be understood as a configured policy, not as validated stakeholder con-
+sensus.
+
+
+2.4 Environmental Clustering
+
+K-Means partitions observations by minimizing within-cluster squared distance. A recent com-
+prehensive review highlights its simplicity and scalability, but also its sensitivity to initialization,
+the selected value of 𝐾, feature scaling, and non-spherical structure [11, 12]:
+
+                                              ∑
+                                              𝐾 ∑
+                                   minimize                  ∥𝑥𝑖 − 𝜇 𝑘 ∥ 22 .                          (2.2)
+                                       𝐶,𝜇
+                                              𝑘=1 𝑥 𝑖 ∈𝐶 𝑘
+
+
+Equation 2.2 is suitable here for descriptive environmental grouping after scaling and trans-
+formation. It is not a supervised measure of vendor success. Model selection evaluates 𝐾 = 2
+through 8 across five seeds, with minimum cluster-size and adjusted-Rand stability guards. The
+cluster label is retained as environmental context rather than legal or social classification.
+
+
+2.5 Allocation Optimization and Explainability
+
+Recent street-vending research proposes spatial optimization of formalization zones to balance
+vendor location logic with governance objectives [13]. VendorMap’s allocation optimizer sim-
+ilarly constructs candidate edges between demands and feasible zones, then solves a staged
+mixed-integer model. The model is advisory because operational approval still requires current
+capacity, ownership, and request-state checks. This separation avoids treating an optimization
+result as an authorization.
+     The experimental work also includes a Random Forest and TreeSHAP proof-of-pipeline.
+Recent vendor research demonstrates the value of nonlinear and geographically aware tree mod-
+els for studying infrastructure effects [6]. GeoAI scholarship also warns that generic feature
+
+                                                    6
+VendorMap Project Report                                                   Chapter 2. Literature Review
+
+
+attributions may omit spatial scale, topology, semantics, and social context [14]. VendorMap’s
+artifacts use synthetic expert judgments, so their metrics demonstrate executable research tool-
+ing only. They are not evidence of real-world predictive accuracy and do not replace the MCDA
+engine.
+
+
+2.6 Comparison and Research Gap
+
+Table 2.1 compares the principal approaches considered in the design and states the limited role
+assigned to each one in VendorMap.
+
+                   Table 2.1: Comparison of approaches relevant to VendorMap
+
+ Approach            Strength                  Limitation                     VendorMap use
+
+ Manual registry     Familiar and low setup    Weak traceability across       Imported evidence plus
+                     cost                      changing capacity and          operational database
+                                               evidence
+ GIS overlay         Spatially interpretable   Layer quality may be           Analytical points,
+                                               incomplete or legally          distances, counts, and
+                                               non-authoritative              map views
+ K-Means             No outcome labels         Clusters are descriptive,      Environmental typology
+                     required                  sensitive to                   only
+                                               preprocessing
+ Weighted            Explicit factors and      Policy weights require         Primary
+ MCDA                weights                   review; compensation           recommendation engine
+                                               can mask weakness              with coverage evidence
+ AHP                 Structured expert         Inconsistent or synthetic      Implemented calibration
+                     elicitation               judgments are not policy       workflow; not claimed
+                                               evidence                       as validated
+ Goal                Handles capacity and      Model validity depends         Advisory batch plan;
+ programming         competing goals           on constraints and input       transactional approval
+                                               currency                       remains authoritative
+ Supervised ML       Can learn nonlinear       Requires representative        Synthetic research demo
+                     relations                 labels and careful             only
+                                               validation
+
+
+    The comparison shows why no single method is sufficient. MCDA provides the primary
+explainable ranking mechanism, clustering supplies descriptive context, and optimization sup-
+ports advisory planning, while operational authorization remains a human-reviewed and trans-
+actionally checked process.
+
+
+
+                                                 7
+VendorMap Project Report                                             Chapter 2. Literature Review
+
+
+    The literature rarely joins vendor-facing access, officer review, explicit spatial evidence,
+live capacity, small-slot geometry, and multichannel interaction in one reproducible student
+implementation. VendorMap addresses this integration gap. It does not close the empirical gap:
+field-verified boundaries, observed footfall, representative expert labels, longitudinal vendor
+outcomes, and production-scale evaluation remain future requirements.
+
+
+2.7 Chapter Summary
+
+The literature supports transparent, participatory, and explicitly limited decision support rather
+than automatic spatial authorization. VendorMap consequently combines interpretable criteria,
+descriptive clustering, advisory optimization, and human review while keeping data-quality and
+validation gaps visible. Chapter 3 next translates these foundations into the implemented system
+architecture and end-to-end workflow.
+
+
+
+
+                                                8
+                                       CHAPTER 3
+
+                           SYSTEM ARCHITECTURE
+
+Chapter 2 established the legal, spatial, and computational basis for explainable decision sup-
+port. This chapter formalizes the recommendation and allocation problem, then describes the
+end-to-end methodology, system components, ranking algorithm, geometry controls, external
+integration boundaries, data provenance, and layered decision safeguards.
+
+
+3.1 Formal Problem Statement
+
+Given a vendor context 𝑣, a set of official zone records 𝑍, analytical feature evidence, live
+operational state, and a configured policy, determine an ordered set of eligible zones and support
+a human-reviewed allocation process. A zone is eligible only if role-independent rules and
+request-specific filters hold; its ranking score is calculated from available evidence. For batch
+planning, assign at most one candidate to a demand while respecting zone capacity. The system
+must not equate an analytical reference point with an official boundary, a recommendation with
+a permit, or a historical association with current occupancy.
+
+
+3.2 Overall Methodology
+
+The pipeline begins with official-zone and historical evidence, manual reference points, and
+cleaned OpenStreetMap layers. Scripts validate identifiers, construct metric-buffer features
+in EPSG:32643, prepare training snapshots, compare K-Means configurations, and publish a
+versioned model bundle. At request time, the backend resolves the signed-in vendor, applies
+zone and live-state filters, calculates factor scores, derives policy and personalization weights,
+renormalizes for missing evidence, and returns ranked explanations. Allocation requests are
+stored separately from recommendations. Officer approval rechecks capacity and writes the
+allocation and audit event within database transactions.
+    The completed analytical path is shown in Figure 3.1. It is intentionally one-way: municipal,
+vendor, and OpenStreetMap evidence is cleaned before feature engineering; K-Means supplies
+an environmental profile, while historical records supply a separate compatibility signal. Only
+then does the explainable MCDA stage rank the eligible official zones. Thus, cluster member-
+ship is contextual evidence rather than an allocation decision.
+
+
+
+
+                                                9
+VendorMap Project Report                                         Chapter 3. System Architecture
+
+
+
+
+       Figure 3.1: Analytical data and recommendation pipeline used in VendorMap.
+
+
+    Figure 3.2 introduces the principal analytical and operational components and the controlled
+flows between them.
+
+
+
+
+                                              10
+VendorMap Project Report                                              Chapter 3. System Architecture
+
+
+        Vendor PWA                    Municipal officer                    WhatsApp and
+    and interactive map                   dashboard                      webhook channel
+
+             FastAPI application boundary: session authentication, role
+              authorization, request validation and response projection
+
+
+                            Eligibility and             Requests,
+    Identity, profiles                                                     Pilot slots, routing
+                              explainable               allocation,
+      and sessions                                                            and messaging
+                                MCDA             capacity and audit
+
+
+
+
+      Versioned GIS features,        Operational SQLite          Optional routing, Meta
+          K-Means model                 repository and                   and explana-
+             and policy                   audit state                   tion providers
+
+
+            Figure 3.2: Layered system architecture implemented in VendorMap.
+
+
+    The architecture separates versioned analytical assets from mutable operational state. The
+API service is the coordination boundary: it authenticates users, applies the current policy and
+eligibility rules, and commits reviewed decisions without allowing the browser or a model arti-
+fact to become the source of authority.
+
+
+3.3 Major Components
+
+3.3.1 Web Client
+
+The client uses React 18, Vite, React Leaflet, Leaflet, and Lucide icons. A role-aware shell
+selects authentication, vendor, and officer workspaces. Feature folders isolate admin, vendor,
+pilot-slot, navigation, and internationalization logic. The request client includes cookie creden-
+tials. The service worker caches an explicit static allowlist and offline page; API responses,
+authenticated HTML, profile data, map tiles, and navigation URLs are excluded.
+
+3.3.2 API and Service Layer
+
+FastAPI composes routers for authentication, vendors, zones, recommendations, allocations,
+pilot slots, navigation, research views, health, and WhatsApp webhooks. Pydantic schemas val-
+idate external contracts. Services implement authentication, eligibility, capacity, explanations,
+
+
+
+                                               11
+VendorMap Project Report                                           Chapter 3. System Architecture
+
+
+recommendations, navigation, and vendor workflows. Compatibility wrappers retain older im-
+port paths while new code targets the owning modules.
+
+3.3.3 Persistence and Security
+
+The operational schema defines tables for vendors, zone live status, requests, allocations, audit
+events, authentication identities, OTP challenges, sessions, profile photos, WhatsApp conver-
+sations and deduplication, pilot layouts, slots, and slot events. Sessions and OTPs are stored as
+hashes. Phone identities use HMAC values; administrators are configured through environment
+settings. Cookies are HttpOnly and SameSite=Lax, with the Secure flag intended for HTTPS
+deployment. Router dependencies enforce roles and vendor ownership rather than relying on
+hidden client controls.
+
+
+3.4 Recommendation Algorithm
+
+The recommendation engine transforms skewed counts using saturation and distance measures
+using proximity functions. It calculates business, commercial, access, facilities, preference, and
+historical factors, with a feature-availability record accompanying the result. Configured base
+weights can be modified by a vendor preference profile and are normalized before applying
+equation (2.1). Live status and strict-division behavior are request-level constraints, not merely
+score deductions. Algorithm 1 states the runtime sequence used to produce an eligible and
+explainable candidate list.
+
+Algorithm 1 Runtime candidate ranking based on rank_candidates
+Require: authenticated vendor context 𝑣, request 𝑞, zone evidence 𝑍
+ 1: validate request and resolve server-side vendor profile
+ 2: select official free-zone references permitted by 𝑞
+ 3: optionally remove closed, suspended, full, or unverified candidates
+ 4: for all remaining zones 𝑧 do
+ 5:     compute available environmental, business, preference, and historical factors
+ 6:     derive normalized policy weights and effective evidence coverage
+ 7:     calculate 𝑆 𝑧 using only available weighted factors
+ 8:     attach per-factor contributions, warnings, and fallback status
+ 9: end for
+10: sort deterministically by score and tie-break fields
+11: return top 𝑛 results or the permitted complete result set
+
+
+
+
+                                               12
+VendorMap Project Report                                            Chapter 3. System Architecture
+
+
+3.5 Allocation and Slot Geometry
+
+The optimizer builds feasible vendor-zone edges and solves a mixed-integer model through
+SciPy’s optimization facilities. It cannot directly mutate allocations. In the operational work-
+flow an officer decision revalidates request state, category context, current capacity, and reloca-
+tion effects. Pilot geometry is transformed between WGS84 and UTM zone 43N. Each slot is a
+polygon with configured width and depth; validation checks containment, overlap, separation,
+and corridor clearance. The stored pilot result is a computational geometry check and explicitly
+lacks site verification.
+
+
+3.6 External Integrations and Failure Boundaries
+
+Optional integrations are deliberately bounded. A routing provider is called server-side; failure
+leaves the destination visible without inventing a route. AI-generated explanation support is op-
+tional and must recompute eligible evidence rather than accept client-supplied scores. The Meta
+WhatsApp Cloud API webhook validates subscription tokens and message signatures, dedupli-
+cates inbound identifiers, and shares the conversation service used by the simulator. Provider
+configuration and public HTTPS are external deployment tasks.
+
+
+3.7 Data Lifecycle and Provenance
+
+VendorMap separates analytical data from operational data. Analytical inputs pass through the
+numbered scripts in a reproducible order: validation, spatial feature construction, training-data
+preparation, K-Means comparison, model fitting, and recommendation export. Each model
+version retains input snapshots, derived features, evaluation tables, metadata, and the serialized
+estimator. Hashes and generation times identify the inputs used for a result. A new model
+version can therefore be evaluated without silently replacing the active configuration.
+    Operational data has a different lifecycle. Vendor profiles, live zone status, requests, alloca-
+tions, sessions, audit events, conversations, and pilot-slot edits are written through the service
+and repository layers. Historical vendor-zone associations are imported as supporting infor-
+mation but are not counted as current occupancy. This distinction prevents an old survey re-
+lationship from consuming present capacity. Similarly, an analytical geometry is suitable for
+computing distances or placing a marker, but it is not treated as a legal boundary unless an
+approved source supplies that geometry.
+    The API returns projections suited to each role instead of exposing database rows directly.
+Vendor responses are restricted to the signed-in identity, whereas officer responses may include
+registry and decision-support fields required for review. Sensitive configuration is loaded from
+environment settings. Model and data paths are resolved centrally, which reduces differences
+between command-line scripts, tests, and the running API.
+
+
+                                                13
+VendorMap Project Report                                           Chapter 3. System Architecture
+
+
+3.8 Decision Controls
+
+Several controls are applied at different stages of the workflow. Eligibility controls remove can-
+didates that cannot be considered under the request. Scoring controls normalize the remaining
+inputs and report how much of the configured weight is supported by available data. Workflow
+controls prevent duplicate or invalid requests. Authorization controls restrict administrative de-
+cisions to an officer session and vendor records to their owner. Transaction controls protect
+capacity when two decisions are processed close together. Geometry controls reject overlap-
+ping, out-of-bound, or incorrectly referenced pilot slots.
+    These controls operate at more than one layer. The interface may disable an action to guide
+the user, but the API repeats the validation because browser state can be stale or modified. A
+recommendation may show that a zone was suitable at one moment, but approval checks the
+current live state because capacity can change after the recommendation was generated. The
+optimizer may suggest a batch assignment, but each accepted assignment still passes through
+the operational transaction. This layered approach reduces the risk of turning an analytical
+suggestion into an unauthorized database change.
+
+
+3.9 Chapter Summary
+
+The architecture implements a deliberate separation of concerns among spatial evidence, rank-
+ing, workflow state, authorization, and persistence. Repeated server-side checks, versioned
+provenance, and transactional updates ensure that advisory analytical outputs do not bypass
+administrative or operational controls. Chapter 4 next converts this architecture into explicit
+functional, non-functional, deployment, and data-authority requirements.
+
+
+
+
+                                               14
+                                     CHAPTER 4
+
+           PROJECT REQUIREMENT SPECIFICATIONS
+
+Chapter 3 defined the implemented architecture and its control boundaries. This chapter spec-
+ifies the hardware, software, functional, non-functional, API, deployment, and data-authority
+requirements for the completed academic system. It also records assumptions that must be
+resolved before field or production use.
+
+
+4.1 Hardware Requirements
+
+No dedicated GPU, sensor, or server purchase is evidenced. Development requires a modern
+64-bit computer capable of running Python, Node.js, a browser, and local SQLite storage; 8 GB
+RAM and 5 GB free space are practical minimums, while 16 GB RAM is recommended for
+geospatial preprocessing. End users need a recent browser. GPS is useful for navigation but
+is not required for registry and review functions. A production deployment would require an
+HTTPS host and managed backup plan; its sizing has not been load-tested.
+
+
+4.2 Software Requirements
+
+The verified stack includes Python 3, FastAPI, Uvicorn, Pydantic, NumPy, pandas, SciPy, scikit-
+learn, GeoPandas, Shapely, PyProj, SQLAlchemy, psycopg, and pytest [15, 16, 17]. The client
+uses React 18, React DOM, Vite, Leaflet, React Leaflet, and browser-native test tooling [18,
+19]. SQLite is the default operational database; PostgreSQL migration code and dependencies
+exist but do not prove a production migration. Build-time requirements are npm and Node.js.
+Optional settings cover routing, Gemini-based explanations, and Meta WhatsApp Cloud API.
+
+
+4.3 Functional Requirements
+
+Tables 4.1 and 4.2 map the implemented workflow to verifiable functional requirements and
+record qualifications where implementation does not establish deployment or field readiness.
+
+
+
+
+                                              15
+VendorMap Project Report                                Chapter 4. Project Requirement Specifications
+
+
+             Table 4.1: Core functional requirements and implementation status
+
+ ID       Requirement                                                          Status
+
+ FR-01    Vendor OTP request, verification, session lookup, and logout.        Implemented;
+                                                                               provider mode
+                                                                               configurable
+ FR-02    Administrator credential login and role-separated session.           Implemented
+ FR-03    Vendor profile registration, update, photo, activity, and account    Implemented
+          view.
+ FR-04    Search and filter official zones and analytical display locations.   Implemented
+ FR-05    Rank eligible zones with factor evidence and live-state filters.     Implemented and
+                                                                               verified in focused
+                                                                               recommendation
+                                                                               tests
+ FR-06    Submit, list, cancel, approve, or reject allocation requests with    Implemented and
+          audit history.                                                       verified in focused
+                                                                               workflow tests
+ FR-07    Maintain zone capacity and prevent invalid final-slot approvals      Implemented and
+          transactionally.                                                     verified in capacity
+                                                                               and relocation tests
+
+
+
+
+                                                  16
+VendorMap Project Report                                 Chapter 4. Project Requirement Specifications
+
+
+           Table 4.2: Extended functional requirements and implementation status
+
+ ID       Requirement                                                           Status
+
+ FR-08    Provide officer overview, vendor directory, details, and relocation   Implemented
+          planning.
+ FR-09    Create, move, delete, validate, and assign pilot slots.               Implemented and
+                                                                                verified for
+                                                                                configured pilot data
+ FR-10    Route an allocated vendor to a supported slot.                        Implemented with
+                                                                                verified fallback; live
+                                                                                provider deployment
+                                                                                excluded
+ FR-11    Provide English, Hindi, and Marathi interface labels.                 Implemented and
+                                                                                verified by frontend
+                                                                                language tests
+ FR-12    Install as a PWA with privacy-preserving static caching.              Implemented and
+                                                                                verified by tests and
+                                                                                production build
+ FR-13    Receive signed WhatsApp webhook events and run the same               Service and simulator
+          service in a simulator.                                               verified; live Meta
+                                                                                deployment excluded
+ FR-14    Generate advisory optimized allocation plans.                         Implemented as
+                                                                                advisory planning;
+                                                                                automatic approval
+                                                                                excluded
+
+
+    The requirements cover the complete user journey from identity and profile management to
+recommendation, reviewed allocation, pilot-slot operation, and optional multichannel access.
+The status column is intentionally evidence-sensitive: implemented source is distinguished
+from a verified external-provider or production result.
+
+
+4.4 Non-Functional Requirements
+
+Security: protected endpoints shall enforce role and ownership on the server; secrets shall
+remain outside source control; session and OTP material shall not be stored in plaintext; pro-
+duction cookies shall require HTTPS. Privacy: private phone sources shall not be copied into
+model files or client responses. Auditability: recommendations shall expose factor contribu-
+tions and allocations shall create audit records. Reliability: approval shall recheck capacity
+inside a transaction and duplicate webhook messages shall be idempotent. Usability: desktop
+
+
+                                                  17
+VendorMap Project Report                            Chapter 4. Project Requirement Specifications
+
+
+and mobile layouts, keyboard focus utilities, language selection, loading states, and readable
+map fallbacks shall be available. Maintainability: routers, services, repository code, schemas,
+and frontend features shall remain separated, with reproducible scripts and versioned model
+metadata.
+
+
+4.5 Constraints and Assumptions
+
+The primary constraint is data authority. Analytical point coordinates and OSM features are
+not legal boundary surveys. Fifty official records lack usable references in the stored feature-
+build metrics, and geometry area/perimeter are absent for the point-based inventory. There
+is no measured footfall, sales, verified vacancy, longitudinal outcome, or complete business-
+restriction map. Zero mapped points cannot be interpreted as zero real facilities.
+    SQLite is appropriate for the controlled academic system but needs disciplined writers, back-
+ups, and migration planning for multi-instance deployment. Optional provider functions assume
+valid keys, quotas, terms, and public HTTPS. Final verification therefore uses focused test suites
+aligned with the completed, judge-relevant workflows and does not treat unconfigured third-
+party deployment paths as proof of operation.
+
+
+4.6 API and Dependency Requirements
+
+Browser API calls default to a same-origin /api path through the Vite proxy. Production host-
+ing must preserve SPA routing while forwarding API traffic and serving the service worker as
+JavaScript with revalidation. Map usage must respect data attribution and tile-provider policies.
+Meta webhook delivery requires a verified business application, phone number, access token,
+verification token, app secret, and public callback. Routing and AI explanation integrations
+must remain server-side so provider credentials are not embedded in the frontend bundle.
+    OpenStreetMap data and any rendered map derived from it must display the attribution
+“© OpenStreetMap contributors” and identify the Open Database License (ODbL) 1.0. If a
+derivative database is publicly distributed, its notice and share-alike obligations must also be
+assessed; the OpenStreetMap tile service is governed by a separate usage policy and must not
+be treated as an unrestricted production tile host [2, 20].
+
+
+4.7 Chapter Summary
+
+The requirements define a browser-based academic system whose core workflows are imple-
+mented and verified. Production use, however, depends on authoritative data, secure hosting,
+provider configuration, operational monitoring, and field validation. Licensing, privacy, and
+attribution are requirements of any deployed system rather than optional documentation details.
+Chapter 5 next presents the structural and behavioural models that realize these requirements.
+
+
+                                               18
+                                          CHAPTER 5
+
+                                HIGH LEVEL DESIGN
+
+Chapter 4 converted the architecture into verifiable system requirements and operational con-
+straints. This chapter presents the structural and behavioural design of VendorMap through a
+data model, data-flow diagrams, use cases, component dependencies, and sequence and activity
+models. Each diagram is tied to the implemented role and service boundaries.
+
+
+5.1 Data Model
+
+The operational store is relational even though analytical assets include CSV, GeoJSON,
+GeoPackage, JSON, and serialized model files. The central vendor record is associated with
+requests, allocations, authentication identities, optional profile photos, and conversation state.
+Zone live state references the official zone identifier. Pilot layouts contain slots, and slot events
+preserve administrative edits. Historical associations remain evidence and are not converted
+into current occupancy.
+    Figure 5.1 summarizes the principal operational entities and their relationships.
+
+                                           zone_live_status
+
+                                              checks                 updates
+
+
+                                submits                         approved as
+          operational_vendors             allocation_requests                     allocations
+
+
+
+              vendor_auth                  admin_audit_log                    pilot_slots / events
+                identities
+
+
+
+          auth_sessions / OTP                                                  pilot_slot_layouts
+
+
+            Figure 5.1: Entity-relationship view of the operational SQLite schema.
+
+
+    The model places the vendor and zone state at the centre of reviewed requests and commit-
+ted allocations. Authentication and audit records remain separate, while pilot layouts and slot
+events preserve the smaller-scale geometry and its administrative history.
+
+
+
+
+                                                  19
+VendorMap Project Report                                                                          Chapter 5. High Level Design
+
+
+5.2 Data Flow Diagrams
+
+At level 0, two human actors interact with one platform, while optional providers supply routing,
+generated explanations, and message delivery. The platform reads versioned analytical assets
+and writes operational state. At level 1 the platform decomposes into identity, recommendation,
+application, review/allocation, and pilot-navigation processes. Figure 5.2 presents the system
+boundary and external data flows at Level 0.
+                               profile and request                                        review decision
+                                                          VendorMap decision-
+          Vendor                                                                                                      Officer
+                                                              support platform
+                            ranked results and status                                   queues and evidence
+
+
+                      features and policy                                                          transactions and audit
+
+
+     Versioned an-
+                                                                                                              Operational database
+     alytical assets
+
+                                            Figure 5.2: Level 0 data flow diagram.
+
+
+    Figure 5.2 shows that both roles communicate through one controlled platform; neither actor
+writes directly to analytical assets or operational tables.
+    Figure 5.3 decomposes that boundary into the five principal internal processes and their
+associated data stores.
+
+                                                  Versioned
+                                               model bundle
+
+
+
+                                                2. Eligibility
+1. Identity and sessions                                                    3. Request workflow
+                                                and ranking
+
+
+
+                                                5. Pilot slots                    4. Review
+     Identity store                                                                                                  Operational tables
+                                               and navigation                    and allocation
+
+
+
+                                               Pilot geometry
+
+
+                                            Figure 5.3: Level 1 data flow diagram.
+
+
+    Figure 5.3 expands that platform into five coordinated processes. Identity and model as-
+sets feed the request path, while reviewed decisions and pilot geometry remain coupled to the
+operational stores that enforce current state.
+
+
+
+
+                                                                    20
+VendorMap Project Report                                               Chapter 5. High Level Design
+
+
+5.3 UML Use Cases
+
+The vendor actor authenticates, maintains a profile, obtains recommendations, submits or can-
+cels a request, views status, and navigates when an assigned pilot slot is available. The offi-
+cer actor authenticates, searches vendors and zones, changes zone live state, reviews requests,
+records decisions, inspects planning suggestions, and edits pilot slots. External provider actors
+are conditional rather than required for core registry operation. Figure 5.4 relates these actors
+to the implemented system capabilities.
+
+                                              VendorMap
+                             Vendor au-                      Officer au-
+                             thentication                    thentication
+
+                                                            Inspect zones
+                           Maintain profile
+                                                             and vendors
+
+                             Explore rec-
+        Vendor                                        Review and decide             Officer
+                           ommendations
+
+                             Submit and
+                                                          Manage pilot slots
+                            track request
+
+                           View allocation                   Update live
+                            and navigate                      zone state
+
+
+                  Figure 5.4: Implemented actor and use-case relationships.
+
+
+   The use-case model demonstrates that vendor actions are self-service and identity-scoped,
+whereas officer actions concern review, live-state administration, and slot management. This
+separation supports least-privilege interface and API design.
+
+
+5.4 Component Diagram
+
+The frontend depends on a single API client. Routers own HTTP concerns and delegate to
+services; services use the repository, MCDA engine, optimizer, and geometry modules. Con-
+figuration and security helpers are cross-cutting dependencies. This division is explicit in the
+architecture and protected by focused contract tests. Figure 5.5 shows the resulting component
+ownership and dependencies.
+
+
+
+
+                                                 21
+VendorMap Project Report                                                                  Chapter 5. High Level Design
+
+
+
+ React feature modules           Credentialed API client                FastAPI routers
+
+
+
+                                    MCDA, optimizer                                                          Repository and
+                                                                       Domain services
+                                      and geometry                                                            transactions
+
+                             Figure 5.5: Component and dependency design.
+
+
+   The component model makes service ownership explicit. HTTP routers translate requests,
+domain services coordinate rules, and repositories or analytical modules perform the specialized
+work; this structure limits direct coupling between the user interface and persistence.
+
+
+5.5 Sequence and Activity Designs
+
+Figure 5.6 traces recommendation retrieval and the creation of a pending request across the
+client, API, analytical engine, and database.
+
+       Vendor                Web client                     API                    MCDA                      Database
+                         request recommendations
+
+
+                                                                           load evidence and live state
+
+                                                                  rank eligible zones
+
+
+                                                              scores and contributions
+
+                                          ranked response
+
+
+                           submit selected zone
+
+                                                                       validate and create pending request
+
+                                                                          request and audit identifiers
+
+
+
+                Figure 5.6: Sequence for recommendation and request submission.
+
+
+   The sequence keeps ranking read-oriented and stores only the later application event. This
+prevents a viewed recommendation from being misrepresented as an approved allocation.
+   Figure 5.7 then shows the decision points applied before and during officer review.
+
+
+
+
+                                                            22
+VendorMap Project Report                                                                   Chapter 5. High Level Design
+
+
+                                    Authenticated ven-
+                                   dor selects candidate
+
+
+
+
+                                    eligible and open?
+
+                              no                                yes
+
+
+   Return validation reason                                           Create pending request
+
+
+
+                                                                      Officer reviews evidence
+
+
+
+                                                                             approve?
+                                                                 no                              yes
+
+
+                                   Record rejection and audit                                          Recheck capacity; commit
+                                                                                                          allocation and audit
+
+                 Figure 5.7: Activity diagram for the reviewed allocation workflow.
+
+
+   The activity model emphasizes two checks: initial eligibility before a request is accepted
+and a fresh capacity check when approval is committed. The second check protects against stale
+browser state and concurrent decisions.
+
+
+5.6 Chapter Summary
+
+The design models consistently enforce role separation, service ownership, auditable state
+changes, and a distinction between recommendation and allocation. Together, the diagrams
+provide complementary structural and behavioural views of the implemented system. Chapter
+6 next explains how these designs were implemented and how the resulting evidence was
+produced.
+
+
+
+
+                                                            23
+                                        CHAPTER 6
+
+                             EXPERIMENTAL SETUP
+
+Chapter 5 described the implemented data, component, interaction, and workflow models. This
+chapter documents the development environment, data inventory, preprocessing, experimental
+procedures, implemented workflows, evaluation parameters, testing strategy, and deployment
+assumptions used to produce the reported evidence.
+
+
+6.1 Development Environment
+
+The project source tree is organized into backend, frontend, scripts, research, data, models,
+reports, tests, and documentation. Final verification used the repository’s configured Python
+environment and the available Node.js and npm installation. Analytical results are read from
+versioned data and model metadata so that the report does not depend on silently retraining
+a different model. LaTeX report compilation uses MiKTeX XeLaTeX and latexmk so the in-
+stalled Times New Roman font can be embedded directly. The scientific pipeline relies on the
+documented Python ecosystem, including SciPy and scikit-learn [17, 16].
+
+
+6.2 Dataset Inventory
+
+Table 6.1 identifies each analytical or operational data asset, its stored scale, intended role, and
+evidential limitation.
+
+
+
+
+                                                24
+VendorMap Project Report                                           Chapter 6. Experimental Setup
+
+
+                     Table 6.1: Project data inventory and evidence limits
+
+ Asset              Stored scale   Purpose                         Limitation
+
+ Official zone      308 zones;     Administrative identifiers,     Not all zones have analytical
+ catalog            166 free       type, division, capacity        coordinates
+                                   context
+ Resolved zone      258 usable     Point-based spatial feature     Approximate analytical
+ references                        construction                    references, not legal
+                                                                   boundaries
+ Scoreable free     146            Active recommendation           20 free-zone records
+ candidates                        population                      unscorable in stored
+                                                                   acceptance summary
+ OSM-derived        Roads,         Distance, density, count, and   Incomplete and
+ layers             facilities,    composition features            time-dependent volunteered
+                    transport,                                     data
+                    land use
+ Historical         Versioned      Compatibility and association   Not current occupancy and not
+ vendor-zone        CSV            context                         business outcome labels
+ pairs              evidence
+ Pilot boundaries   Two            Metric slot geometry            No site survey or obstruction
+ and slots          reviewed       experiment                      certification
+                    polygons;
+                    ten stored
+                    slots in
+                    validation
+                    artifact
+
+
+    The inventory shows that the project combines official identifiers with approximate ana-
+lytical references and derived context. In particular, OpenStreetMap supplies volunteered ge-
+ographic data contributed by its mapping community; it is neither a municipal survey nor a
+warranty of completeness. The required attribution is “© OpenStreetMap contributors”, and
+the database is made available under ODbL 1.0 [2, 20].
+
+
+6.3 Preprocessing
+
+The reproducible pipeline starts with validation of identifiers, schema, geometry, duplicate ref-
+erences, and source manifests. Feature construction transforms WGS84 inputs to EPSG:32643
+before calculating distances, line densities, fixed-radius counts, and land-use coverage. Stored
+metadata lists 250 m and 500 m buffers. It preserves missingness rather than fabricating area
+for point references and records fifty missing analytical references.
+
+                                                  25
+VendorMap Project Report                                              Chapter 6. Experimental Setup
+
+
+     Training-data scripts combine candidate snapshots, historical compatibility, vendor reg-
+istries, and development splits into a versioned package. K-Means preprocessing selects twelve
+active environmental features, applies transformations and scaling, and excludes capacity, zone
+type, historical evidence, missing geometry area, and sparse land-use shares. This separation
+prevents the unsupervised grouping from learning the later ranking target or operational avail-
+ability.
+
+
+6.4 K-Means Selection Procedure
+
+For each 𝐾 ∈ {2, . . . , 8}, the training script evaluates seeds 42 through 46 and records silhouette,
+Davies-Bouldin, Calinski-Harabasz, inertia, cluster-size, and adjusted-Rand stability. Eligible
+solutions require median stability of at least 0.80 and minimum cluster size at least eight. Among
+eligible solutions, the smallest 𝐾 within 0.01 of the best mean silhouette is selected. The active
+artifact selected 𝐾 = 2.
+     Figure 6.1 presents the stored silhouette comparison used in that selection procedure; the
+silhouette coefficient follows the interpretation introduced by Rousseeuw [21].
+
+
+
+
+   Figure 6.1: Silhouette comparison across candidate cluster counts for the active model.
+
+
+     The plotted comparison supports the documented two-cluster choice under the stated sta-
+bility and minimum-size guards. It should be interpreted as internal structure in the selected
+feature space, not as evidence that either group is commercially superior.
+     Figure 6.2 adds a visual comparison of the same 258 GIS-ready zone references before and
+after environmental profiling. The two-dimensional PCA projection is used only for inspection;
+K-Means is fitted on the selected scaled feature space rather than on the plotted coordinates.
+
+
+
+
+                                                 26
+VendorMap Project Report                                             Chapter 6. Experimental Setup
+
+
+
+
+(a) PCA projection before assigning cluster labels. (b) The same projection coloured by the selected
+                                                    𝐾 = 2 labels.
+
+   Figure 6.2: Environmental-profile visualization for the 258 GIS-ready zone references.
+
+
+6.5 Recommendation and Sensitivity Procedure
+
+The operational MCDA loads reference candidates, resolves vendor and request context, com-
+putes available factors, applies policy and preference weights, and produces a deterministic
+ranking with explanations. The stored sensitivity experiment uses a food vendor request in
+Nashik West with no live-status filter. It evaluates one-at-a-time weight changes of 0.10 and
+0.20 plus 200 Monte Carlo samples at a 0.20 perturbation bound, for 224 scenarios using seed
+42. Its purpose is ranking robustness, not predictive accuracy.
+
+
+6.6 Pilot Geometry Procedure
+
+Pilot boundaries are read in geographic coordinates and transformed to the local metric CRS.
+Rectangular slot polygons are generated from center, heading, width, and depth. The validator
+checks all vertices for containment, detects polygon overlaps, measures configured spacing and
+pedestrian corridor clearance, and transforms saved output back to EPSG:4326. The stored
+result covers ten 2 m by 2 m slots split evenly between two boundaries.
+
+
+6.7 Implementation of Operational Workflows
+
+The API composes nine primary router areas and a WhatsApp webhook router. Authentication
+creates server-side sessions; vendor endpoints project only the signed-in vendor’s data; admin-
+istrator endpoints expose controlled registry and review functions. Allocation approval uses
+transactional writes so capacity, request status, allocation, and audit state advance together.
+The UI consumes these projections through one credentialed client and does not become the
+authorization boundary.
+
+
+
+
+                                                27
+VendorMap Project Report                                           Chapter 6. Experimental Setup
+
+
+    The PWA build generates a cache allowlist of immutable assets and a generic offline page.
+This design intentionally sacrifices offline private workspaces: loss of connectivity clears in-
+memory authenticated data, and reconnecting revalidates the session. The navigation flow uses
+the same map to display slot destination, current location, route, and provider-failure fallback.
+WhatsApp simulation enters the persistent conversation service without calling Meta, enabling
+deterministic local workflow tests.
+
+
+6.8 Performance Parameters and Efficiency Considerations
+
+The evaluation combines several measures because no single value captures the quality of the
+complete system. Data quality is described by usable and missing-record counts. The K-
+Means experiment uses silhouette, Davies–Bouldin, Calinski–Harabasz, inertia, cluster size,
+and seed stability. Recommendation behaviour is examined through rank stability and factor
+contributions, while slot generation is checked through containment, dimensions, spacing, and
+coordinate-reference invariants. Automated backend and frontend tests, the production build,
+and browser captures provide software-level evidence.
+    Efficiency was considered in the implementation even though a controlled performance
+benchmark was outside the available evidence. Analytical features and the fitted clustering
+model are versioned and loaded for reuse instead of being rebuilt for every request. The rec-
+ommendation service filters ineligible zones before scoring, database operations use bounded
+queries and transactions, and the browser receives only the data required for the active view.
+Private API responses are deliberately excluded from service-worker caching; this adds a net-
+work dependency but avoids retaining authenticated information on a shared device. SQLite is
+suitable for the demonstrated academic workload, but concurrent municipal deployment would
+require load testing and, if necessary, migration to PostgreSQL.
+    No controlled latency, throughput, memory, income-improvement, adoption, or production-
+cost measurement was available. Chapter 7 therefore reports only observed test, build, model,
+and geometry results, and Chapter 8 labels every monetary value as a planning estimate rather
+than a measured project expense.
+
+
+6.9 Testing Strategy
+
+Testing is organized around domain behavior rather than only individual functions. Backend
+tests create disposable databases and exercise authentication, vendor registration, recommenda-
+tion filters, allocation requests, capacity changes, relocation, pilot geometry, navigation, What-
+sApp processing, and administrative projections. Concurrency-oriented tests attempt to approve
+competing requests for the final available place in a zone. Architecture tests compare the Ope-
+nAPI document, protected paths, selected asset hashes, and scientific function bodies against
+
+
+
+
+                                               28
+VendorMap Project Report                                                 Chapter 6. Experimental Setup
+
+
+recorded baselines. These checks help identify unintended changes, although a changed base-
+line must be reviewed rather than automatically accepted.
+     Frontend tests cover the credentialed API client, multilingual labels, mapping utilities, dia-
+log focus, toast behavior, vendor identity display, pilot-slot state, slot presentation, navigation
+utilities, and service-worker policy. Additional browser scripts exercise the PWA lifecycle and
+representative vendor and officer flows. The service-worker tests are particularly important be-
+cause authenticated information must not be written to browser cache storage. Browser views
+are captured at desktop and mobile widths to identify layout problems that are not visible in
+pure unit tests.
+     The completed modular verification workflow is formalized in Figure 6.3. Each module
+is given isolated data, exercised at the unit, API/integration, concurrency, or frontend level as
+applicable, and accepted only after its assertions pass. A failure returns to defect correction and
+reruns the relevant test path rather than being counted as a validated module.
+
+                                                                      Unit tests
+                                                                    API and inte-
+   Module im-           Prepare iso-             Run auto-
+                                                                     gration tests
+   plementation        lated test data          mated tests
+                                                                  Concurrency tests
+                                                                    Frontend tests
+
+
+
+                           Validated     yes                                              Fix defect
+                                               assertions pass?   Collect test results
+                           module                                                         and rerun
+                                                       no
+
+
+
+
+                  Figure 6.3: Modular testing and defect-correction workflow.
+
+
+    Chapter 7 reports only evidence that passed final verification: 97 focused backend tests, 58
+frontend tests, a successful production build, and versioned analytical artifacts. Tests tied to
+historical baselines or excluded deployment scenarios are not used as proof of the completed
+functions.
+
+
+6.10 Configuration and Deployment Procedure
+
+Local development uses separate backend and frontend processes. The backend loads settings
+from the project environment file and exposes FastAPI through Uvicorn. The Vite development
+server proxies same-origin API requests, allowing cookies to work without embedding a fixed
+localhost address in the browser bundle. Database initialization is idempotent and is intended
+to preserve operational records while ensuring required tables and reference state exist.
+    A production installation would build the frontend into static assets, serve it through HTTPS,
+forward the API path to FastAPI, and preserve client-side routing. The service worker, man-
+ifest, and HTML entry require revalidation headers, while fingerprinted static assets may use
+long-lived caching. Secrets must be supplied by the host rather than compiled into Vite vari-
+
+
+                                                     29
+VendorMap Project Report                                          Chapter 6. Experimental Setup
+
+
+ables. Persistent database storage, scheduled backup, restore testing, log retention, dependency
+updates, and provider monitoring are required operational tasks. These steps are documented
+as deployment requirements; no production host is claimed in the evaluation.
+
+
+6.11 Chapter Summary
+
+The implementation uses reproducible, versioned analytical steps and a focused verification
+workflow that covers the completed functions. The procedures support traceability, while au-
+thoritative geometry, field observations, and production operations remain prerequisites for
+field deployment. Chapter 7 next presents the successful analytical, software, build, and in-
+terface results produced by these procedures.
+
+
+
+
+                                              30
+                                        CHAPTER 7
+
+                          RESULTS AND EVALUATION
+
+Chapter 6 established the implementation and verification procedures used for the completed
+system. This chapter presents the successful analytical, automated-test, production-build, and
+interface evidence, followed by a careful interpretation of its limits. Internal metrics are reported
+as reproducible evidence and are not converted into field claims.
+
+
+7.1 Analytical Results
+
+7.1.1 Data and Environmental Typology
+
+Versioned feature metadata reports 308 total zone records, 258 usable references, and 50 miss-
+ing references. The active K-Means run uses 258 rows and twelve environmental features.
+The selected two-cluster model records silhouette 0.3406, Davies-Bouldin 1.4645, Calinski-
+Harabasz 102.8891, inertia 736.1383, and cluster sizes 83 and 175. Across the five stored seeds
+the adjusted-Rand mean, minimum, and median are 1.0. These values establish a stable parti-
+tion for the selected preprocessing, but do not establish that either cluster is more suitable for
+vending.
+    Figure 7.1 shows the population balance of the candidate clustering solutions considered for
+the active model.
+
+
+
+
+            Figure 7.1: Cluster-size comparison used to evaluate the active model.
+
+    The selected two-cluster solution contains 83 and 175 records. This imbalance is acceptable
+for descriptive typology under the stated minimum-size rule, but the plot does not attach a
+suitability or policy meaning to either cluster.
+
+                                                 31
+VendorMap Project Report                                        Chapter 7. Results and Evaluation
+
+
+7.1.2 MCDA Sensitivity
+
+The stored baseline ranks NW_F_025, NW_F_005, and NW_F_001 first through third for the
+documented food-vendor scenario. Across 224 perturbation scenarios, top-one stability is 100
+percent, ordered top-three stability is 56.70 percent, mean top-three retention is 85.57 percent,
+mean rank correlation is 0.9977, mean absolute rank shift is 1.8128, and the maximum observed
+rank shift is 19. This indicates a robust first result for that scenario but meaningful reordering
+below it. Generalization to other vendor contexts requires separate sensitivity runs.
+    Table 7.1 summarizes the stored stability measures for this documented scenario.
+
+          Table 7.1: Stored MCDA sensitivity results for one documented scenario
+
+                              Measure                        Value
+
+                              Scenarios                      224
+                              Candidates                     146
+                              Top-one stability           1.0000
+                              Ordered top-three stability 0.5670
+                              Mean top-three retention    0.8557
+                              Mean rank correlation       0.9977
+                              Maximum rank shift              19
+
+
+   Table 7.1 demonstrates that the highest-ranked candidate remained stable for the docu-
+mented perturbations, while the lower top-three positions were more sensitive. The result is
+scenario-specific and is not a system-wide accuracy estimate.
+
+7.1.3 Pilot Slot Geometry
+
+The geographic validation artifact marks ten slots as valid in EPSG:32643. Five slots are placed
+in each source boundary. Containment, spacing, and pedestrian clearance pass; the maximum
+recorded edge error is approximately 1.87 × 10−9 m and the minimum spacing is approximately
+0.5 m. The configured corridor width is 1.2 m. Unknown obstructions were not assessed, site
+verification is false, and live routing is untested. These qualifications prevent interpreting the
+result as field approval.
+
+
+7.2 Verified Software Results
+
+Final verification concentrated on the completed functions that can be demonstrated to a re-
+view panel. Two focused backend groups covered authentication, persistence, MCDA, capacity,
+relocation, pilot-slot geometry, live recommendations, historical associations, and WhatsApp
+service behaviour. Together they completed 97 tests with no failures. The frontend unit suite
+
+
+                                               32
+VendorMap Project Report                                              Chapter 7. Results and Evaluation
+
+
+completed all 58 tests, and the production build transformed 1,690 modules successfully. Ta-
+ble 7.2 records these results alongside the versioned analytical evidence.
+
+                  Table 7.2: Final verification summary for completed functions
+
+ Layer             Command /         Result                                         Classification
+                   evidence
+
+ Focused           Selected pytest   97 passed; 0 failed                            Fresh test
+ backend           suites                                                           execution
+ verification
+ Frontend unit     npm test          58 passed; 0 failed                            Fresh test
+ suite                                                                              execution
+ Production        npm run           1,690 modules transformed; build               Fresh build
+ frontend build    build             successful                                     execution
+ K-Means           Versioned         Stable two-cluster result                      Versioned
+                   metrics JSON                                                     analytical
+                   and CSV                                                          evidence
+ MCDA              Sensitivity       224 scenarios; top result stable in            Versioned
+                   JSON and CSV      documented case                                analytical
+                                                                                    evidence
+ Pilot             Geographic        10 slots computationally valid                 Versioned
+ geometry          validation JSON                                                  evidence; no field
+                                                                                    test
+
+
+    These results need to be read within their limits. The software counts come from successful
+final executions, while the model and geometry statements are traceable to versioned result files.
+No claim is made for field conditions, legal boundary approval, or live third-party-provider
+deployment.
+
+
+7.3 Working Interface Evidence
+
+Browser-captured desktop and mobile views document the implemented application. These
+images are used as interface evidence rather than regenerated mockups. Figure 7.2 compares
+the role-separated officer and vendor workspaces.
+
+
+
+
+                                                  33
+VendorMap Project Report                                      Chapter 7. Results and Evaluation
+
+
+
+
+                 (a) Officer overview workspace.                      (b) Vendor mobile home.
+
+          Figure 7.2: Role-separated workspaces captured during implementation.
+
+
+    The officer interface includes searchable vendor records, zone and capacity summaries,
+pending work, and planning views. The vendor interface presents identity, recommendation,
+request, and allocation state without exposing administrator operations. Responsive captures
+exist at 1440 px and 390 px widths, supporting the implementation claim but not replacing
+formal accessibility and device testing.
+    Figure 7.3 presents the vendor-directory and relocation-planning views used during officer
+review.
+
+
+
+
+        (a) Vendor directory and filters.             (b) Relocation planning workspace.
+
+         Figure 7.3: Officer workflow screenshots captured during implementation.
+
+
+                                               34
+VendorMap Project Report                                      Chapter 7. Results and Evaluation
+
+
+    Figure 7.3 shows that registry inspection and relocation planning are presented as distinct
+officer tasks, reducing the chance that exploratory comparison is mistaken for a recorded deci-
+sion.
+    Figure 7.4 introduces the map and inspector used for supported pilot-slot administration.
+
+
+
+
+          Figure 7.4: Implemented pilot vending-slot map and inspector interface.
+
+
+    The slot interface combines geometry, state, and administrative controls in one view. Its
+presence verifies the implemented interaction, whereas physical clearance and field safety re-
+main outside the screenshot evidence.
+
+
+7.4 Feature Evaluation
+
+Authentication, profile management, recommendation evidence, request lifecycle, officer re-
+view, live capacity, pilot slots, navigation adapters, PWA behavior, multilingual labels, and
+WhatsApp services are present in source. Their maturity differs. Core registry and UI flows
+are supported by focused passing tests and captured interfaces. External delivery, field geome-
+try, production HTTPS, load behavior, backup recovery, and physical-device PWA installation
+remain unverified. The optional AI explanation path and synthetic supervised model must not
+be described as authoritative recommendation logic.
+
+
+
+
+                                              35
+VendorMap Project Report                                          Chapter 7. Results and Evaluation
+
+
+7.5 Functional Walkthrough
+
+The implemented screens form one continuous user journey. The authentication landing page
+first determines whether the user is a vendor or an officer. A vendor session opens a compact
+dashboard showing the identity card, current allocation, recent requests, and the next relevant
+action. New vendors without an allocation receive a clear entry point to find a vending place.
+Existing vendors can review their current location and start a relocation request without losing
+the history of the earlier allocation.
+     The recommendation explorer presents ranked cards and a map instead of requiring the
+user to interpret raw coordinate tables. Each result includes the division, zone type, capacity
+context, factor contributions, and cautions associated with incomplete information. A detailed
+view supports closer inspection before an application is created. The application area then shows
+pending, approved, rejected, or cancelled state. These states are obtained from the server and
+are not inferred from local interface actions.
+     The officer dashboard provides a city-level overview and separates routine tasks into fo-
+cused workspaces. The vendor directory supports text and category filters, pagination, and de-
+tailed record inspection. Zone views combine catalog data, live status, historical associations,
+and analytical map references. The relocation planning view assists comparison without per-
+forming automatic approval. Request review displays the information required for a decision
+and submits the decision to the transactional backend.
+     Pilot-slot administration extends the zone-level process to a smaller spatial unit. Officers
+can inspect a saved layout, select a slot, review its state, and use controlled operations to create,
+move, delete, or assign slots in supported areas. Geometry is validated before it is saved. On
+the vendor side, an assigned slot becomes the navigation destination. This flow connects the
+strategic question of which zone is suitable with the practical question of where the cart or stall
+should be positioned.
+
+
+7.6 Interpretation of the Evaluation
+
+The analytical results are strongest as measures of reproducibility and internal behavior. The
+K-Means run shows that the selected environmental partition is stable across the tested seeds,
+but its moderate silhouette value indicates that the groups are not sharply separated. The MCDA
+experiment shows excellent rank correlation and a stable first result for one documented case,
+while the lower ordered top-three stability demonstrates that secondary positions respond to
+weight changes. Both observations support showing several candidates with explanations in-
+stead of presenting one location as an unquestionable answer.
+     The pilot-slot result demonstrates correct coordinate transformation and geometric invari-
+ants for the saved test layout. It does not address temporary obstacles, actual cart dimensions,
+utility access, crowd movement, road works, or changes in the surveyed area. Those factors
+
+
+                                                36
+VendorMap Project Report                                          Chapter 7. Results and Evaluation
+
+
+require physical inspection. In the same manner, responsive screenshots show that the inter-
+face renders at the tested sizes, but they do not establish complete accessibility, low-end device
+performance, or usability for every language group.
+    The focused backend and frontend results show that the completed judge-facing workflows
+behave as intended under the tested conditions, and the successful production build confirms
+that the client can be packaged for deployment. These checks do not replace field studies,
+security assessment, load testing, or live-provider validation; they establish the narrower claim
+that the documented academic system and its principal workflows are reproducible.
+
+
+7.7 Cost Analysis
+
+No invoice, payroll record, cloud bill, or actual effort log exists. A minimal academic system
+scenario can therefore state only assumptions. The software stack uses open-source software
+with no evidenced license purchase. Existing student hardware and internet are treated as sunk
+resources. A small pilot host, storage, domain allocation, and monitoring may be budgeted
+at INR 3,500 per month, excluding paid routing, messaging, AI usage, SMS, support labor,
+and institutional security review. This value is illustrative and must be replaced by provider
+quotations before procurement.
+    The separate COCOMO II planning document estimates commercial replacement effort
+from source lines and produces a far larger labor figure; it explicitly warns that the output is not
+actual project history and is inconsistent with the short visible Git span. This report therefore
+avoids presenting that modeled amount as student-project expenditure. The most important cost
+risk is not software licensing but data verification, field survey, stakeholder review, deployment
+hardening, and ongoing operational support.
+
+
+7.8 Observed Limitations
+
+The evaluation has no verified footfall, revenue, safety outcome, displacement outcome, or
+longitudinal allocation success. Analytical points are not certified boundaries. OSM coverage
+is incomplete. The MCDA sensitivity result describes one request. The pilot slots lack physical
+verification and obstruction survey. Optional providers are not live-tested. These are material
+limitations and define the field-validation boundary.
+
+
+7.9 Chapter Summary
+
+The verified results demonstrate reproducible clustering, scenario-specific MCDA robustness,
+computational pilot geometry, 97 passing focused backend tests, 58 passing frontend tests, and
+a successful production frontend build. The interfaces document the integrated system, while
+incomplete spatial authority and absent field or live-provider evidence correctly limit the claim
+
+
+                                                37
+VendorMap Project Report                                  Chapter 7. Results and Evaluation
+
+
+to a completed academic decision-support system. Chapter 8 next records how the work was
+organized, costed, and controlled.
+
+
+
+
+                                          38
+                                     CHAPTER 8
+
+                              PROJECT PLANNING
+
+Chapter 7 presented the successful analytical, test, build, and interface evidence. This chap-
+ter reconstructs the project work breakdown from the available project files and presents the
+corresponding milestones, dependency sequence, resource assumptions, estimated costs, and
+principal delivery risks. Estimates are kept separate from observed project history.
+
+
+8.1 Work Breakdown
+
+The dated project files show work on data validation, spatial feature engineering, K-Means
+comparison, MCDA and AHP tooling, operational APIs, authentication, allocation workflows,
+pilot geometry, frontend restructuring, PWA behavior, multilingual support, tests, and documen-
+tation. The plan below is a reconstructed project schedule, not an asserted diary of completed
+student hours.
+    Table 8.1 maps the reconstructed sixteen-week plan to evidence-oriented exit criteria.
+
+
+
+
+                                              39
+VendorMap Project Report                                                     Chapter 8. Project Planning
+
+
+                    Table 8.1: Reconstructed sixteen-week project schedule
+
+ Weeks      Work package                                                         Evidence / exit
+                                                                                 criterion
+
+ 1–2        Confirm problem, privacy boundary, official identifiers, and         Data manifest and
+            project baseline                                                     requirements review
+ 3–4        Validate spatial inputs and build metric features                    Data-quality reports
+                                                                                 and versioned feature
+                                                                                 package
+ 5–6        Compare K-Means configurations and document limitations              Selection CSV,
+                                                                                 metrics JSON, saved
+                                                                                 artifact
+ 7–8        Implement and evaluate MCDA policy, explanations, and                Ranked output and
+            sensitivity                                                          sensitivity summary
+ 9–10       Complete authenticated vendor and officer workflows                  API, database, and UI
+                                                                                 integration tests
+ 11–12      Implement allocation planning and pilot-slot geometry                Optimizer and
+                                                                                 geographic invariant
+                                                                                 tests
+ 13         Refine multilingual, responsive, and PWA behavior                    Unit and browser
+                                                                                 evidence
+ 14         Integrate optional routing and WhatsApp boundaries                   Simulator and
+                                                                                 configuration
+                                                                                 documentation
+ 15         Focused verification and defect correction                           Passing
+                                                                                 backend/frontend
+                                                                                 suites and production
+                                                                                 build
+ 16         Report, demonstration, release checklist, and field-validation       Compiled report and
+            plan                                                                 evidence index
+
+
+    The schedule orders data validation before model evaluation and places integration before
+final focused verification. Its exit criteria emphasize reviewable artifacts rather than an unsup-
+ported claim about hours already spent.
+
+
+8.2 Milestones and Dependencies
+
+The model bundle depends on validated references and features. Recommendations depend on
+the model bundle and policy configuration. Application review depends on identity, eligibility,
+
+
+                                                  40
+VendorMap Project Report                                            Chapter 8. Project Planning
+
+
+and database invariants. Pilot navigation depends on an approved allocation, assigned slot,
+valid geometry, browser location permission, and routing-provider access. Production release
+additionally depends on HTTPS, secret management, backups, field and stakeholder validation,
+and passing focused verification suites.
+
+
+8.3 Gantt Chart
+
+Figure 8.1 visualizes the overlap and dependency structure of the reconstructed schedule.
+
+
+                                                         Project weeks
+
+                                      1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+
+
+ Evidence and requirements
+
+                 Data validation
+
+                 Spatial features
+
+               Decision models
+
+           K-Means evaluation
+
+        MCDA and sensitivity
+
+      Application integration
+
+      Backend and persistence
+
+          Frontend workspaces
+
+       Pilot slots and channels
+
+    Verification and handoff
+
+           Focused verification
+
+    Report and demonstration
+
+       Figure 8.1: Reconstructed project timeline; not a measured historical schedule.
+
+
+
+                                             41
+VendorMap Project Report                                               Chapter 8. Project Planning
+
+
+    The chart shows that analytical and application work overlap, but verification and handoff
+depend on their integration. The final verification period is therefore a release gate rather than
+a parallel documentation activity.
+
+
+8.4 Resources and Estimated Cost
+
+Required development resources are four general-purpose laptops, shared broadband, Git,
+Python, Node.js, MiKTeX, and open-source libraries. No dedicated GPU is needed. For an
+academic system, incremental software cost is assumed to be INR 0 and existing hardware cost
+INR 0. The illustrative production-pilot allowance of INR 3,500 per month is excluded from
+historical cost because no deployment bill exists. Human effort is not monetized without veri-
+fied hours and rates. External API use, field survey, penetration testing, training, accessibility
+review, and long-term maintenance require separate quotations.
+
+
+8.5 Risk Register
+
+High-priority risks are inaccurate or non-authoritative spatial inputs, privacy exposure, stale
+capacity, inconsistent policy weights, regression drift, provider outages, and users mistaking
+recommendations for permits. Mitigations include provenance metadata, HMAC-based iden-
+tity handling, transactional rechecks, factor explanations, contract tests, server-side provider
+adapters, explicit labels, and mandatory human approval. Focused passing suites and versioned
+analytical artifacts reduce regression risk for the completed workflows.
+
+
+8.6 Chapter Summary
+
+The reconstructed plan prioritizes evidence quality, integration, and focused verification before
+handoff. Existing hardware and open-source software limit academic-system expenditure, but
+field verification, secure hosting, external services, accessibility, and ongoing support remain
+material future costs and risks. Chapter 9 next consolidates the verified contribution, remaining
+limitations, and future scope.
+
+
+
+
+                                               42
+                                        CHAPTER 9
+
+                                     CONCLUSIONS
+
+Chapter 8 documented the work plan, resources, cost assumptions, and risk controls. This chap-
+ter consolidates the implemented contribution, evaluates achievement against the stated objec-
+tives, identifies the evidence that is still missing, and defines a staged path from a completed
+academic system to a field-validated and operationally governed system.
+
+
+9.1 Summary of Implemented Work
+
+VendorMap provides an end-to-end, role-separated decision-support platform for street vendor
+zone discovery and reviewed allocation. The system connects a React PWA, FastAPI routers
+and services, operational SQLite persistence, versioned geospatial evidence, descriptive K-
+Means clustering, explainable MCDA, advisory allocation optimization, pilot slot geometry,
+and optional navigation and messaging adapters. Source organization and screenshots show
+distinct vendor and officer workspaces rather than a research script alone.
+    The project meets its architectural objective of keeping recommendation, authorization, and
+legal interpretation separate. Candidate scores expose contributing factors and evidence cover-
+age. Requests remain pending until reviewed. Approval rechecks operational conditions and
+creates audit records. Environmental clusters do not become suitability labels. Approximate
+map points do not become official boundaries. Optional provider failures do not fabricate re-
+sults. These separations are the project’s most important technical contribution.
+
+
+9.2 Achievement of Objectives
+
+Role-based authentication, profile workflows, zone browsing, recommendations, application
+tracking, officer review, capacity state, audit records, pilot-slot editing, multilingual labels, and
+privacy-aware PWA caching are implemented in source. Versioned metadata makes the analyt-
+ical pipeline inspectable. Stored results support a stable two-cluster descriptive model, a robust
+first-ranked result in one MCDA sensitivity scenario, and computationally valid geometry for
+ten pilot slots. Real browser captures provide interface evidence.
+     Table 9.1 maps each objective from Chapter 1 to concrete implementation and verification
+evidence.
+
+
+
+
+                                                43
+VendorMap Project Report                                                       Chapter 9. Conclusions
+
+
+                    Table 9.1: Achievement of the stated project objectives
+
+ ID     Objective achieved                             Verification evidence
+
+ O1     Role-separated vendor and officer              Authentication, session, and workflow tests
+        workflows
+ O2     Reproducible spatial features                  Versioned feature metadata and coordinate
+                                                       documentation
+ O3     Explainable, missing-data-aware MCDA           Focused recommendation tests and
+        ranking                                        sensitivity artifact
+ O4     Factor contributions and evidence coverage     API and interface implementation with
+                                                       explanatory results
+ O5     Capacity and allocation invariants             Passing capacity, relocation, and
+                                                       transaction-focused tests
+ O6     Pilot-slot geometry controls                   Ten computationally valid slots and
+                                                       geometry tests
+ O7     Multilingual, installable web access           Passing frontend tests, service-worker
+                                                       checks, and production build
+ O8     Preserved evidence with explicit limitations   Versioned analytical files, report citations,
+                                                       and bounded claims
+
+
+    Achievement is not equivalent to production certification. Final verification established
+97 passing focused backend tests, 58 passing frontend tests, and a successful production build.
+The outcome is therefore a completed academic decision-support system whose field, legal, and
+third-party deployment boundaries remain explicit.
+
+
+9.3 Current Limitations
+
+The most serious limitations are the absence of authoritative vending polygons, observed foot-
+fall and sales, verified vacancy, longitudinal outcomes, representative real expert labels, field-
+tested slot obstructions, live routing tests, and production deployment evidence. Optional AI
+and WhatsApp paths require secure provider setup. SQLite needs an operational strategy for
+concurrent production use. Accessibility, load, disaster recovery, and external security assess-
+ment are not established.
+
+
+9.4 Future Scope
+
+The next validation phase should obtain institutionally approved zone geometry and capacity
+records, conduct site surveys for obstruction and pedestrian clearance, record provenance and
+update dates, and elicit AHP judgments from accountable experts with consistency review. A
+
+
+                                                 44
+VendorMap Project Report                                                 Chapter 9. Conclusions
+
+
+field pilot should measure recommendation acceptance, request completion, allocation duration,
+navigation success, vendor satisfaction, and adverse outcomes without overstating causality.
+Only after these steps should supervised learning be considered; it would require representative,
+privacy-reviewed outcome labels and temporal or geographic validation.
+    For production engineering, the system should adopt managed secrets, HTTPS, backup and
+restore drills, observability, rate limiting, database migration and concurrency testing, acces-
+sibility conformance testing, provider quota monitoring, and a documented incident process.
+These enhancements preserve the core design principle: software may organize and explain
+evidence, but accountable authorities and affected vendors must remain central to the final de-
+cision.
+
+
+9.5 Chapter Summary
+
+VendorMap demonstrates an integrated and auditable approach to spatial vendor-allocation sup-
+port while preserving the distinction between evidence, recommendation, and authority. The
+completed academic system satisfies its stated software and analytical objectives under the
+tested conditions. Its next phase is authoritative and field-verified data collection, followed
+by governed production deployment or carefully validated supervised models.
+
+
+
+
+                                               45
+                                  BIBLIOGRAPHY
+
+ [1] Government of India, “The street vendors (protection of livelihood and regulation of street
+     vending) act, 2014,” The Gazette of India, Ministry of Law and Justice, Act No. 7 of 2014,
+     2014.
+
+ [2] OpenStreetMap Foundation, “Copyright and license,”                Online:     https://www.
+     openstreetmap.org/copyright, accessed: Nov. 9, 2026.
+
+ [3] Y. Liu and Y. Liu, “Detecting the city-scale spatial pattern of the urban informal sector by
+     using street view images: A street vendor massive investigation case,” Cities, vol. 131, p.
+     103959, 2022.
+
+ [4] C. Li, Y. Huang, Y. Shen, and L. Xu, “Spatiotemporal patterns and mechanisms of street
+     vending from the social sensing perspective: A comparison between law-enforcement
+     reported and residents complaint events,” Cities, vol. 124, p. 103597, 2022.
+
+ [5] S. Anand and K. Jagadeesh, “Neighborhoods and their impacts on the informal food econ-
+     omy of bengaluru,” Cities, vol. 126, p. 103672, 2022.
+
+ [6] N. Yesmin and B. Calzada Olvera, “Key determinants of street vendor sales in dhaka:
+     Infrastructure and socioeconomic factors,” Journal of Entrepreneurship and Public Policy,
+     vol. 14, no. 2, pp. 187–206, 2024.
+
+ [7] S. A. Waheeb, B. Zerouali, A. Elbeltagi, M. Alwetaishi, Y. J. Wong, N. Bailek, A. A.
+     AlSaggaf, S. I. M. Abd Elrahman, C. A. G. a. Santos, and A. A. Majrashi, “Enhancing
+     sustainable urban planning through GIS and multiple-criteria decision analysis: A case
+     study of green space infrastructure in taif province, saudi arabia,” Water, vol. 15, no. 17,
+     p. 3031, 2023.
+
+ [8] T. H. Son, Z. Weedon, T. Yigitcanlar, T. Sanchez, J. M. Corchado, and R. Mehmood,
+     “Algorithmic urban planning for smart and sustainable development: Systematic review
+     of the literature,” Sustainable Cities and Society, vol. 94, p. 104562, 2023.
+
+ [9] A. K. Marondedze, O. Mutanga, and M. A. Cho, “Promoting inclusion in urban land use
+     planning using participatory geographic information system (PGIS) techniques: A system-
+     atic review,” Journal of Environmental Management, vol. 370, p. 123099, 2024.
+
+[10] T. L. Saaty, The Analytic Hierarchy Process. New York, NY, USA: McGraw-Hill, 1980.
+
+[11] S. P. Lloyd, “Least squares quantization in PCM,” IEEE Transactions on Information The-
+     ory, vol. 28, no. 2, pp. 129–137, 1982.
+
+
+
+                                              46
+VendorMap Project Report                                                              Bibliography
+
+
+[12] A. M. Ikotun, A. E. Ezugwu, L. Abualigah, B. Abuhaija, and J. Heming, “K-means clus-
+     tering algorithms: A comprehensive review, variants analysis, and advances in the era of
+     big data,” Information Sciences, vol. 622, pp. 178–210, 2023.
+
+[13] Y. Liu, Y. Liu, X. Chen, C. Lin, and Z. Zhou, “Balancing spatial logic and governance
+     objectives for street vending: An optimizing model for dynamic formalization zones,”
+     Cities, p. 105819, 2025.
+
+[14] J. Xing and R. Sieber, “The challenges of integrating explainable artificial intelligence
+     into GeoAI,” Transactions in GIS, vol. 27, no. 3, pp. 626–645, 2023.
+
+[15] FastAPI Project, “FastAPI documentation,” Online: https://fastapi.tiangolo.com/, ac-
+     cessed: Nov. 9, 2026.
+
+[16] F. Pedregosa, G. Varoquaux, A. Gramfort, V. Michel, B. Thirion, O. Grisel, M. Blon-
+     del, P. Prettenhofer, R. Weiss, V. Dubourg, J. Vanderplas, A. Passos, D. Cournapeau,
+     M. Brucher, M. Perrot, and E. Duchesnay, “Scikit-learn: Machine learning in python,”
+     Journal of Machine Learning Research, vol. 12, pp. 2825–2830, 2011.
+
+[17] P. Virtanen, R. Gommers, T. E. Oliphant et al., “SciPy 1.0: Fundamental algorithms for
+     scientific computing in python,” Nature Methods, vol. 17, pp. 261–272, 2020.
+
+[18] Meta Open Source, “React documentation,” Online: https://react.dev/, accessed: Nov. 9,
+     2026.
+
+[19] Leaflet Contributors, “Leaflet documentation,” Online: https://leafletjs.com/, accessed:
+     Nov. 9, 2026.
+
+[20] Open Data Commons, “Open database license (ODbL) version 1.0,” Online: https://
+     opendatacommons.org/licenses/odbl/1-0/, accessed: Nov. 9, 2026.
+
+[21] P. J. Rousseeuw, “Silhouettes: A graphical aid to the interpretation and validation of cluster
+     analysis,” Journal of Computational and Applied Mathematics, vol. 20, pp. 53–65, 1987.
+
+
+
+
+                                                47
+

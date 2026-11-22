@@ -281,10 +281,13 @@ def get_whatsapp_settings() -> WhatsAppSettings:
     graph_version = _required_value("WHATSAPP_GRAPH_VERSION").strip()
     if not re.fullmatch(r"v\d+\.\d+", graph_version):
         raise ConfigurationError("WHATSAPP_GRAPH_VERSION must use the form vNN.N")
+    phone_number_id = _required_value("WHATSAPP_PHONE_NUMBER_ID").strip()
+    if not phone_number_id.isdigit():
+        raise ConfigurationError("WHATSAPP_PHONE_NUMBER_ID must be numeric")
     return WhatsAppSettings(
-        access_token=_required_value("WHATSAPP_ACCESS_TOKEN"),
-        phone_number_id=_required_value("WHATSAPP_PHONE_NUMBER_ID").strip(),
-        verify_token=_required_value("WHATSAPP_VERIFY_TOKEN"),
-        meta_app_secret=_required_value("META_APP_SECRET"),
+        access_token=_required_value("WHATSAPP_ACCESS_TOKEN").strip(),
+        phone_number_id=phone_number_id,
+        verify_token=_required_value("WHATSAPP_VERIFY_TOKEN").strip(),
+        meta_app_secret=_required_value("META_APP_SECRET").strip(),
         graph_version=graph_version,
     )

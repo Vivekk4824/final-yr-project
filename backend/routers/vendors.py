@@ -294,6 +294,11 @@ def vendor_dashboard(
                         "request_type"
                     ],
 
+                "slot_id":
+                    row.get(
+                        "slot_id"
+                    ),
+
                 "requested_zone_id":
                     row[
                         "zone_id"
@@ -931,6 +936,31 @@ def admin_vendor_directory(request: FastAPIRequest, q: str = "", business_catego
                                   zone_id=zone_id, mapping_status=mapping_status,
                                   page=page, page_size=page_size, database_path=dependencies.DATABASE_PATH)
     except OperationalValidationError as exc:
+        operational_error(exc)
+
+
+@router.get("/api/admin/vendor-heatmap", tags=["Vendors", "Admin"])
+def admin_vendor_heatmap(request: FastAPIRequest, business_category: str = "", location_key: str = ""):
+    request_session(request, "ADMIN")
+    from backend.services.vendor_heatmap import vendor_heatmap_data
+    return vendor_heatmap_data(
+        business_category=business_category,
+        location_key=location_key,
+        database_path=dependencies.DATABASE_PATH,
+    )
+
+
+@router.get("/api/vendors/me/location-insights", tags=["Vendors"])
+def vendor_location_insights(request: FastAPIRequest, zone_id: list[str] = Query(default=[])):
+    session = request_session(request, "VENDOR")
+    from backend.services.vendor_location_insights import vendor_location_insights as get_location_insights
+    try:
+        return get_location_insights(
+            session["vendor_id"],
+            zone_ids=zone_id,
+            database_path=dependencies.DATABASE_PATH,
+        )
+    except (OperationalNotFoundError, OperationalValidationError) as exc:
         operational_error(exc)
 
 

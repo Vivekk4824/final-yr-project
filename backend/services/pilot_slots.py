@@ -142,7 +142,15 @@ def get_layout(database_path=DATABASE_PATH, zone_id=PILOT_ZONE_ID):
         active_allocations = db.execute(
             "SELECT COUNT(*) AS total FROM allocations WHERE zone_id=? AND status='ACTIVE'", (zone_id,)
         ).fetchone()["total"]
-        mapped_allocations = sum(bool(s.get("assigned_vendor_id")) for s in layout["slots"])
+        mapped_allocations = db.execute(
+            """SELECT COUNT(DISTINCT a.allocation_id) AS total
+               FROM allocations AS a
+               JOIN pilot_slots AS s
+                 ON s.zone_id = a.zone_id AND s.slot_id = a.slot_id
+                AND s.assigned_vendor_id = a.vendor_id AND s.is_deleted = 0
+               WHERE a.zone_id = ? AND a.status = 'ACTIVE'""",
+            (zone_id,),
+        ).fetchone()["total"]
         authoritative_available = None if not official.get("capacity") else max(0, int(float(official["capacity"])) - active_allocations)
         raw_available_slots = sum(s["status"] == "AVAILABLE" for s in layout["slots"])
         layout["summary"] = {"listed_capacity": int(float(official["capacity"])) if official.get("capacity") else None,
@@ -150,6 +158,7 @@ def get_layout(database_path=DATABASE_PATH, zone_id=PILOT_ZONE_ID):
             "reserved_slots": sum(s["status"] == "RESERVED" for s in layout["slots"]),
             "available_slots": raw_available_slots,
             "active_allocations": active_allocations,
+            "mapped_active_allocations": mapped_allocations,
             "unmapped_active_allocations": max(0, active_allocations - mapped_allocations),
             "remaining_uncreated_capacity": None if authoritative_available is None else max(0, int(float(official["capacity"])) - len(layout["slots"])),
             "requestable_slots": raw_available_slots if authoritative_available is None else min(raw_available_slots, authoritative_available)}
@@ -180,7 +189,7 @@ def update_slot(slot_id, status, vendor_id, *, actor, expected_updated_at, datab
             if vendor_id:
                 if not current["assigned_vendor_id"] and current["status"] != "AVAILABLE":
                     raise OperationalConflictError("A new vendor assignment requires an AVAILABLE slot")
-                approved = db.execute("""SELECT a.allocation_id FROM allocations a
+                approved = db.execute("""SELECT a.allocation_id, a.slot_id FROM allocations a
                     WHERE a.vendor_id = ? AND a.zone_id = ? AND a.status = 'ACTIVE'
                     AND (a.allocation_source='LEGACY_IMPORT' OR EXISTS (
                         SELECT 1 FROM allocation_requests r WHERE r.request_id=a.request_id
@@ -188,6 +197,14 @@ def update_slot(slot_id, status, vendor_id, *, actor, expected_updated_at, datab
                     (vendor_id, zone_id)).fetchone()
                 if not approved:
                     raise OperationalValidationError("Vendor needs a current approved allocation for the pilot zone")
+                existing_slot = db.execute(
+                    """SELECT zone_id, slot_id FROM pilot_slots
+                       WHERE assigned_vendor_id = ? AND is_deleted = 0
+                         AND NOT (zone_id = ? AND slot_id = ?)""",
+                    (vendor_id, zone_id, slot_id),
+                ).fetchone()
+                if existing_slot or (approved["slot_id"] and approved["slot_id"] != slot_id):
+                    raise OperationalConflictError("Vendor already has an active slot assignment")
                 db.execute(
                     "UPDATE allocations SET slot_id = ?, updated_at = ? WHERE allocation_id = ? AND status = 'ACTIVE'",
                     (slot_id, datetime.now(timezone.utc).isoformat(timespec="microseconds"), approved["allocation_id"]),

@@ -21,6 +21,11 @@ def allocation_request_response(
         in ALLOCATION_REQUEST_RESPONSE_FIELDS
     }
 
+    # request_kind is the forward-compatible workflow discriminator used by
+    # databases whose legacy request_type constraint predates slot changes.
+    if row.get("request_kind"):
+        response["request_type"] = row["request_kind"]
+
 
     profile = get_vendor_profile(
         row[

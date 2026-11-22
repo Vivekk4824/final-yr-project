@@ -1,0 +1,167 @@
+            Project Review - I Presentation On
+ VendorMap: A GIS-Enabled Data-Driven Decision
+Support System for Street Vendor Zoning, Allocation
+                and Management
+                           By
+              Roll No. 19 – Darshan Gavate
+                 Roll No. 49 – Vivek Patil
+               Roll No. 65 – Sneha Tingare
+               Roll No. 66 – Kalyani Ugale
+                          Guide
+                       Prof. R. M. Bora
+        Day and Date of Review: Wednesday 05/08/2026
+Problem Definition
+                                                          Current System :
+Street vendor management in many urban areas is
+largely manual, making vendor management, zoning, and
+allocation inefficient for municipal authorities. The
+existing system lacks a centralized and data-driven
+approach for vendor allocation, zoning, and monitoring.
+
+
+Key Challenges
+   Manual registration and license management.
+   Time-consuming search and record updates.
+   Manual vendor allocation within designated zones.
+   Lack of data-driven zoning and allocation
+   decisions.
+   Uneven vendor distribution, leading to traffic
+   congestion and poor space utilization.
+   Limited visibility of vendor distribution and zone
+   occupancy.
+Scope
+
+The project focuses on developing a GIS-Enabled AI-Assisted Street
+Vendor Zoning and Management System for urban areas. The system
+will:
+
+   Digital vendor registration and profile management.
+   Unique vendor licensing.
+   Vendor allocation within PMC-designated vending zones.
+   AI-based location suitability analysis.
+   GIS-based zoning and map visualization.
+   Vendor and zone monitoring dashboard.
+Objectives
+
+
+   Develop a web-based street vendor management platform.
+   Implement digital vendor registration and unique licensing.
+   Build a centralized GIS-enabled vendor and zoning database.
+   Develop a data-driven recommendation engine for vendor
+   allocation within designated vending zones.
+   Evaluate location suitability using spatial and urban factors such
+   as vendor density, road network, nearby facilities, accessibility, and
+   traffic conditions.
+   Visualize recommended allocations and zone occupancy through an
+   interactive GIS dashboard.
+   Provide a decision support system to assist municipal authorities
+   in vendor allocation and zoning decisions.
+Literature Review
+  Sr. No.           Author                   Paper            Year    What the Paper Proposes        Relation to Our Project
+
+
+                                   Zoning Management of
+                                   Urban Informal Vendor             Uses ML and spatial          Forms the basis for our GIS-
+    1       Heng Zhou et al.       Spaces Using Mobile        2025   analysis for vendor zoning   based zone recommendation
+                                   Signaling and Machine             and site selection.          engine.
+                                   Learning
+
+                                   Balancing Spatial Logic
+                                                                     Optimizes vending zones
+                                   and Governance                                                 Supports our data-driven
+    2       Yuchen Liu et al.                                 2025   using GeoAI and
+                                   Objectives for Street                                          vendor allocation approach.
+                                                                     optimization techniques.
+                                   Vending
+
+
+                                   Prioritizing Urban Green                                      Similar GIS methodology is
+                                                                     Uses GIS-based decision
+    3       Mihir Rambhia et al.   Spaces in Resource-        2024                               used for vendor zone
+                                                                     support for urban planning.
+                                   Constrained Scenarios                                         planning.
+
+
+                                   A Two-Phase Clustering                                         Helps identify suitable
+                                                                     Detects urban hotspots
+    4       Fei Li et al.          Approach for Urban         2021                                vendor locations based on
+                                                                     using spatial clustering.
+                                   Hotspot Detection                                              demand.
+Methodology
+Methodology
+Architecture
+Requirement Specification
+
+Functional Requirements                            Non-Functional Requirements
+
+ID    Requirement                                  ID     Requirement
+
+
+FR1   Vendor registration and profile management   NFR1   Secure authentication and authorization
+
+
+FR2   Document verification and approval           NFR2   User-friendly interface
+
+
+FR3   Digital license generation and renewal       NFR3   Fast response time
+
+
+FR4   GIS-based vendor and zone visualization      NFR4   Reliable and accurate recommendations
+
+      Recommendation engine for vendor
+FR5                                                NFR5   Scalable architecture
+      allocation
+
+FR6   Zone occupancy and capacity management       NFR6   Data privacy and integrity
+
+
+FR7   Dashboard and report generation              NFR7   System availability
+Requirement Specification
+
+Software Requirements                                                Data Requirements
+Component           Technology                  Data                           Source
+Frontend            React.js
+                                                Street Vendor Records          Pune Municipal Corporation (PMC)
+Backend             Node.js, Express.js
+
+Database            PostgreSQL + PostGIS        Designated Vending Zones       Pune Municipal Corporation (PMC)
+
+GIS & Maps          Leaflet.js, OpenStreetMap
+                                                Road Network                   OpenStreetMap (Geofabrik)
+Development Tools   VS Code, Git
+                                                Commercial POIs                OpenStreetMap
+
+Hardware Requirements                           Public Transport (Bus Stops,
+                                                                               OpenStreetMap
+                                                Stations)
+Component           Minimum Specification
+                                                Land Use / Land Cover          OpenStreetMap
+Processor           Intel i5 / Ryzen 5
+                                                Existing Vendor Locations      PMC Vendor Dataset
+RAM                 8 GB
+                                                Traffic Data                   TomTom Traffic API
+Storage             256 GB SSD
+
+Internet            Broadband Connection        Population Density             WorldPop / Meta HRSL
+Detailed Design
+
+
+1) Use Case Diagram
+2) Class Diagram
+3) Activity Diagram
+4) Sequence Diagram
+Class Diagram
+Activity
+Diagram
+Activity
+Diagram
+Activity
+Diagram
+Question & Answer
+
+
+
+
+                    23
+THANK YOU !!
+

@@ -13,4 +13,5 @@
 .vm-allocation-badge.is-active{background:var(--vm-allocation-background);color:var(--vm-green);border-color:var(--vm-allocation-border)}
 .vm-allocation-badge.is-unallocated{background:var(--vm-paper);color:var(--vm-muted)}
 .vm-vendor-row .vm-allocation-zone{margin-top:7px;padding-left:2px;color:var(--vm-green);font-size:13px}
+.vm-vendor-allocation>small{display:block;margin:4px 0 0 2px;color:var(--vm-muted);font-size:10px}
 @media(max-width:767px){.vm-vendor-row.has-allocation{padding-left:10px;padding-right:10px}.vm-vendor-allocation{min-width:0}.vm-allocation-badge{font-size:11px;padding:6px 8px}}

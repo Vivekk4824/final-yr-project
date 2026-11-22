@@ -1,15 +1,16 @@
 import {zoneName, officialZoneDivision, zoneMapLocation} from "../../shared/utils/displayLabels.js";
 import React, {useEffect, useMemo, useState} from "react";
 
-import {ChevronLeft, ChevronRight, ClipboardList, Eye, Search, Users, X} from "lucide-react";
+import {ChevronLeft, ChevronRight, ClipboardList, Eye, Search, X} from "lucide-react";
 
 import {STATUS_COLORS, pretty, display, when} from "./viewModel.js";
 import {PILOT_ZONE_IDS} from "../pilot-slots/pilotState.js";
 import {AdminZoneMap, divisionFeatures, spatialDivisionZones} from "./AdminZoneMap.jsx";
 import {StatusBadge, DataTable} from "./AdminPrimitives.jsx";
+import RequestSlotPreview from "./RequestSlotPreview.jsx";
 
-export function AdminHome({pending, allocationCounts, summaryCards, zoneCounts, setTab, setAllocationFilter, setZoneFilters}) {
-  return <section className="service-home"><div className="admin-section-heading"><div><span className="admin-eyebrow">TODAY’S WORK</span><h2>Welcome, officer</h2><p>Review vendor applications and manage designated zones.</p></div></div><article className="service-action"><span className="admin-eyebrow">PENDING REVIEW</span><h3>{pending.length} allocation requests</h3><p>{pending.length ? "Applications are waiting for your decision." : "You’re up to date. New applications will appear here."}</p><button className="admin-approve" onClick={() => setTab("requests")}>Open pending requests <ChevronRight size={15}/></button></article><div className="service-quick-actions"><button onClick={() => setTab("map")}>Explore zones <ChevronRight size={15}/></button><button onClick={() => {setAllocationFilter("ACTIVE"); setTab("allocations");}}>Active allocations · {allocationCounts.ACTIVE ?? "Not recorded"} <ChevronRight size={15}/></button><button onClick={() => {setZoneFilters(current => ({...current, live_status: "FULL"})); setTab("zones");}}>Full zones · {zoneCounts.FULL ?? "Not recorded"} <ChevronRight size={15}/></button></div><details className="service-disclosure"><summary>Operational totals and status counts</summary><p>Historical associations are not counted as occupancy.</p><div className="admin-summary-grid">{summaryCards.map(([label,value,Icon,tone]) => <article className={`admin-summary-card ${tone}`} key={label}><div><span>{label}</span><strong>{value ?? "Not recorded"}</strong></div><Icon size={20}/></article>)}</div></details></section>;
+export function AdminHome({pending, allocationCounts, summaryCards, zoneCounts, setTab, setZoneFilters}) {
+  return <section className="service-home"><div className="admin-section-heading"><div><span className="admin-eyebrow">TODAY’S WORK</span><h2>Welcome, officer</h2><p>Review vendor applications and manage designated zones.</p></div></div><article className="service-action"><span className="admin-eyebrow">PENDING REVIEW</span><h3>{pending.length} allocation requests</h3><p>{pending.length ? "Applications are waiting for your decision." : "You’re up to date. New applications will appear here."}</p><button className="admin-approve" onClick={() => setTab("requests")}>Open pending requests <ChevronRight size={15}/></button></article><div className="service-quick-actions"><button onClick={() => setTab("map")}>Explore zones <ChevronRight size={15}/></button><button onClick={() => setTab("vendors")}>Vendor directory · view allocations and history <ChevronRight size={15}/></button><button onClick={() => {setZoneFilters(current => ({...current, live_status: "FULL"})); setTab("zones");}}>Full zones · {zoneCounts.FULL ?? "Not recorded"} <ChevronRight size={15}/></button></div><details className="service-disclosure"><summary>Operational totals and status counts</summary><p>Historical associations are not counted as occupancy.</p><div className="admin-summary-grid">{summaryCards.map(([label,value,Icon,tone]) => <article className={`admin-summary-card ${tone}`} key={label}><div><span>{label}</span><strong>{value ?? "Not recorded"}</strong></div><Icon size={20}/></article>)}</div></details></section>;
 }
 
 export function PendingRequests({pending, zones, openRequest, setDialog}) {
@@ -34,7 +35,7 @@ export function PendingRequests({pending, zones, openRequest, setDialog}) {
             <td>{request.business_name || pretty(request.business_category)}</td>
             <td>{pretty(request.request_type)}</td>
             <td>{request.request_type === "RELOCATION" ? currentZoneId || "Not recorded" : "—"}</td>
-            <td>{zoneName(zone || request.zone_id)}</td>
+            <td>{zoneName(zone || request.zone_id)}<small className="admin-secondary-id">{request.slot_id ? `Slot ${request.slot_id}` : "Zone-only request"}</small></td>
             <td>{request.preferred_division || "Not recorded"}</td>
             <td>{when(request.created_at)}</td>
             <td><StatusBadge status={zone?.live_status}/></td>
@@ -50,7 +51,7 @@ export function PendingRequests({pending, zones, openRequest, setDialog}) {
   </section>;
 }
 
-export function RequestReviewModal({request, zones, onClose}) {
+export function RequestReviewModal({request, zones, onClose, onDecision}) {
   if (!request) return null;
   const targetZone = zones.find(zone => zone.zone_id === request.zone_id);
   const currentZoneId = request.current_zone_id;
@@ -68,6 +69,7 @@ export function RequestReviewModal({request, zones, onClose}) {
       fields: [
         ["Request ID", request.request_id],
         ["Type", pretty(request.request_type)],
+        ["Requested slot", request.slot_id || "Zone only — no slot selected"],
         ["Submitted", when(request.created_at)],
         ["Preferred division", request.preferred_division || "Not recorded"],
       ],
@@ -98,7 +100,8 @@ export function RequestReviewModal({request, zones, onClose}) {
           </div>
         </article>)}
       </div>
-      <div className="admin-request-modal-footer"><StatusBadge status={request.status}/><button className="vendor-secondary" type="button" onClick={onClose}>Close</button></div>
+      <RequestSlotPreview zoneId={request.zone_id} slotId={request.slot_id}/>
+      <div className="admin-request-modal-footer"><StatusBadge status={request.status}/><div><button className="vendor-secondary" type="button" onClick={onClose}>Close</button>{request.status === "PENDING" && <><button className="admin-reject" type="button" onClick={() => onDecision("reject",request)}>Reject</button><button className="admin-approve" type="button" onClick={() => onDecision("approve",request)}>Confirm and approve</button></>}</div></div>
     </section>
   </div>;
 }
@@ -139,51 +142,16 @@ export function ZoneManagement({filteredZones, zoneFilters, setZoneFilters, divi
   </section>;
 }
 
-export function AllocationRecords({filteredAllocations, allocationFilter, setAllocationFilter, setRequestDetail, zones, setSelectedZone, loading, loaded, error, onRetry, total, page, pageSize, onPageChange}) {
-  const firstRecord = total ? page * pageSize + 1 : 0;
-  const lastRecord = Math.min((page + 1) * pageSize, total);
-  return <section>
-    <div className="admin-section-heading">
-      <div><span className="admin-eyebrow">CONFIRMED RECORDS</span><h2>Allocations</h2></div>
-      <span className="admin-count">{loading || !loaded ? "Loading…" : `${firstRecord}–${lastRecord} of ${total} records`}</span>
-    </div>
-    <div className="admin-filters compact"><select value={allocationFilter} onChange={event => setAllocationFilter(event.target.value)}><option value="">All allocations</option><option>ACTIVE</option><option>RELEASED</option></select></div>
-    {loading
-      ? <div className="admin-empty" role="status"><Users size={28}/><h3>Loading allocations…</h3><p>Fetching allocated vendors and their zones.</p></div>
-      : error
-        ? <div className="admin-empty" role="alert"><Users size={28}/><h3>Allocations could not be loaded</h3><p>{error}</p><button className="row-detail" type="button" onClick={onRetry}>Retry</button></div>
-        : !loaded
-          ? <div className="admin-empty" role="status"><Users size={28}/><h3>Loading allocations…</h3><p>Fetching allocated vendors and their zones.</p></div>
-      : filteredAllocations.length === 0
-        ? <div className="admin-empty"><Users size={28}/><h3>No allocations found</h3><p>There are no allocation records for this filter.</p></div>
-        : <>
-          <DataTable><thead><tr><th>Allocation ID</th><th>Vendor</th><th>Zone</th><th>Status</th><th>Source</th><th>Allocated</th><th>Released</th><th>Approved by</th><th>Request</th><th>Links</th></tr></thead><tbody>{filteredAllocations.map(item => <tr key={item.allocation_id}>
-            <td><strong>{item.allocation_id}</strong></td>
-            <td><strong>{item.vendor_name || "Registered Vendor"}</strong><small className="admin-secondary-id">{item.vendor_type === "NEW" ? item.application_vendor_id || "Application ID pending" : item.vendor_id}</small></td>
-            <td>{zoneName(item)}</td>
-            <td><StatusBadge status={item.status}/></td>
-            <td>{item.allocation_source === "LEGACY_IMPORT" ? "Imported existing allocation" : "Admin-approved allocation"}</td>
-            <td>{when(item.allocated_at)}</td>
-            <td>{when(item.released_at)}</td>
-            <td>{item.allocation_source === "LEGACY_IMPORT" ? "Not individually approved" : item.approved_by || "Not recorded"}</td>
-            <td>{item.request_id || "Not applicable"}</td>
-            <td><div className="table-actions"><button onClick={() => setRequestDetail({vendor_id: item.vendor_id})}>Vendor</button><button onClick={() => setSelectedZone(zones.find(zone => zone.zone_id === item.zone_id))}>Zone</button></div></td>
-          </tr>)}</tbody></DataTable>
-          {total > pageSize && <nav className="allocation-pagination" aria-label="Allocation pages">
-            <button type="button" className="row-detail" disabled={page === 0 || loading} onClick={() => onPageChange(page - 1)}><ChevronLeft size={15}/>Previous</button>
-            <span>Page {page + 1} of {Math.ceil(total / pageSize)}</span>
-            <button type="button" className="row-detail" disabled={(page + 1) * pageSize >= total || loading} onClick={() => onPageChange(page + 1)}>Next<ChevronRight size={15}/></button>
-          </nav>}
-        </>}
-  </section>;
-}
-
-export function ZoneExplorer({zoneLoad, geometryError, onRetry, zones, zoneFilters, setZoneFilters, mapStatuses, setMapStatuses, geometry, setSelectedZone, division, setDivision, onPilot}) {
+export function ZoneExplorer({zoneLoad, geometryError, onRetry, zones, zoneFilters, setZoneFilters, mapStatuses, setMapStatuses, geometry, setSelectedZone, division, setDivision, onPilot, onContextualBackChange = () => {}}) {
   const [referenceEnabled, setReferenceEnabled] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [sheetExpanded, setSheetExpanded] = useState(false);
 
   useEffect(() => {setSelectedId(null); setSheetExpanded(false);}, [division]);
+  useEffect(() => {
+    onContextualBackChange(Boolean(division));
+    return () => onContextualBackChange(false);
+  }, [division, onContextualBackChange]);
   const divisionRecords = useMemo(() => spatialDivisionZones(zones, division, geometry, referenceEnabled), [zones, division, geometry, referenceEnabled]);
   const records = useMemo(() => divisionRecords.filter(zone => (!zoneFilters.q || `${zoneName(zone)} ${zone.zone_id} ${zone.official_description || ""}`.toLowerCase().includes(zoneFilters.q.toLowerCase()))
     && (!zoneFilters.zone_type || zone.zone_type === zoneFilters.zone_type)

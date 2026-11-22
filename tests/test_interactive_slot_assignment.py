@@ -139,6 +139,44 @@ class InteractiveSlotAssignmentTests(unittest.TestCase):
             after = connection.execute("SELECT current_vendor_count FROM zone_live_status WHERE zone_id='PAN_F_031'").fetchone()[0]
         self.assertEqual(after, before)
 
+    def test_same_zone_slot_change_preserves_allocation_and_occupancy(self):
+        first = self.create_slot()
+        second = self.create_slot(longitude=73.79484)
+        initial = db.create_allocation_request(
+            "V2024_00001", "PAN_F_031", "NEW_ALLOCATION", slot_id=first["slot_id"],
+            database_path=self.path,
+        )
+        approved = db.approve_allocation_request(
+            initial["request_id"], "test-admin", database_path=self.path,
+        )
+        allocation_id = approved["allocation"]["allocation_id"]
+        with closing(db.connect(self.path)) as connection:
+            before = connection.execute(
+                "SELECT current_vendor_count FROM zone_live_status WHERE zone_id='PAN_F_031'"
+            ).fetchone()[0]
+
+        change = db.create_allocation_request(
+            "V2024_00001", "PAN_F_031", "SLOT_CHANGE", slot_id=second["slot_id"],
+            database_path=self.path,
+        )
+        self.assertEqual(change["request_kind"], "SLOT_CHANGE")
+        result = db.approve_allocation_request(
+            change["request_id"], "test-admin", database_path=self.path,
+        )
+        layout = pilot_slots.get_layout(self.path, "PAN_F_031")
+        old_slot = next(item for item in layout["slots"] if item["slot_id"] == first["slot_id"])
+        new_slot = next(item for item in layout["slots"] if item["slot_id"] == second["slot_id"])
+        with closing(db.connect(self.path)) as connection:
+            after = connection.execute(
+                "SELECT current_vendor_count FROM zone_live_status WHERE zone_id='PAN_F_031'"
+            ).fetchone()[0]
+        self.assertEqual(result["allocation"]["allocation_id"], allocation_id)
+        self.assertEqual(result["allocation"]["slot_id"], second["slot_id"])
+        self.assertEqual(old_slot["status"], "AVAILABLE")
+        self.assertEqual(new_slot["status"], "OCCUPIED")
+        self.assertEqual(new_slot["assigned_vendor_id"], "V2024_00001")
+        self.assertEqual(after, before)
+
 
 if __name__ == "__main__":
     unittest.main()

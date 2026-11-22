@@ -1,0 +1,658 @@
+K. K. WAGH INSTITUTE OF ENGINEERING EDUCATION AND RESEARCH, NASHIK
+Department of Information Technology
+Project Final Examination Presentation On
+VendorMap
+
+GIS Decision Support for Vendors
+
+Zoning, Allocation and Management Presented By
+
+19 Darshan Gavate 65 Sneha Tingare
+
+48 Vivek Patil
+
+66 Kalyani Ugale
+
+Under the Guidance of
+
+Prof. R. M. Bora
+
+Academic Year 2026-27
+
+Project Team
+PROJECT FINAL EXAMINATION
+19 Darshan Gavate 48 Vivek Patil 65 Sneha Tingare 66 Kalyani Ugale
+Department of Information Technology | A.Y. 2026-27
+
+Project Guide Prof. R. M. Bora
+2
+
+Presentation Sequence
+PROJECT FINAL EXAMINATION
+- Problem, objectives and proposed solution - Roles, architecture, UML and data-flow models - Raw data, GeoPackages and GIS preparation - K-Means profiling and MCDA ranking - Real WhatsApp, vendor and officer workflows - Testing, COCOMO, deployment and conclusion
+
+Department of Information Technology | A.Y. 2026-27
+
+3
+
+Problem Definition
+PROJECT FINAL EXAMINATION
+- Municipal vendor records, zones and spatial evidence are fragmented. - Manual allocation is difficult to explain, audit and update. - Zone suitability depends on policy, capacity, access and livelihood factors. - Final decisions require both analytical evidence and officer control.
+
+Department of Information Technology | A.Y. 2026-27
+
+4
+
+Project Objectives
+PROJECT FINAL EXAMINATION
+- Prepare traceable NMC and OpenStreetMap spatial datasets. - Profile vending environments through unsupervised learning. - Rank eligible zones through explainable multi-criteria analysis. - Support vendor requests, officer review, capacity and audit workflows. - Provide multilingual web and WhatsApp access.
+
+Department of Information Technology | A.Y. 2026-27
+
+5
+
+Existing System and Proposed System
+
+PROJECT FINAL EXAMINATION
+
+Existing System
+
+Proposed System
+
+- Separate files and manual lists - Limited spatial evidence - No factor-level explanation - Manual follow-up
+
+- Unified operational workflow - GIS-based zone evidence - Explainable ranked options - Auditable allocation lifecycle
+
+Department of Information Technology | A.Y. 2026-27
+
+6
+
+Implemented Solution Story
+PROJECT FINAL EXAMINATION
+
+DATA
+NMC + OSM
+
+PROFILE
+K-Means
+
+RECOMM
+END
+MCDA
+
+ALLOCAT OffEicer
+approval
+
+Evidence remains advisory; municipal authority remains final.
+
+Department of Information Technology | A.Y. 2026-27
+
+7
+
+System Architecture - Report Evidence
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+8
+
+System Architecture - Layered View
+
+PROJECT FINAL EXAMINATION
+CLIENT CHANNELS
+
+Vendor PWA | Officer Dashboard | WhatsApp
+
+APPLICATION AND DOMAIN
+
+FastAPI | Authentication | MCDA | Allocation
+
+DATA AND PROVIDERS
+
+SQLite/PostgreSQL | GIS Assets | OSM/Meta
+
+Department of Information Technology | A.Y. 2026-27
+
+9
+
+Major Architecture Components
+
+PROJECT FINAL EXAMINATION
+
+Service Layer
+
+Data Layer
+
+- Session and role validation - Eligibility and MCDA - Requests and allocation - Capacity and audit
+
+- Operational repository - Versioned GIS features - K-Means model assets - External providers
+
+Department of Information Technology | A.Y. 2026-27
+
+10
+
+Operational Data Model
+PROJECT FINAL EXAMINATION
+Department of Information Technology | A.Y. 2026-27
+
+Context
+- Vendor requests connect to reviewed allocations. - Live zone status supports capacity checks. - Audit and slot records preserve administrative history.
+11
+
+Data Flow Diagrams
+PROJECT FINAL EXAMINATION
+
+Level 0: actors and system boundary
+Department of Information Technology | A.Y. 2026-27
+
+Level 1: identity, ranking and allocation processes
+12
+
+UML Use-Case Model
+PROJECT FINAL EXAMINATION
+Department of Information Technology | A.Y. 2026-27
+
+Context
+- Vendors manage profiles and requests. - Officers inspect evidence and decide. - Role separation limits each action to its owner.
+13
+
+Component Dependency Model
+PROJECT FINAL EXAMINATION
+Department of Information Technology | A.Y. 2026-27
+
+Context
+- React calls one credentialed API client. - FastAPI routes delegate to domain services. - Repositories control database transactions.
+14
+
+Recommendation Sequence Diagram
+PROJECT FINAL EXAMINATION
+Department of Information Technology | A.Y. 2026-27
+
+Context
+- The API loads evidence and live state. - MCDA returns scores and contributions. - Only the selected request reaches the database.
+15
+
+Allocation Activity Diagram
+PROJECT FINAL EXAMINATION
+Department of Information Technology | A.Y. 2026-27
+
+Context
+- Eligibility is checked before request creation. - The officer reviews the supporting evidence. - Capacity is checked again before commit.
+16
+
+Data Sources
+PROJECT FINAL EXAMINATION
+- NMC official zone records: type, division, capacity and description. - Historical vendor registry: 7,259 vendor records. - OpenStreetMap: roads, commercial places, transport and facilities. - Operational database: profiles, requests, allocations and slots.
+
+Department of Information Technology | A.Y. 2026-27
+
+17
+
+Data Before Processing - Municipal Sources
+PROJECT FINAL EXAMINATION
+
+Official NMC source table
+Department of Information Technology | A.Y. 2026-27
+
+Raw vendor registry extract
+18
+
+Prepared GeoPackage Dataset
+PROJECT FINAL EXAMINATION
+
+Cleaned, deduplicated and versioned GIS layers
+
+Department of Information Technology | A.Y. 2026-27
+
+19
+
+GIS Verification in QGIS
+PROJECT FINAL EXAMINATION
+
+Layer alignment, geometry and coverage were visually inspected.
+
+Department of Information Technology | A.Y. 2026-27
+
+20
+
+GeoPackage Layers and Parameters - I
+
+PROJECT FINAL EXAMINATION
+Layer
+
+Features
+
+roads_clean.gpkg
+
+13,988
+
+Geometry MultiLineString
+
+commercial_model_points.gpkg
+
+353
+
+Point
+
+landuse_clean.gpkg
+
+401
+
+MultiPolygon
+
+Department of Information Technology | A.Y. 2026-27
+
+21
+
+GeoPackage Layers and Parameters - II
+
+PROJECT FINAL EXAMINATION
+Layer / Parameter
+
+Value
+
+transport_deduplicated.gpkg
+
+61
+
+Type Point
+
+facilities_deduplicated.gpkg Analysis CRS
+
+373
+
+Point
+
+EPSG:3264 3
+
+Metric projection
+
+Department of Information Technology | A.Y. 2026-27
+
+22
+
+Data Processing Pipeline
+PROJECT FINAL EXAMINATION
+
+INGEST NMC + OSM
+
+CLEAN IDs + CRS
+
+VALIDAT QuEality audit
+
+FEATURE
+S 12 features
+
+SERVE API + maps
+
+Invalid geometry: 0 | Ready for feature engineering: Yes
+
+Department of Information Technology | A.Y. 2026-27
+
+23
+
+Data Transformation - Before and After
+PROJECT FINAL EXAMINATION
+
+Before: raw registry
+Department of Information Technology | A.Y. 2026-27
+
+After: structured analytical table
+24
+
+K-Means Environmental Profiling
+PROJECT FINAL EXAMINATION
+- Input: 258 usable zone references. - Features: 12 scaled environmental variables. - Model selection compared candidate K values. - Selected K = 2 with five-seed stability testing. - Purpose: descriptive typology, not suitability prediction.
+
+Department of Information Technology | A.Y. 2026-27
+
+25
+
+K-Means - Before and After
+PROJECT FINAL EXAMINATION
+
+Before clustering
+Department of Information Technology | A.Y. 2026-27
+
+After environmental profiling
+26
+
+K-Means Evaluation Parameters
+PROJECT FINAL EXAMINATION
+
+0.3406
+Silhouette
+
+1.4645
+Davies-Bouldin
+
+102.8891
+Calinski-Harabasz
+
+Cluster sizes: 83 and 175 | ARI across five seeds: 1.0000
+Interpretation: stable environmental groups, not accuracy.
+
+Department of Information Technology | A.Y. 2026-27
+
+27
+
+MCDA Recommendation Method
+PROJECT FINAL EXAMINATION
+Score(z) = SUM [ weight(i) x normalized factor(i,z) ]
+- Eligibility filters are applied before scoring. - Each factor contribution is shown to the user. - Missing values are handled without inventing evidence. - Officer approval is required before allocation.
+
+Department of Information Technology | A.Y. 2026-27
+
+28
+
+MCDA Parameters and Baseline Weights
+PROJECT FINAL EXAMINATION
+- Business compatibility - 25% - Commercial activity - 20% - Access - 20% - Facilities - 15% - Vendor preference - 10% - Historical evidence - 10%
+
+Department of Information Technology | A.Y. 2026-27
+
+29
+
+Ranking Eligibility Rules
+PROJECT FINAL EXAMINATION
+- Zone type must be FREE and analytically scoreable. - Live status and verified capacity must allow a request. - A selected division becomes a strict candidate filter. - The current zone is excluded during relocation. - Only eligible candidates enter MCDA ranking.
+
+Department of Information Technology | A.Y. 2026-27
+
+30
+
+Factor Scoring Parameters
+PROJECT FINAL EXAMINATION
+Counts use diminishing returns
+- Commercial POIs scale: 12 - Markets scale: 4 - Food POIs scale: 8 - Historical evidence scale: 50
+
+Distance and access transforms
+- Major-road distance scale: 400 m - Bus-access distance scale: 1,000 m - Pedestrian density scale: 5,000 - Closer distances receive higher scores
+
+Department of Information Technology | A.Y. 2026-27
+
+31
+
+Facility and Historical Parameters
+
+PROJECT FINAL EXAMINATION
+
+Facility count scales
+
+Historical evidence controls
+
+- Healthcare: 15 - Education: 6 - Public toilets: 3 - Parking: 4
+
+- Business-share shrinkage strength: 20 - Evidence-count saturation scale: 50 - Small samples move toward the citywide share - Historical evidence does not represent profit or footfall
+
+Department of Information Technology | A.Y. 2026-27
+
+32
+
+Vendor Preference Personalization
+PROJECT FINAL EXAMINATION
+
+40%
+Baseline policy
+
+60%
+Preference distribution
+
+3x
+Selected priority multiplier
+
+- A selected priority multiplies commercial, access or facilities by 3x. - Final weights blend 40% baseline with 60% preference distribution. - A fixed division removes preference from scoring and redistributes its weight.
+
+Department of Information Technology | A.Y. 2026-27
+
+33
+
+Preference-Adjusted Weight Example
+PROJECT FINAL EXAMINATION
+Balanced profile with market, transport and parking selected
+- Business compatibility - 18.4% - Commercial activity - 27.0% - Access - 27.0% - Facilities - 20.2% - Vendor preference - 0.0% after strict division filtering - Historical evidence - 7.4%
+
+Department of Information Technology | A.Y. 2026-27
+
+34
+
+Final Score and Rank Order
+PROJECT FINAL EXAMINATION
+Score = 100 x weighted available-factor sum / available weight
+- Each factor is normalized to a value from 0 to 1. - Missing factors are omitted and available weights are renormalized. - Factor contributions add to the final 0-100 score. - Candidates sort by score descending, then zone ID ascending. - The score supports comparison and is not a success probability.
+
+Department of Information Technology | A.Y. 2026-27
+
+35
+
+Recommendation Sensitivity
+PROJECT FINAL EXAMINATION
+
+224
+Weight scenarios
+
+100%
+Top-1 stability
+
+85.57%
+Mean top-3 retention
+
+Mean rank correlation: 0.9977
+The interface presents multiple candidates because lower ranks can change.
+
+Department of Information Technology | A.Y. 2026-27
+
+36
+
+End-to-End Recommendation Flow
+PROJECT FINAL EXAMINATION
+
+ACCESS Login + context
+
+RECOMMEND Filter + rank + explain
+
+APPROVE Request + capacity + audit
+
+Capacity, status and audit are verified again at approval.
+
+Department of Information Technology | A.Y. 2026-27
+
+37
+
+WhatsApp Channel - Menu and Current Allocation
+PROJECT FINAL EXAMINATION
+
+Main menu and active allocation
+Department of Information Technology | A.Y. 2026-27
+
+Interactive menu selection
+38
+
+WhatsApp Channel - Recommendations and Request
+PROJECT FINAL EXAMINATION
+
+Top 3 ranked zones
+Department of Information Technology | A.Y. 2026-27
+
+Relocation request submission
+39
+
+WhatsApp Channel - Language, WHY and MAP
+PROJECT FINAL EXAMINATION
+
+Language and profile preferences
+Department of Information Technology | A.Y. 2026-27
+
+Explanation and map reference
+40
+
+Website Access - Bilingual Vendor Login
+PROJECT FINAL EXAMINATION
+
+English interface
+Department of Information Technology | A.Y. 2026-27
+
+Marathi interface
+41
+
+Vendor Workflow 1 - Dashboard and Entry Point
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+42
+
+Vendor Workflow 2 - Preference Capture
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+43
+
+Vendor Workflow 3 - Ranked Zone Recommendations
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+44
+
+Vendor Workflow 4 - Explainable Match Scores
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+45
+
+Vendor Workflow 5 - Relocation Application
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+46
+
+Vendor Workflow 6 - Allocated Slot Tracking
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+47
+
+Officer Workflow 1 - Application Review
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+48
+
+Officer Workflow 2 - Vendor Directory
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+49
+
+Officer Workflow 3 - Spatial Slot Creation
+PROJECT FINAL EXAMINATION
+
+Department of Information Technology | A.Y. 2026-27
+
+50
+
+Testing and Verified Results
+PROJECT FINAL EXAMINATION
+
+97 / 97
+Focused backend tests
+
+64 / 64
+Frontend unit tests
+
+1,690
+Build modules
+
+- Role, capacity and relocation workflows verified. - PWA privacy and localization verified. - Pilot slot geometry passed computational checks.
+
+Department of Information Technology | A.Y. 2026-27
+
+51
+
+COCOMO II - Repository Size
+PROJECT FINAL EXAMINATION
+
+20.930
+Backend KSLOC
+
+5.899
+Scripts KSLOC
+
+4.664
+Frontend KSLOC
+
+Total maintained source size: 31.493 KSLOC
+Tests, generated files and dependencies are excluded.
+
+Department of Information Technology | A.Y. 2026-27
+
+52
+
+COCOMO II - Effort and Schedule
+PROJECT FINAL EXAMINATION
+
+177.37 PM
+Professional effort
+
+19.35 months
+Estimated schedule
+
+9.17 FTE
+Average team
+
+PM = 2.94 x 31.493^1.1153 x 1.287
+Planning estimate only; not recorded student expenditure.
+
+Department of Information Technology | A.Y. 2026-27
+
+53
+
+Deployment and Limitations
+PROJECT FINAL EXAMINATION
+Deployment
+- Vite production client - FastAPI service - SQLite / PostgreSQL - HTTPS and secrets
+
+Limitations
+- Reference points only - No verified outcome labels - Field survey required - Provider validation pending
+
+Department of Information Technology | A.Y. 2026-27
+
+54
+
+Future Scope and Conclusion
+PROJECT FINAL EXAMINATION
+Future Scope
+- Authoritative polygons - Field-verified capacity - Operational monitoring - Accessibility testing
+
+Conclusion
+- Traceable GIS evidence - Explainable ranking - Controlled allocation - Auditable workflow
+
+Department of Information Technology | A.Y. 2026-27
+
+55
+
+References
+PROJECT FINAL EXAMINATION
+- VendorMap Project Report and current codebase. - NMC municipal zone and vendor records. - OpenStreetMap GIS layers and prepared GeoPackages. - K-Means metrics and MCDA sensitivity artifacts. - Automated test suites and captured application screens.
+
+Department of Information Technology | A.Y. 2026-27
+
+56
+
+Questions and Discussion
+PROJECT FINAL EXAMINATION
+Thank You
+VendorMap - Project Final Examination
+
+Department of Information Technology | A.Y. 2026-27
+
+57
+
+

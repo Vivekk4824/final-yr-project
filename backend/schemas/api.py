@@ -163,6 +163,7 @@ class AllocationRequestCreate(
     request_type: Literal[
         "NEW_ALLOCATION",
         "RELOCATION",
+        "SLOT_CHANGE",
     ]
 
     business_category: (
@@ -198,6 +199,7 @@ class AllocationRequestResponse(
     request_type: Literal[
         "NEW_ALLOCATION",
         "RELOCATION",
+        "SLOT_CHANGE",
     ]
 
     status: Literal[

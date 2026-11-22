@@ -153,6 +153,42 @@ class PilotApiTests(unittest.TestCase):
         allocation = db.get_active_allocation_for_vendor("V_PILOT_1", self.path)
         self.assertEqual(allocation["slot_id"], "S001")
 
+    def test_eligible_vendor_options_exclude_existing_slot_assignments(self):
+        self.initialize()
+        self.approve("V_PILOT_1")
+        self.approve("V_PILOT_2")
+
+        before = self.client.get("/api/pilot/eligible-vendors?zone_id=NN_F_013")
+        self.assertEqual(before.status_code, 200, before.text)
+        self.assertEqual(
+            {vendor["vendor_id"] for vendor in before.json()["vendors"]},
+            {"V_PILOT_1", "V_PILOT_2"},
+        )
+
+        assigned = self.update(vendor="V_PILOT_1")
+        self.assertEqual(assigned.status_code, 200, assigned.text)
+        assigned_summary = self.client.get("/api/pilot/layout").json()["summary"]
+        self.assertEqual(assigned_summary["active_allocations"], 2)
+        self.assertEqual(assigned_summary["mapped_active_allocations"], 1)
+        self.assertEqual(assigned_summary["unmapped_active_allocations"], 1)
+        after = self.client.get("/api/pilot/eligible-vendors?zone_id=NN_F_013")
+        self.assertEqual(after.status_code, 200, after.text)
+        self.assertEqual(
+            {vendor["vendor_id"] for vendor in after.json()["vendors"]},
+            {"V_PILOT_2"},
+        )
+
+        released = self.update(status="AVAILABLE", timestamp=assigned.json()["updated_at"])
+        self.assertEqual(released.status_code, 200, released.text)
+        released_summary = self.client.get("/api/pilot/layout").json()["summary"]
+        self.assertEqual(released_summary["mapped_active_allocations"], 0)
+        self.assertEqual(released_summary["unmapped_active_allocations"], 2)
+        available_again = self.client.get("/api/pilot/eligible-vendors?zone_id=NN_F_013")
+        self.assertEqual(
+            {vendor["vendor_id"] for vendor in available_again.json()["vendors"]},
+            {"V_PILOT_1", "V_PILOT_2"},
+        )
+
     def test_wrong_zone_allocation_and_unapproved_active_allocation_rejected(self):
         self.initialize()
         self.approve(zone="NN_F_001")

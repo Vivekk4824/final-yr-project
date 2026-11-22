@@ -8,8 +8,9 @@ import logging
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse
+from starlette.concurrency import run_in_threadpool
 
 try:
     from ..app_config import ConfigurationError, WhatsAppSettings, get_whatsapp_settings
@@ -18,6 +19,7 @@ except ImportError:
     from app_config import ConfigurationError, WhatsAppSettings, get_whatsapp_settings
     from database import DATABASE_PATH
 
+from .cloud_api import WhatsAppDeliveryError
 from .cloud_api import (
     send_button_message, send_list_message, send_location_message, send_text_message,
 )
@@ -98,6 +100,100 @@ async def dispatch_bot_message(
         )
 
 
+def _sender_log_hint(sender: str) -> str:
+    digits = "".join(character for character in sender if character.isdigit())
+    return f"***{digits[-2:]}" if digits else "***"
+
+
+def _message_log_hint(message_id: str) -> str:
+    return hashlib.sha256(message_id.encode("utf-8")).hexdigest()[:12]
+
+
+def _log_delivery_failure(
+    sender: str,
+    message_id: str,
+    failure: WhatsAppDeliveryError,
+) -> None:
+    LOGGER.error(
+        "WhatsApp reply delivery failed sender=%s message_id_hash=%s http_status=%s "
+        "graph_error_code=%s graph_error_subcode=%s graph_error_type=%s fbtrace_id=%s",
+        _sender_log_hint(sender),
+        _message_log_hint(message_id),
+        failure.status_code,
+        failure.graph_error_code,
+        failure.graph_error_subcode,
+        failure.graph_error_type,
+        failure.fbtrace_id,
+    )
+
+
+async def _process_verified_messages(
+    messages: list[dict[str, str | None]],
+    settings: WhatsAppSettings,
+) -> None:
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            for incoming in messages:
+                sender = incoming["sender"]
+                message_id = incoming["message_id"]
+                try:
+                    if incoming["content"] is None:
+                        await run_in_threadpool(
+                            record_ignored_message,
+                            sender,
+                            message_id,
+                            database_path=DATABASE_PATH,
+                        )
+                        continue
+                    result = await run_in_threadpool(
+                        process_incoming_message,
+                        sender,
+                        incoming["content"],
+                        message_id,
+                        database_path=DATABASE_PATH,
+                    )
+                except ValueError:
+                    LOGGER.warning(
+                        "Ignored WhatsApp message with invalid sender metadata "
+                        "message_id_hash=%s",
+                        _message_log_hint(message_id),
+                    )
+                    continue
+                except Exception as exc:
+                    LOGGER.error(
+                        "WhatsApp message processing failed sender=%s message_id_hash=%s "
+                        "error_type=%s",
+                        _sender_log_hint(sender),
+                        _message_log_hint(message_id),
+                        type(exc).__name__,
+                    )
+                    continue
+                if result.duplicate:
+                    continue
+                for reply in result.replies:
+                    try:
+                        await dispatch_bot_message(
+                            sender, reply, settings=settings, client=client
+                        )
+                    except WhatsAppDeliveryError as exc:
+                        _log_delivery_failure(sender, message_id, exc)
+                        break
+                    except Exception as exc:
+                        LOGGER.error(
+                            "WhatsApp reply delivery failed sender=%s message_id_hash=%s "
+                            "error_type=%s",
+                            _sender_log_hint(sender),
+                            _message_log_hint(message_id),
+                            type(exc).__name__,
+                        )
+                        break
+    except Exception as exc:
+        LOGGER.error(
+            "WhatsApp webhook background processing failed error_type=%s",
+            type(exc).__name__,
+        )
+
+
 @router.get("/webhook", response_class=PlainTextResponse)
 def verify_webhook(
     mode: str = Query(default="", alias="hub.mode"),
@@ -114,7 +210,7 @@ def verify_webhook(
 
 
 @router.post("/webhook")
-async def receive_webhook(request: Request):
+async def receive_webhook(request: Request, background_tasks: BackgroundTasks):
     try:
         settings = get_whatsapp_settings()
     except ConfigurationError as exc:
@@ -131,30 +227,6 @@ async def receive_webhook(request: Request):
     if not isinstance(payload, dict):
         raise HTTPException(400, "Invalid webhook payload")
     messages = extract_messages(payload)
-    processed = 0
-    ignored = 0
-    async with httpx.AsyncClient(timeout=15.0) as client:
-        for incoming in messages:
-            try:
-                if incoming["content"] is None:
-                    if record_ignored_message(
-                        incoming["sender"], incoming["message_id"], database_path=DATABASE_PATH
-                    ):
-                        ignored += 1
-                    continue
-                result = process_incoming_message(
-                    incoming["sender"], incoming["content"], incoming["message_id"],
-                    database_path=DATABASE_PATH,
-                )
-            except ValueError:
-                LOGGER.warning("Ignored WhatsApp message with invalid sender metadata")
-                ignored += 1
-                continue
-            if result.duplicate:
-                continue
-            processed += 1
-            for reply in result.replies:
-                await dispatch_bot_message(
-                    incoming["sender"], reply, settings=settings, client=client
-                )
-    return {"status": "ok", "processed": processed, "ignored": ignored}
+    if messages:
+        background_tasks.add_task(_process_verified_messages, messages, settings)
+    return {"status": "ok", "accepted": len(messages)}

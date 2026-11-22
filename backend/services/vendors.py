@@ -1234,6 +1234,8 @@ def admin_vendor_details(vendor_id, database_path=DATABASE_PATH):
         account = connection.execute("SELECT COUNT(*) AS total, MAX(is_verified) AS verified FROM vendor_auth_identities WHERE vendor_id = ?", (vendor_id,)).fetchone()
         allocations = [dict(row) for row in connection.execute("SELECT * FROM allocations WHERE vendor_id = ? ORDER BY allocated_at DESC, allocation_id DESC", (vendor_id,))]
         requests = [dict(row) for row in connection.execute("SELECT * FROM allocation_requests WHERE vendor_id = ? ORDER BY created_at DESC, request_id DESC", (vendor_id,))]
+        for request in requests:
+            request["request_type"] = request.get("request_kind") or request["request_type"]
         active = next((row for row in allocations if row["status"] == "ACTIVE"), None)
         slot = connection.execute("SELECT zone_id, slot_id, status, width_m, depth_m FROM pilot_slots WHERE assigned_vendor_id = ? AND is_deleted = 0 AND geometry_crs = 'EPSG:4326'", (vendor_id,)).fetchone()
         assigned = dict(slot) if slot and active and slot["zone_id"] == active["zone_id"] else None
@@ -1268,7 +1270,7 @@ def vendor_account_information(vendor_id, database_path=DATABASE_PATH, mobile_la
         connection.execute("BEGIN")
         identities = [dict(row) for row in connection.execute("SELECT phone_hash, vendor_source, is_verified FROM vendor_auth_identities WHERE vendor_id = ?", (vendor_id,))]
         overlay = bool(connection.execute("SELECT 1 FROM operational_vendors WHERE vendor_id = ?", (vendor_id,)).fetchone())
-        requests = [dict(row) for row in connection.execute("SELECT request_id, zone_id, request_type, status, business_category, preferred_division, created_at, reviewed_at, rejection_reason FROM allocation_requests WHERE vendor_id = ? ORDER BY created_at DESC", (vendor_id,))]
+        requests = [dict(row) for row in connection.execute("SELECT request_id, zone_id, slot_id, COALESCE(request_kind, request_type) AS request_type, status, business_category, preferred_division, created_at, reviewed_at, rejection_reason FROM allocation_requests WHERE vendor_id = ? ORDER BY created_at DESC", (vendor_id,))]
         allocations = [dict(row) for row in connection.execute("SELECT allocation_id, zone_id, request_id, status, allocated_at, released_at, allocation_source FROM allocations WHERE vendor_id = ? ORDER BY allocated_at DESC", (vendor_id,))]
     finally:
         connection.close()
@@ -1353,8 +1355,8 @@ def vendor_activity(vendor_id, database_path=DATABASE_PATH):
         raise OperationalNotFoundError("Vendor profile not found")
     connection = connect(database_path)
     try:
-        requests = [dict(row) for row in connection.execute("SELECT request_id, zone_id, request_type, status, created_at, reviewed_at, updated_at, rejection_reason FROM allocation_requests WHERE vendor_id = ?", (vendor_id,))]
-        allocations = [dict(row) for row in connection.execute("SELECT a.*, r.request_type FROM allocations a LEFT JOIN allocation_requests r ON r.request_id = a.request_id WHERE a.vendor_id = ?", (vendor_id,))]
+        requests = [dict(row) for row in connection.execute("SELECT request_id, zone_id, slot_id, COALESCE(request_kind, request_type) AS request_type, status, created_at, reviewed_at, updated_at, rejection_reason FROM allocation_requests WHERE vendor_id = ?", (vendor_id,))]
+        allocations = [dict(row) for row in connection.execute("SELECT a.*, COALESCE(r.request_kind, r.request_type) AS request_type FROM allocations a LEFT JOIN allocation_requests r ON r.request_id = a.request_id WHERE a.vendor_id = ?", (vendor_id,))]
         # Event payloads remain JSON text for schema compatibility. Filtering
         # in Python avoids SQLite json_extract/PostgreSQL JSON operator drift.
         slot_events = [

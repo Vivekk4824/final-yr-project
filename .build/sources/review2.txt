@@ -1,0 +1,356 @@
+         Project Review - III Presentation On
+VendorMap: A GIS-Enabled Data-Driven Decision
+Support System for Street Vendor Zoning,
+Allocation and Management
+
+                         By
+             Roll No. 19 – Darshan Gavate
+                Roll No. 48 – Vivek Patil
+              Roll No. 65 – Sneha Tingare
+               Roll No. 66 –Kalyani Ugale
+                        Guide
+                   Prof. R. M. Bora
+    Day and DateofReview: Friday 16/10/2026
+PROBLEM                                          PROJECT SCOPE
+                                                  Develop a data-driven vendor zoning and
+ Vendors often lack data-driven guidance
+ on where their business would be most            recommendation system for designated vending zones.
+ suitable within designated vending zones.        Analyze factors such as vendor type, location, demand,
+ During large events like Nashik Kumbh,           accessibility, and surrounding facilities.
+ uneven vendor distribution can lead to           Provide recommendations for suitable zones/locations
+ overcrowding in some areas and poor              for different types of vendors.
+ business opportunities in others.
+                                                  Demonstrate the system using Nashik/Kumbh-related
+                                                  vendor zoning data.
+
+PROPOSED SOLUTION                                KEY OBJECTIVES
+                                                   Analyze vendor and zoning data to identify location
+ Collect and integrate vendor, zone, location,     patterns.
+ and contextual data.                              Evaluate the suitability of zones for different
+ Process the data using geospatial analysis        business/vendor categories.
+ and recommendation techniques.                    Recommend optimal zones based on multiple location
+ Generate a suitability score for different        factors.
+ vendor types across designated zones.             Visualize recommendations through maps and an
+ Display the results through an interactive        interactive dashboard.
+                                                   Support better vendor distribution and data-driven
+ dashboard/map to support better vendor
+                                                   planning during high-footfall events.
+ placement decisions.
+What the review evaluates
+
+
+     Modular Testing
+     Module-level cases, expected vs actual outputs, evidence of executed checks.
+
+
+
+
+     Results • Conclusion • Future Scope
+     Dataset coverage, corrected GIS, clustering, personalized ranking, working workflows and limitations.
+
+
+
+
+     Cost Analysis
+     Prototype development resources and a realistic deployment budget scenario.
+From location uncertainty to informed allocation
+A municipal decision-support workflow with explainable recommendations
+
+
+
+
+     Identify                            Understand                            Recommend                    Allocate
+Official NMC zone                Mapped locations and                    Eligible FREE zones ranked       Admin approval, slot
+descriptions, capacity and       250m/500m OSM                           for a vendor’s priorities        assignment and audit trail
+status                           surroundings
+
+
+
+
+  What the model estimates             Relative zone suitability — NOT sales, measured footfall, or municipal permit approval.
+Final system architecture
+
+
+   DATA SOURCES
+                  NMC 308-zone registry       7,259 historical vendor records   OSM roads / POIs / land use   Manual 142-point GIS layer
+
+
+
+                                                                   ↓
+   ANALYTICS
+
+                  Cleaning + geo references          62 GIS features                                            6-factor MCDA ranking
+                                                                                  K-Means K=2 profiling
+
+                                                                   ↓
+   BACKEND
+                   FastAPI + authorization         SQLite / PostgreSQL           Capacity / applications           Slots + audit history
+Actual project data coverage
+How we test each module
+For every case: input → expected output → actual observation → status
+Experimental Setup
+Datasets Used
+308 official NMC vending zones
+7,259 vendor records
+OpenStreetMap GIS data for roads,
+commercial POIs, transport,
+facilities and land use
+GIS-ready Zones: 258 usable
+analytical zone references
+Feature Set: 12 selected
+GIS/environmental features used for
+clustering
+Recommendation Output: Top 3
+suitable zones for a selected
+business type and division
+ Performance Parameters
+
+      Parameter                        Purpose
+                                                                K-Means Experiments
+   Silhouette Score          Measures cluster separation
+                                                                • K tested: 2 to 8
+ Adjusted Rand Index      Measures stability across different
+                                                                • Multiple random seeds tested
+        (ARI)                      random seeds
+                                                                • Selected baseline: K = 2
+                          Measures cluster compactness and      • Silhouette Score: 0.3159
+ Davies-Bouldin Index
+                                     separation                 • Stability ARI: 1.0000
+                              Measures between-cluster          • Cluster sizes: 83 and 175 zones
+Calinski-Harabasz Score
+                                    separation
+
+                           Measures distance of zones from
+        Inertia
+                                  cluster centers
+           Efficiency Issues & Solutions
+Efficiency / Data Issue                      Handling
+
+Repeated GIS computation is expensive        GIS features are precomputed and stored
+
+                                             Missing geometry is kept unresolved instead
+50 zones have unresolved geometry
+                                             of guessing
+                                             Duplicate geometry audit using Shapely and
+Multiple zones share analytical references
+                                             IoU
+                                             OSM values treated as mapped evidence, not
+OSM coverage can be incomplete
+                                             absolute truth
+                                             Log transformation + clipping +
+Features have different numerical scales
+                                             StandardScaler
+
+K-Means can vary with initialization         Multiple random seeds + ARI stability check
+
+No true suitability labels yet               Independent expert-review system created
+
+Large vendor-zone combinations               Candidate filtering before ranking
+Technology Stack
+Domain              Technology                      Purpose
+
+Programming         Python                          Data processing & ML
+
+Backend / API       FastAPI                         Recommendation API
+
+Zone Profiling      K-Means                         Environmental zone clustering
+
+Recommendation      MCDA                            Multi-factor zone ranking
+
+GIS Processing      GeoPandas + Shapely             Spatial analysis & zoning
+
+Frontend            React + Vite                    Interactive web dashboard
+
+Maps                Leaflet                         Zone visualization
+
+Data / ML           Pandas + NumPy + Scikit-learn   Data & model processing
+
+Database/ Storage   CSV +GeoPackage                 Zone , Vendor & GIs data
+
+Explainability      Factor-based explanations       Transparent recommendations
+
+Validation          Streamlit                       Expert review & feedback
+Data Preprocessing Pipeline                 Zone Recommendation (MCDA)
+  Missing Values:Handles unavailable          Suitability Score: Combines business
+  GIS/zone attributes without fabricating     compatibility, commercial activity,
+  values.                                     accessibility, facilities, historical evidence,
+  Feature Engineering: Calculates             and other factors.
+  road access, commercial activity,           Ranking: Produces a ranked list of the
+  transport access, facilities, and other     most suitable zones for the selected
+  zone-level features.                        vendor/business type.
+  Spatial Processing: Uses GeoPandas          Explainability: Shows the individual factor
+  & Shapely to extract and aggregate          contributions behind each recommendation.
+  geographic features around each zone.
+
+
+Zone Profiling (K-Means)                    Safety & Validation Guardrails
+  Zone Clustering: Groups zones based
+                                              Official Zones: Recommendations are
+  on environmental and accessibility
+                                              restricted to the municipal zone registry.
+  characteristics.
+                                              Evidence Check: Clearly distinguishes
+  Cluster Evaluation: Uses Silhouette
+                                              available evidence from unavailable/missing
+  Score and ARI to evaluate clustering
+                                              data.
+  quality.
+MCDA Factor Contribution                  Evidence-Based Explanation
+
+   Foundation: Weighted multi-               Mechanism: Uses available GIS
+   criteria decision analysis.               and historical vendor evidence to
+   Mechanism: Calculates each                support each recommendation.
+   zone's score from weighted                Output: Displays why a zone
+   suitability factors.                      ranked higher and the evidence
+   Output: Shows the                         behind each factor.
+   positive/negative contribution of         Strength: Easy for
+   factors such as business fit,             municipal/expert reviewers to
+   commercial activity, accessibility,       understand and validate.
+   facilities, and historical evidence.
+   Strength: Fully deterministic and
+   transparent — the same inputs
+   produce the same score and
+   explanation.
+                              Implementation Status
+Module                              Implemented Components                             Status
+
+                                    Cleaned and standardized NMC zone/vendor data,
+Data Preprocessing & Zone Mapping   geocoded locations, and mapped vendors to          100%
+                                    candidate zones.
+
+                                    Generated commercial, transport, road, facility,
+GIS Feature Engineering                                                                100%
+                                    division, and historical vendor features.
+
+                                  Implemented candidate filtering, weighted MCDA
+Explainable Recommendation Engine                                                      100%
+                                  scoring, Top-3 ranking, and factor explanations.
+
+                                    Built FastAPI endpoints and React UI for
+Recommendation API & Frontend                                                          90%
+                                    recommendations, map view, and score breakdown.
+
+                                    Implemented English/Marathi/Hindi flow, Top-3
+Multilingual WhatsApp Assistant                                                        90%
+                                    results, explanations, and map reference.
+
+                                    Dashboard analytics, live vacancy, verified
+Municipal Dashboard & Live
+                                    boundaries, and approval workflow are under        50%
+Allocation
+                                    development.
+NMC Zone Data Preparation & Geocoding
+
+
+
+
+                                        Methods: extraction,
+                                        translation,
+                                        standardization, zone ID
+                                        creation,
+                                        geocoding/reference
+                                        mapping
+                                        Tools:
+                                        OCR/Excel/Python/Panda
+                                        s + GIS tools
+Vendor Data Preparation
+
+
+
+
+                          Methods: extraction,
+                          translation,
+                          standardization, zone ID
+                          creation,
+                          geocoding/reference
+                          mapping
+                          Tools:
+                          OCR/Excel/Python/Panda
+                          s + GIS tools
+OpenStreetMap Data Collection & Cleaning
+
+                                      Technologies
+                                         OpenStreetMap
+                                         BBBike OSM Extract
+                                         GIS / Spatial Data
+                                         Processing
+                                         Python
+
+                                      Tools / Libraries
+                                         GeoPandas — reading,
+                                         filtering and processing
+                                         spatial layers
+                                         Shapely — geometry
+                                         operations
+                                         Pandas — attribute
+                                         cleaning and
+                                         classification
+                                         GeoJSON / GeoPackage
+                                         — storing cleaned GIS
+                                         outputs
+                                         QGIS — visualization and
+                                         verification of layers
+GIS Feature Engineering & K-Means
+     Environmental Profiling
+Future Scope
+1. Real-Time Municipal Integration
+    Integrate NMC data for live zone capacity, availability and vendor status.
+    Automatically update recommendations as conditions change.
+2. Advanced Recommendation Model
+    Use expert-validated suitability labels to develop supervised ML models.
+    Improve recommendation accuracy through continuous feedback.
+3. WhatsApp-Based Vendor Assistance
+    Provide zone recommendations and zone information through WhatsApp.
+    Enable easier access through multilingual interaction.
+4. What-If GIS Analysis
+    Allow users to modify factors such as accessibility, capacity and commercial activity.
+    Instantly observe their impact on zone recommendations.
+Question & Answer
+                                           OSM / GIS
+Municipal / zone data                  environmental data
+zone_id
+zone name                              commercial activity
+division                               transport accessibility
+reference coordinates                  major-road access
+geometry/reference location            public facilities
+official capacity                      relevant nearby land use
+zone status
+                PDF
+                  ↓
+       extract vendor records
+                  ↓
+  clean business names/categories
+                  ↓
+                CSV
+                  ↓
+ associate vendor/locality with zone
+                  ↓
+      processed vendor registry
+                  ↓
+     SQLite / analytical datasets
+Suitability = Business × W1      Factor       Baseline weight   Meaning
+
+             + Commercial × W2                                  compatibility between
+                                 Business          25%          vendor type and location
+             + Access × W3                                      context/historical evidence
+
+             + Facilities × W4   Commercial        20%
+                                                                surrounding commercial
+                                                                environment
+             + Preference × W5                                  road and transport
+                                 Access            20%
+             + Historical × W6                                  accessibility
+
+                                                                nearby supporting public
+                                 Facilities        15%
+                                                                facilities
+
+                                                                whether the zone satisfies
+                                 Preference        10%
+                                                                vendor location preference
+
+                                                                strength of historical
+                                 Historical        10%
+                                                                vendor evidence
+THANK YOU !!
+

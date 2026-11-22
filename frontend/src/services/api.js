@@ -155,6 +155,20 @@ export const getAdminVendors = (filters = {}, signal) => {
   return apiRequest(`/api/admin/vendors?${params}`, {signal});
 };
 
+export const getAdminVendorHeatmap = (filters = {}, signal) => {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => value && params.set(key, value));
+  const query = params.toString();
+  return apiRequest(`/api/admin/vendor-heatmap${query ? `?${query}` : ""}`, {signal});
+};
+
+export const getVendorLocationInsights = (zoneIds = [], signal) => {
+  const params = new URLSearchParams();
+  zoneIds.forEach(zoneId => params.append("zone_id", zoneId));
+  const query = params.toString();
+  return apiRequest(`/api/vendors/me/location-insights${query ? `?${query}` : ""}`, {signal});
+};
+
 export const getAdminVendorDetails = (vendorId, signal) => apiRequest(`/api/admin/vendors/${encodeURIComponent(vendorId)}/details`, {signal});
 export const getVendorRelocationRecommendations = (vendorId, includeAll = false) =>
   apiRequest(`/api/admin/vendors/${encodeURIComponent(vendorId)}/relocation-recommendations?include_all=${includeAll}`);

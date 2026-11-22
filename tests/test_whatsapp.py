@@ -122,7 +122,7 @@ class WhatsAppBotTests(unittest.TestCase):
         with patch.object(webhook, "dispatch_bot_message", new=AsyncMock()) as dispatch:
             response = self.client.post("/api/whatsapp/webhook", content=body, headers=headers)
         self.assertEqual(response.status_code, 200, response.text)
-        self.assertEqual(response.json()["processed"], 1)
+        self.assertEqual(response.json()["accepted"], 1)
         self.assertGreaterEqual(dispatch.await_count, 1)
         bad = self.client.post(
             "/api/whatsapp/webhook", content=body,
@@ -293,10 +293,10 @@ class WhatsAppBotTests(unittest.TestCase):
         }
         body, headers = self.signed_payload(status_payload)
         response = self.client.post("/api/whatsapp/webhook", content=body, headers=headers)
-        self.assertEqual(response.json(), {"status": "ok", "processed": 0, "ignored": 0})
+        self.assertEqual(response.json(), {"status": "ok", "accepted": 0})
         body, headers = self.signed_payload(self.inbound_payload("image"))
         response = self.client.post("/api/whatsapp/webhook", content=body, headers=headers)
-        self.assertEqual(response.json()["ignored"], 1)
+        self.assertEqual(response.json()["accepted"], 1)
 
     def test_cloud_api_posts_direct_meta_payload(self):
         from backend.app_config import get_whatsapp_settings
@@ -315,6 +315,75 @@ class WhatsAppBotTests(unittest.TestCase):
         self.assertEqual(url, "https://graph.facebook.com/v23.0/123456789/messages")
         self.assertEqual(headers["Authorization"], "Bearer test-meta-token")
         self.assertEqual(payload["messaging_product"], "whatsapp")
+
+    def test_graph_errors_expose_safe_metadata_without_response_body(self):
+        from backend.app_config import get_whatsapp_settings
+
+        settings = get_whatsapp_settings()
+        response = Mock(status_code=401)
+        response.json.return_value = {"error": {
+            "message": "Access token rejected: test-meta-token",
+            "type": "OAuthException",
+            "code": 190,
+            "error_subcode": 123,
+            "fbtrace_id": "safe-trace-id",
+        }}
+        client = AsyncMock(spec=httpx.AsyncClient)
+        client.post.return_value = response
+
+        with self.assertRaises(cloud_api.WhatsAppDeliveryError) as raised:
+            asyncio.run(cloud_api.send_text_message(
+                "919876543210", "Hello", settings=settings, client=client
+            ))
+
+        self.assertEqual(raised.exception.status_code, 401)
+        self.assertEqual(raised.exception.graph_error_code, 190)
+        self.assertEqual(raised.exception.graph_error_subcode, 123)
+        self.assertEqual(raised.exception.graph_error_type, "OAuthException")
+        self.assertEqual(raised.exception.fbtrace_id, "safe-trace-id")
+        self.assertNotIn("test-meta-token", str(raised.exception))
+        self.assertNotIn("Access token rejected", str(raised.exception))
+
+    def test_webhook_acks_delivery_failure_and_does_not_repeat_send(self):
+        self.create_vendor()
+        body, headers = self.signed_payload(self.inbound_payload())
+        delivery_failure = cloud_api.WhatsAppDeliveryError(
+            "Meta delivery failed",
+            status_code=401,
+            graph_error_code=190,
+            graph_error_type="OAuthException",
+            fbtrace_id="safe-trace-id",
+        )
+
+        with TestClient(api.app, raise_server_exceptions=False) as webhook_client:
+            with patch.object(
+                webhook, "dispatch_bot_message", new=AsyncMock(side_effect=delivery_failure)
+            ) as dispatch:
+                with self.assertLogs(webhook.LOGGER, level="ERROR") as captured:
+                    first = webhook_client.post(
+                        "/api/whatsapp/webhook", content=body, headers=headers
+                    )
+                    duplicate = webhook_client.post(
+                        "/api/whatsapp/webhook", content=body, headers=headers
+                    )
+
+        self.assertEqual(first.status_code, 200, first.text)
+        self.assertEqual(duplicate.status_code, 200, duplicate.text)
+        self.assertEqual(dispatch.await_count, 1)
+        logs = "\n".join(record.getMessage() for record in captured.records)
+        self.assertIn("WhatsApp reply delivery failed", logs)
+        self.assertIn("graph_error_code=190", logs)
+        self.assertIn("safe-trace-id", logs)
+        self.assertNotIn("test-meta-token", logs)
+        self.assertNotIn("test-app-secret", logs)
+        self.assertNotIn("Access token rejected", logs)
+
+    def test_whatsapp_settings_reject_non_numeric_phone_number_id(self):
+        from backend.core.config import ConfigurationError, get_whatsapp_settings
+
+        with patch.dict(os.environ, {"WHATSAPP_PHONE_NUMBER_ID": "not-a-phone-number-id"}):
+            with self.assertRaisesRegex(ConfigurationError, "must be numeric"):
+                get_whatsapp_settings()
 
 
 if __name__ == "__main__":

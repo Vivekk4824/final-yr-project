@@ -1,0 +1,507 @@
+        Project Review – III Presentation On
+
+                  VendorMap
+A GIS-Enabled Data-Driven Decision Support System
+      for Street Vendor Zoning, Allocation and
+                    Management
+                     Presented By
+              Roll No. 19 – Darshan Gavate
+                Roll No. 48 – Vivek Patil
+               Roll No. 65 – Sneha Tingare
+               Roll No. 66 – Kalyani Ugale
+                 Guide: Prof. R. M. Bora
+             Review Date: Friday, 16 October 2026
+ PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+System Architecture — Brief Recap
+   Collect and integrate vendor, zone,
+   location, and contextual data.
+   Process the data using geospatial analysis
+   and recommendation techniques.
+   Generate a suitability score for different
+   vendor types across designated zones.
+   Display the results through an interactive
+   dashboard/map to support better vendor
+   placement decisions.
+
+
+
+
+                                                02
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+                                         Modular Testing
+
+
+
+
+                                                           02
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Modular Testing Workflow
+     Demonstrate that each implemented subsystem works independently.
+
+     Verify security, MCDA constraints, capacity and transaction integrity.
+
+
+
+
+                                                                              02
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+             Actual Test Outcomes — Updated
+             Existing suites: 189 passed, 3 failed, 0 setup errors. Additional checks: 6 passed.
+
+             Test cases
+              160
+                                               145 tests
+               140                                                                                                Passed
+
+               120                                                                                                Failed
+
+               100
+
+
+                80
+                                                                                                                  3 remaining
+                                                                                                                    failures
+                                                                                                                WhatsApp webhook
+                60                                                                                                  tests only
+                                                                             47 tests
+                40
+
+
+                20                                142                          47
+                                                                                                    6 tests
+                  0
+                                               Backend                      Frontend               Additional
+                                              (existing)                    (existing)              checks
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                               09
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Module A: Authentication, Database & MCDA Testing
+
+Module                                                                 Test Scenario                           Expected Result
+
+Database                                                               Initialize database repeatedly          No duplicate zone records
+
+Database                                                               Enter invalid capacity                  Database rejects invalid value
+
+Authentication                                                         Submit expired OTP                      Login denied
+
+Authentication                                                         Vendor accesses admin API               Access denied
+
+Authentication                                                         Use expired session                     HTTP 401
+
+MCDA                                                                   Select preferred Nashik East division   Only Nashik East zones returned
+
+MCDA                                                                   Zone is FULL or CLOSED                  Zone excluded
+
+MCDA                                                                   Less than 3 eligible zones              Only available zones returned
+
+MCDA                                                                   Change priority weights                 Factor contributions updated
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                                             09
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Module A: Authentication, Database & MCDA Testing
+
+
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research   09
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Module B: Allocation, Capacity & Pilot Slot Testing
+Module                                                                 Test Scenario                      Expected Result
+
+Allocation                                                             Submit duplicate pending request   Duplicate prevented
+
+Allocation                                                             Approve valid vendor request       Allocation and audit record created
+
+Capacity                                                               Two admins approve final slot      Only one approval succeeds
+
+Capacity                                                               Last available slot allocated      Zone becomes FULL
+
+Relocation                                                             Move vendor to another zone        Old capacity released; new occupied
+
+Pilot Slots                                                            Generate 10 numbered slots         Valid, non-overlapping polygons
+
+Pilot Slots                                                            Two vendors select same slot       Double-booking prevented
+
+Pilot Slots                                                            Assign vendor without approval     Assignment rejected
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                                            09
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Module B: Allocation, Capacity & Pilot Slot Testing
+
+
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research   09
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Module C: GIS, Dashboard & Integration Testing
+Module                                                                 Test Scenario                           Expected Result
+
+GIS                                                                    Three zones share same coordinate       One marker, three independent zones
+
+GIS                                                                    Recommendation geometry missing         Recommendation card remains visible
+
+Dashboard                                                              Vendor accesses another vendor's data   Unauthorized access prevented
+
+Dashboard                                                              Admin changes zone status               Audit entry recorded
+
+Historical Data                                                        Ambiguous historical association        Held for manual review
+
+AI Explanation                                                         Gemini API unavailable                  Rule-based explanation returned
+
+AI Explanation                                                         AI attempts to alter MCDA score         Original score preserved
+
+WhatsApp                                                               Duplicate incoming message              No duplicate request
+
+Frontend                                                               Switch between 3 languages              Correct translations displayed
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                                                 09
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+                                         Results,
+                                         Conclusion &
+                                         Future Scope
+
+
+
+                                                        02
+PROJECT REVIEW – III | TEST CASE EVIDENCE
+
+
+
+
+System Implementation & Functional Results
+   • VendorMap integrates GIS-based recommendations, vendor registration, allocation management and administrative
+   monitoring.
+
+      Evidence                                                         Measured outcome                      Interpretation
+
+
+      Existing backend tests                                           142 passed / 3 failed / 0 errors      Only WhatsApp webhook tests remain failing
+
+
+      All frontend source tests                                        47 passed / 0 failed / 0 skipped      UI-state and display assertions now pass
+
+
+      Additional API / policy checks                                   6 passed / 0 failed                   Focused vendor, allocation and policy paths verified
+
+
+      Existing browser smoke                                           1 passed (reported)                   Previously failing browser check resolved
+
+
+      Frontend production build                                        PASS; last recorded: 19.264 s         Successful production compilation
+
+
+      MCDA demo output                                                 Top 3; 146 scoreable; 20 unscorable   Calculated with active v2 data and demo occupancy
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                                                                15
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+MCDA Scoring & Comparative Analysis
+     The recommendation system evaluates candidate zones through six weighted suitability factors. The
+     final MCDA score is calculated as:
+
+
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                     30
+ PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+GIS & Pilot Slot Results
+
+
+
+
+   A. GIS Zone Visualization                                           B. Pilot 2D Slot Visualization
+   Interactive mapping of recommended zones, preserving                Numbered slot polygons with availability, occupancy and
+   independent zone identities even when coordinates are               assignment states, supporting spatial inspection and controlled
+   shared.                                                             allocation.
+                                                                                                                                 33
+VendorMap • K. K. Wagh Institute of Engineering Education & Research
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+End-to-End Allocation Workflow
+
+
+
+
+                                         02
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+End-to-End Allocation Workflow
+
+
+
+
+                                         02
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research   30
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+ Validated Capabilities and Current Limitations
+
+
+
+
+   VendorMap demonstrates a tested decision-support workflow; real-world municipal allocation still
+   requires verified field data and officer authorization.
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                  30
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+                                         Cost Evaluation
+
+
+
+
+                                                           02
+PROJECT REVIEW – III | COCOMO II COST ANALYSIS
+
+
+
+
+COCOMO II — Repository-Based Software Size
+Post-Architecture estimation uses effective maintained source size, not tests or dependencies.
+
+
+     EFFECTIVE SOFTWARE SIZE                                                  Maintained logical source by area
+
+
+     27.802                                          KSLOC                    Backend
+
+
+                                                                              Scripts / data & models
+                                                                                                                                                    20,483
+
+
+                                                                                                                                                     5,475
+
+      27,802                   logical source lines
+                                                                              Frontend                                                              1,319
+      − 177 verified retained baseline lines
+
+                                                                              App + research                                                          281
+      42,062 physical LOC • 157 source files
+
+
+
+   Tests: 5,673 physical LOC excluded                                  Dependencies/build output excluded        Repository snapshot: 16 Oct 2026
+
+
+ The scope includes maintained GIS, training, model and evaluation utilities, not only deployed API/UI source.
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                                                         23
+PROJECT REVIEW – III | COCOMO II COST ANALYSIS
+
+
+
+
+COCOMO II — Effort and Schedule Estimation
+Model constants, scale factors and cost drivers convert source size into estimated professional effort.
+
+      EFFORT MODEL                                                                                     Scale exponent E
+
+
+      PM = 2.94 × 33.381^1.1153 × 1.2870                                                               1.1153
+      189.27 person-months                                                                             Effort factor EAF
+
+                                                                                                       1.2870
+      SCHEDULE MODEL
+
+      TDEV = 3.67 × 189.27^0.32106                                                                     Implied average team
+
+      19.76 calendar months                                                                            9.58 FTE
+
+     SENSITIVITY                                                                     Base: 189.27 PM
+                                                                                                        Nominal EAF: 147.06 PM
+
+
+  Σ scale factors = 20.53 • High reliability & complexity multipliers: 1.10 × 1.17
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                             24
+PROJECT REVIEW – III | COCOMO II COST ANALYSIS
+
+
+
+
+Estimated Development Budget — Professional Scenario
+Hypothetical 2026 Indian-market replacement cost; NOT actual expenditure by the student project team.
+
+    Budget Component                                                   Estimated Cost
+                                                                                        INITIAL BUDGET
+    Fully loaded professional labor                                      ₹1,64,57,273
+
+    Existing equipment allocation
+
+    Project-attributed internet
+                                                                              ₹70,800
+
+                                                                               ₹4,441
+                                                                                        ₹1.90 Cr
+                                                                                        ₹1,90,16,416 including contingency
+    One-month pilot launch hosting                                             ₹3,500
+
+    Software license purchases                                                    ₹0    Professional cost model • 189.27 PM
+
+    Initial direct cost                                                  ₹1,65,36,014
+                                                                                        COMPOSITION OF TOTAL
+    15% contingency reserve                                                ₹24,80,402
+
+
+ Loaded labor 86.5% • Reserve 13.0% • Other 0.4%
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                          25
+PROJECT REVIEW – III | COCOMO II COST ANALYSIS
+
+
+
+
+Pilot Deployment and First-Year Maintenance
+Operating costs are separate from the initial COCOMO II development estimate.
+
+
+      PILOT HOSTING                                                                 FIRST 12 MONTHS AFTER LAUNCH
+
+
+      ₹3,500 / month                                                               ₹25.13 L
+       API + static frontend                                           ₹2,500       ₹25,13,288 estimated maintenance
+
+       Storage & backups                                                ₹500        Maintenance labor                            ₹24,68,591
+
+       Bandwidth & monitoring                                           ₹400        12-month hosting                               ₹42,000
+
+       DNS / domain allowance                                           ₹100        Connectivity allocation                         ₹2,697
+
+
+
+
+     COMBINED PLANNING BUDGET                                            ₹2,15,29,704 • Initial budget with reserve + first-year maintenance
+
+ Assumptions only: excluded live SMS, WhatsApp, Gemini, ORS usage, managed database premiums and major municipal GIS surveys.
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                                           26
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Future Scope and Enhancement Roadmap
+
+       Phase 1                                                         Phase 2                        Phase 3
+
+         Field verification of GIS                                        Production OTP and             Integration with official NMC
+         coordinates and capacity                                         WhatsApp deployment            GIS
+
+         Correction of historical                                         Digital document               Surveyed 2D/3D vending
+         data                                                             verification                   layouts
+
+         Vendor and NMC user-                                             Grievance and appeal           Demand forecasting after
+         acceptance testing                                               management                     collecting verified data
+
+
+
+         Pilot validation                                                   Operational enhancement             Municipal-scale integration
+
+
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                                                          30
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Conclusion
+
+
+
+
+  The system supports evidence-based municipal decision-making, while final allocation remains subject
+  to official verification and applicable regulations.
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                     30
+PROJECT REVIEW – III | MODULAR TESTING
+
+
+
+
+Thank You
+
+
+
+                                                           Questions & Discussion
+
+                                                                       VendorMap | Project Review – III
+
+
+
+
+VendorMap • K. K. Wagh Institute of Engineering Education & Research                                      36
+

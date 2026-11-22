@@ -23,13 +23,18 @@
 .pilot-panel.pilot-geographic .slot-inspector label{font-size:12px}.pilot-panel.pilot-geographic .slot-inspector button{font-size:12px;min-height:40px}
 .slot-sheet-toggle{display:none}
 .slot-map-controls{position:absolute;top:10px;left:54px;right:10px;z-index:450;display:flex;flex-wrap:wrap;gap:5px;pointer-events:none}
+.slot-basemap-toggle{display:flex;gap:0;pointer-events:auto;box-shadow:0 2px 6px #19374e13;border-radius:7px}
 .pilot-panel.pilot-geographic .slot-map-controls button{pointer-events:auto;padding:8px 10px;font-size:11px;min-height:36px;background:#fff;border:1px solid #bccedb;box-shadow:0 2px 6px #19374e13}
+.pilot-panel.pilot-geographic .slot-basemap-toggle button{border-radius:0;box-shadow:none}
+.pilot-panel.pilot-geographic .slot-basemap-toggle button:first-child{border-radius:7px 0 0 7px}
+.pilot-panel.pilot-geographic .slot-basemap-toggle button:last-child{border-radius:0 7px 7px 0;margin-left:-1px}
+.pilot-panel.pilot-geographic .slot-basemap-toggle button:disabled{cursor:not-allowed}
 .pilot-panel.pilot-geographic .slot-map-controls button[aria-pressed=true]{background:#e6f0f5;color:#174b77;border-color:#7195ad}
 .pilot-panel.pilot-geographic .slot-map-controls a{pointer-events:auto;padding:8px 10px;font-size:11px;min-height:36px;background:#fff;border:1px solid #bccedb;border-radius:7px;text-decoration:none;color:#174b77}
 .admin-dashboard:has(.pilot-panel:not([hidden]))>.service-disclosure{display:none}
 .admin-dashboard:has(.pilot-panel:not([hidden])) .admin-header{margin-bottom:10px;padding-bottom:10px}
 .slot-map-legend{position:absolute;bottom:24px;left:10px;right:10px;z-index:440;display:flex;flex-wrap:wrap;gap:5px 10px;background:#ffffffed;border:1px solid #d3dfe7;border-radius:6px;padding:7px 9px;font-size:10px;pointer-events:none}
-.slot-map-legend span{display:flex;align-items:center;gap:4px}.slot-map-legend i{width:9px;height:9px;border-radius:2px}.slot-selected-key{border:2px solid #142e50}.slot-own-key{border:2px dashed #086c72}
+.slot-map-legend span{display:flex;align-items:center;gap:4px}.slot-map-legend i{width:9px;height:9px;border-radius:2px}.slot-selected-key{border:2px solid #d5a900;background:#ffd43b}.slot-own-key{border:2px dashed #087a72;background:#32d5c4}
 .slot-own-note,.slot-own-access{font-size:12px;color:#566d7d;line-height:1.5}.slot-own-access{display:grid;gap:8px;margin-top:12px}.slot-own-access a{display:block;color:#185d87;font-weight:600;padding:10px;border:1px solid #cad9e3;border-radius:7px;text-decoration:none}.slot-own-access small{display:block}.slot-inspector-basic .slot-my-assignment{color:#086c72;font-weight:700}
 .pilot-panel.pilot-geographic .pilot-error{font-size:12px;margin-bottom:8px}.pilot-panel.pilot-geographic>p[role=status]{margin:4px 0;font-size:12px}
 .pilot-panel.pilot-geographic .pilot-draft-banner{padding:8px;margin:6px 0;font-size:11px;gap:8px;background:#f4f6f7;border:1px solid #dce5ea;border-radius:7px}
